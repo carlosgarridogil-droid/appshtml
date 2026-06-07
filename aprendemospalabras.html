@@ -1,0 +1,419 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APRENDEMOS TIPOS DE PALABRAS - 1º Primaria</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;800&display=swap');
+
+        :root {
+            --header-bg: #2E7D32;
+            --progress-bar: #4CAF50;
+            --bg-body: #E8F5E9;
+            --app-bg: #C8E6C9;
+            --card-bg: #FFFFFF;
+            --text-main: #1B5E20;
+            --btn-orange: #FF9800;
+            --success: #81C784;
+            --error: #E57373;
+            --yellow-tag: #FFEB3B;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: var(--app-bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        #app {
+            width: 95%;
+            max-width: 950px;
+            height: 90vh;
+            background: var(--bg-body);
+            border-radius: 25px;
+            box-shadow: 0 10px 40px rgba(46,125,50,0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 5px solid #fff;
+            position: relative;
+        }
+
+        .top-bar {
+            background-color: var(--header-bg);
+            padding: 15px;
+            color: white;
+            text-align: center;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-main {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .tag-gramatica {
+            background-color: var(--yellow-tag);
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+        }
+
+        .header-title { font-size: 1.8rem; font-weight: 700; margin: 0; }
+        .header-subtitle { font-size: 1.1rem; opacity: 0.9; margin-top: 5px; }
+
+        .nav-buttons {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+        }
+
+        .nav-btn {
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 0px rgba(0,0,0,0.1);
+        }
+
+        .screen { display: none; flex: 1; flex-direction: column; align-items: center; padding: 15px; text-align: center; overflow-y: auto; }
+        .active { display: flex; }
+
+        .start-icons-row {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 15px 0;
+            font-size: 3.5rem;
+        }
+
+        .icon-group { display: flex; flex-direction: column; align-items: center; }
+        .icon-label { font-size: 0.9rem; font-weight: bold; color: var(--header-bg); margin-top: 5px; }
+
+        .curricular-box {
+            background: white;
+            border: 3px solid var(--header-bg);
+            border-radius: 15px;
+            padding: 15px 25px;
+            width: 80%;
+            max-width: 700px;
+            font-size: 0.85rem;
+            text-align: left;
+            box-shadow: 4px 4px 0px var(--header-bg);
+            margin-bottom: 15px;
+        }
+
+        .credits {
+            font-family: 'Nunito', sans-serif;
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+            font-weight: 700;
+        }
+
+        .game-area { width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .drop-zone { 
+            display: flex; gap: 10px; min-height: 80px; width: 90%; 
+            background: #fff; border: 3px dashed var(--header-bg); 
+            border-radius: 15px; margin-bottom: 20px; padding: 10px; justify-content: center; align-items: center;
+        }
+        .options-zone { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        
+        .word-card, .btn-choice {
+            background: white; border: 2px solid var(--header-bg);
+            padding: 10px 20px; border-radius: 12px; cursor: pointer;
+            font-size: 1.3rem; font-weight: 600; color: var(--text-main);
+            box-shadow: 0 4px 0 var(--header-bg); transition: 0.2s;
+        }
+
+        .big-icon { font-size: 6rem; margin-bottom: 15px; }
+        .sentence-context { font-size: 1.7rem; margin-bottom: 15px; color: var(--text-main); }
+
+        .btn-start {
+            background: var(--btn-orange); color: white; border: none;
+            padding: 12px 45px; border-radius: 50px; font-size: 1.4rem;
+            cursor: pointer; font-weight: 700;
+            box-shadow: 0 5px 0px #e68a00;
+        }
+
+        #final-rank { font-size: 3.5rem; font-weight: 800; margin: 20px 0; z-index: 10; }
+
+        /* Confeti */
+        .confetti {
+            position: absolute; width: 10px; height: 10px; background-color: #f00;
+            top: -10px; opacity: 0.7; animation: fall 3s linear infinite;
+        }
+        @keyframes fall {
+            to { transform: translateY(90vh) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div class="top-bar">
+        <div class="header-main">
+            <span class="tag-gramatica">GRAMÁTICA</span>
+            <h1 class="header-title">APRENDEMOS TIPOS DE PALABRAS</h1>
+        </div>
+        <div class="header-subtitle">1º Primaria - Lengua Castellana</div>
+        <div class="nav-buttons">
+            <button class="nav-btn" title="Inicio" onclick="location.reload()">🏠</button>
+        </div>
+    </div>
+
+    <div id="screen-start" class="screen active">
+        <div class="start-icons-row">
+            <div class="icon-group">🍎<span class="icon-label">Sustantivo</span></div>
+            <div class="icon-group">🌈<span class="icon-label">Adjetivo</span></div>
+            <div class="icon-group">🏃<span class="icon-label">Verbo</span></div>
+        </div>
+
+        <div class="curricular-box">
+            <h4 style="margin:0 0 8px 0; text-align:center; color:var(--header-bg)">🎯 CONCRECIÓN CURRICULAR</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div><strong>Bloque:</strong> Reflexión sobre la lengua.</div>
+                <div><strong>Saberes:</strong> LCL.1.D.1. Tipos de palabras.</div>
+                <div><strong>Competencia:</strong> C.E. 9. Reflexión guiada.</div>
+                <div><strong>Objetivo:</strong> Identificar categorías básicas.</div>
+            </div>
+        </div>
+
+        <button class="btn-start" onclick="startGame()">¡EMPEZAR A JUGAR!</button>
+        <div class="credits">Elaborado por Carlos Garrido - IA Gemini 2026</div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div id="activity-title" style="font-size: 1.4rem; font-weight: 700; color: var(--header-bg); margin-bottom: 5px;"></div>
+        <div class="game-area" id="game-content"></div>
+        <div id="feedback" style="height: 30px; font-weight: bold; margin-top: 10px;"></div>
+    </div>
+
+    <div id="screen-end" class="screen">
+        <div id="confetti-container" style="position:absolute; width:100%; height:100%; top:0; left:0; pointer-events:none;"></div>
+        <h2 style="z-index:10">RESULTADO FINAL</h2>
+        <div id="final-score" style="font-size: 2rem; z-index:10">Puntuación: 0 / 35</div>
+        <div id="final-rank"></div>
+        <button class="btn-start" style="z-index:10" onclick="location.reload()">REINTENTAR</button>
+    </div>
+</div>
+
+<script>
+    const state = { currentActivity: 0, currentIndex: 0, score: 0, totalExercises: 35 };
+
+    const activities = [
+        {
+            title: "Actividad 1: Ordena la oración",
+            type: "order",
+            data: [
+                { words: ["El", "perro", "corre", "mucho."], sentence: "El perro corre mucho." },
+                { words: ["La", "niña", "come", "manzana."], sentence: "La niña come manzana." },
+                { words: ["Mi", "casa", "es", "azul."], sentence: "Mi casa es azul." },
+                { words: ["El", "gato", "duerme", "ahora."], sentence: "El gato duerme ahora." },
+                { words: ["Papá", "lee", "un", "libro."], sentence: "Papá lee un libro." }
+            ]
+        },
+        {
+            title: "Actividad 2: ¿Qué es? (Sustantivos)",
+            type: "choice",
+            data: [
+                { icon: "👶", correct: "Persona", options: ["Persona", "Animal", "Cosa"] },
+                { icon: "🐶", correct: "Animal", options: ["Persona", "Animal", "Cosa"] },
+                { icon: "🚗", correct: "Cosa", options: ["Persona", "Animal", "Cosa"] },
+                { icon: "🌳", correct: "Cosa", options: ["Persona", "Animal", "Cosa"] },
+                { icon: "👵", correct: "Persona", options: ["Persona", "Animal", "Cosa"] },
+                { icon: "🐘", correct: "Animal", options: ["Persona", "Animal", "Cosa"] },
+                { icon: "📱", correct: "Cosa", options: ["Persona", "Animal", "Cosa"] },
+                { icon: "👩‍🏫", correct: "Persona", options: ["Persona", "Animal", "Cosa"] },
+                { icon: "🐱", correct: "Animal", options: ["Persona", "Animal", "Cosa"] },
+                { icon: "🍕", correct: "Cosa", options: ["Persona", "Animal", "Cosa"] }
+            ]
+        },
+        {
+            title: "Actividad 3: ¿Cómo son? (Adjetivos)",
+            type: "adjectives",
+            data: [
+                { icon: "🎨", text: "Esta pintura es...", options: ["roja", "salta", "mesa"], correct: "roja" },
+                { icon: "☀️", text: "El sol es...", options: ["frío", "caliente", "corre"], correct: "caliente" },
+                { icon: "🧊", text: "El hielo es...", options: ["duro", "blando", "vuela"], correct: "duro" },
+                { icon: "🐘", text: "El elefante es...", options: ["pequeño", "grande", "canta"], correct: "grande" },
+                { icon: "🍋", text: "El limón es...", options: ["dulce", "ácido", "azul"], correct: "ácido" },
+                { icon: "🚛", text: "Señala el adjetivo para Camión:", options: ["conducir", "pesado", "carga"], correct: "pesado" },
+                { icon: "🍎", text: "Señala el adjetivo para Manzana:", options: ["comer", "roja", "árbol"], correct: "roja" },
+                { icon: "🐰", text: "Señala el adjetivo para Conejo:", options: ["suave", "zanahoria", "salta"], correct: "suave" },
+                { icon: "🚀", text: "Señala el adjetivo para Cohete:", options: ["rápido", "espacio", "volar"], correct: "rápido" },
+                { icon: "🍰", text: "Señala el adjetivo para Pastel:", options: ["cumpleaños", "dulce", "cocinar"], correct: "dulce" }
+            ]
+        },
+        {
+            title: "Actividad 4: ¿Qué hacen? (Verbos)",
+            type: "verbs",
+            data: [
+                { icon: "🚕", context: "El taxista...", options: ["cocina", "conduce", "investiga"], correct: "conduce" },
+                { icon: "👩‍🍳", context: "La cocinera...", options: ["cocina", "vuela", "pinta"], correct: "cocina" },
+                { icon: "👨‍🎨", context: "El pintor...", options: ["limpia", "pinta", "duerme"], correct: "pinta" },
+                { icon: "⚽", context: "El niño...", options: ["juega", "bebe", "llora"], correct: "juega" },
+                { icon: "🐦", context: "El pájaro...", options: ["vuela", "nada", "habla"], correct: "vuela" },
+                { icon: "🐟", context: "El pez...", options: ["camina", "nada", "salta"], correct: "nada" },
+                { icon: "💃", context: "La bailarina...", options: ["baila", "escribe", "lee"], correct: "baila" },
+                { icon: "🦷", context: "El dentista...", options: ["cura", "salta", "canta"], correct: "cura" },
+                { icon: "🦁", context: "El león...", options: ["ruge", "ríe", "baila"], correct: "ruge" },
+                { icon: "📚", context: "La niña...", options: ["lee", "nada", "vuela"], correct: "lee" }
+            ]
+        }
+    ];
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'es-ES';
+        window.speechSynthesis.speak(msg);
+    }
+
+    function startGame() {
+        document.getElementById('screen-start').classList.remove('active');
+        document.getElementById('screen-game').classList.add('active');
+        renderExercise();
+    }
+
+    function renderExercise() {
+        const activity = activities[state.currentActivity];
+        const exercise = activity.data[state.currentIndex];
+        const container = document.getElementById('game-content');
+        const title = document.getElementById('activity-title');
+        title.innerText = activity.title;
+        container.innerHTML = "";
+        document.getElementById('feedback').innerText = "";
+
+        if (activity.type === "order") {
+            const dropZone = document.createElement('div');
+            dropZone.className = "drop-zone"; dropZone.id = "drop-zone";
+            const optionsZone = document.createElement('div');
+            optionsZone.className = "options-zone"; optionsZone.id = "options-zone";
+            
+            const shuffled = [...exercise.words].sort(() => Math.random() - 0.5);
+            shuffled.forEach(w => {
+                const card = document.createElement('div');
+                card.className = "word-card"; card.innerText = w;
+                card.onclick = () => {
+                    if (card.parentElement.id === "options-zone") dropZone.appendChild(card);
+                    else optionsZone.appendChild(card);
+                    checkSentence(exercise.sentence);
+                };
+                optionsZone.appendChild(card);
+            });
+            container.appendChild(dropZone); container.appendChild(optionsZone);
+            speak("Ordena las palabras para formar la oración correctamente.");
+        } else {
+            const icon = document.createElement('div');
+            icon.className = "big-icon"; icon.innerText = exercise.icon;
+            container.appendChild(icon);
+            if (exercise.text || exercise.context) {
+                const sentence = document.createElement('div');
+                sentence.className = "sentence-context";
+                sentence.innerText = exercise.text || exercise.context;
+                container.appendChild(sentence);
+            }
+            const options = document.createElement('div');
+            options.className = "options-zone";
+            exercise.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "btn-choice"; btn.innerText = opt;
+                btn.onclick = () => checkChoice(opt, exercise.correct);
+                options.appendChild(btn);
+            });
+            container.appendChild(options);
+            speak((exercise.text || exercise.context || "¿Es persona, animal o cosa?"));
+        }
+    }
+
+    function checkSentence(correct) {
+        const current = Array.from(document.getElementById('drop-zone').children).map(c => c.innerText).join(" ");
+        if (current === correct) handleSuccess();
+    }
+
+    function checkChoice(selected, correct) {
+        if (selected === correct) handleSuccess();
+        else {
+            speak("¡No te rindas! Inténtalo otra vez.");
+            document.getElementById('feedback').innerText = "❌ ¡Inténtalo de nuevo!";
+            document.getElementById('feedback').style.color = "var(--error)";
+        }
+    }
+
+    function handleSuccess() {
+        state.score++;
+        const msgs = ["¡Genial!", "¡Eres un artista!", "¡Sigue así!", "¡Estupendo!", "¡Lo has logrado!"];
+        const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
+        speak(randomMsg);
+        document.getElementById('feedback').innerText = "✅ " + randomMsg.toUpperCase();
+        document.getElementById('feedback').style.color = "var(--success)";
+        setTimeout(() => {
+            state.currentIndex++;
+            if (state.currentIndex >= activities[state.currentActivity].data.length) {
+                state.currentIndex = 0; state.currentActivity++;
+            }
+            if (state.currentActivity >= activities.length) showEnd();
+            else renderExercise();
+        }, 1300);
+    }
+
+    function createConfetti() {
+        const container = document.getElementById('confetti-container');
+        const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722'];
+        for (let i = 0; i < 100; i++) {
+            const c = document.createElement('div');
+            c.className = 'confetti';
+            c.style.left = Math.random() * 100 + '%';
+            c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            c.style.animationDelay = Math.random() * 3 + 's';
+            container.appendChild(c);
+        }
+    }
+
+    function showEnd() {
+        document.getElementById('screen-game').classList.remove('active');
+        document.getElementById('screen-end').classList.add('active');
+        const finalScore = state.score;
+        const nota = (finalScore / state.totalExercises) * 10;
+        let rank = ""; let color = "";
+        if (nota >= 5) createConfetti();
+        if (nota >= 9) { rank = "SOBRESALIENTE"; color = "#2E7D32"; }
+        else if (nota >= 7) { rank = "NOTABLE"; color = "#4CAF50"; }
+        else if (nota >= 6) { rank = "BIEN"; color = "#FF9800"; }
+        else if (nota >= 5) { rank = "SUFICIENTE"; color = "#FFC107"; }
+        else { rank = "INSUFICIENTE"; color = "#E57373"; }
+        document.getElementById('final-score').innerText = `Aciertos: ${finalScore} de ${state.totalExercises}`;
+        const rankEl = document.getElementById('final-rank');
+        rankEl.innerText = rank; rankEl.style.color = color;
+        speak("¡Buen trabajo! Has terminado el juego con un " + rank);
+    }
+</script>
+</body>
+</html>
+
+```
