@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Primeras Trabadas - App Educativa</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;800&display=swap');
+
+        :root {
+            --header-bg: #6A1B9A;    
+            --progress-bar: #AB47BC; 
+            --bg-body: #F3E5F5;      
+            --card-bg: #FFFFFF;      
+            --card-hover: #E1BEE7;   
+            --btn-yellow: #FFCA28;   
+            --text-main: #4A148C;    
+            --success: #66BB6A;      
+            --error: #EF5350;
+            /* Colores del título */
+            --m-color: #E91E63;
+            --p-color: #4CAF50;
+            --t-color: #2196F3;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: #E1BEE7;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 950px;
+            height: 95vh;
+            background: var(--bg-body);
+            border-radius: 25px;
+            box-shadow: 0 10px 40px rgba(74, 20, 140, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            border: 5px solid #fff;
+        }
+
+        /* --- CABECERA --- */
+        .top-bar {
+            background-color: var(--header-bg);
+            padding: 10px 25px;
+            height: 90px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+
+        .stars-pill {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 1.3rem;
+            display: flex; align-items: center; gap: 5px;
+            font-weight: bold;
+        }
+
+        .skill-text {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.85rem;
+            color: #E1BEE7; 
+            font-weight: bold;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+
+        .progress-line-container { width: 100%; height: 8px; background: #ddd; }
+        .progress-fill { height: 100%; background: var(--progress-bar); width: 0%; transition: width 0.5s ease; }
+
+        /* --- PANTALLAS --- */
+        .screen { display: none; flex: 1; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; animation: fadeIn 0.4s ease-out; }
+        .screen.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- TÍTULO ESPECIAL --- */
+        .main-title {
+            font-size: 3.8rem;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: 700;
+        }
+        .main-title span.bold-init { font-weight: 900; }
+        .m-init { color: var(--m-color); }
+        .p-init { color: var(--p-color); }
+        .t-init { color: var(--t-color); }
+
+        /* --- SECCIONES INICIO --- */
+        .info-section { background: white; padding: 20px; border-radius: 20px; margin: 15px 0; width: 95%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .info-title { color: var(--text-main); font-weight: bold; margin-bottom: 10px; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+        
+        .pedagogy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; }
+        .pedagogy-item { background: #F3E5F5; border: 2px solid #CE93D8; padding: 12px; border-radius: 15px; text-align: center; }
+        .pedagogy-item h4 { margin: 0 0 5px 0; font-size: 0.95rem; color: var(--header-bg); }
+        .pedagogy-item p { margin: 0; font-size: 0.8rem; color: #666; font-family: 'Nunito'; }
+
+        /* --- MAPA DE TRABADAS --- */
+        .grid-map { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; width: 100%; max-width: 800px; padding: 20px; }
+        .trabada-btn {
+            aspect-ratio: 1.2; background: white; color: var(--text-main);
+            border-radius: 20px; font-size: 2.2rem; font-weight: 800;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 6px 0 #ddd; transition: transform 0.1s; border: none;
+        }
+        .trabada-btn:active { transform: translateY(4px); box-shadow: 0 0 0; }
+
+        /* --- JUEGO --- */
+        .game-zone { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
+        .card-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 20px; }
+        .card {
+            background-color: var(--card-bg); border-radius: 25px; padding: 20px;
+            width: 160px; min-height: 180px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s; border: none; text-align: center;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.05);
+        }
+        .card:hover { transform: translateY(-5px); }
+        .card .emoji { font-size: 4.5rem; margin-bottom: 10px; }
+        .card span { font-size: 1.4rem; font-weight: 700; color: var(--text-main); }
+        
+        .sopa-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .sopa-cell { 
+            width: 75px; height: 75px; background: white; border-radius: 15px;
+            font-size: 2.5rem; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; font-weight: 800; color: var(--text-main); box-shadow: 0 4px 0 #eee;
+        }
+
+        /* --- BOTONES --- */
+        .circle-btn {
+            background: var(--btn-yellow); color: #5d4037; width: 50px; height: 50px;
+            border-radius: 50%; border: none; font-size: 1.6rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+        }
+        .btn-start {
+            background: var(--btn-yellow); color: var(--text-main); font-size: 1.6rem; padding: 15px 60px;
+            border: none; border-radius: 50px; cursor: pointer; font-weight: 800;
+            box-shadow: 0 8px 0 #FBC02D; margin-top: 25px; transition: 0.1s;
+        }
+        .btn-start:active { transform: translateY(4px); box-shadow: 0 2px 0 #FBC02D; }
+
+        /* --- INFORME --- */
+        .report-card { background: white; padding: 30px; border-radius: 25px; width: 100%; max-width: 750px; }
+        .stat-row { display: flex; align-items: center; margin-bottom: 15px; }
+        .stat-label { flex: 1; font-weight: bold; color: #555; font-size: 1.1rem; }
+        .stat-bar-bg { flex: 2; height: 18px; background: #eee; border-radius: 10px; overflow: hidden; margin: 0 15px; }
+        .stat-bar-fill { height: 100%; transition: width 0.5s ease, background 0.5s ease; }
+
+        /* --- ALERTA PERSONALIZADA --- */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center;
+            z-index: 1000; backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: white; padding: 40px; border-radius: 30px; text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 6px solid var(--error);
+            animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 80%;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* ARREGLADO EL CSS DE IMPRESIÓN PARA QUE SALGA EL REPORTE CON COLOR DE BARRAS */
+        @media print {
+            body { background: white !important; display: block; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+            #app { box-shadow: none; border: none; max-width: 100%; height: auto; display: block; background: white !important; }
+            .top-bar, .progress-line-container, .hide-on-print { display: none !important; }
+            .screen { display: none !important; }
+            #screen-report { display: flex !important; }
+            .report-card { box-shadow: none; width: 100%; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div class="top-bar">
+        <div class="header-left">
+            <button class="circle-btn" onclick="showScreen('start')">🏠</button>
+            <span style="font-size:1.5rem; font-weight:800; letter-spacing:1px;">MIS PRIMERAS TRABADAS</span>
+        </div>
+        <div class="header-right">
+            <div class="stars-pill"><span id="stars-count">0</span> ⭐</div>
+            <div id="skill-display" class="skill-text">1º de Primaria</div>
+        </div>
+    </div>
+    
+    <div class="progress-line-container">
+        <div id="progress-fill" class="progress-fill"></div>
+    </div>
+
+    <div id="screen-start" class="screen active">
+        <h1 class="main-title">
+            <span class="m-init bold-init">M</span>is 
+            <span class="p-init bold-init">P</span>rimeras 
+            <span class="t-init bold-init">T</span>rabadas
+        </h1>
+        
+        <div style="background:var(--btn-yellow); padding:5px 20px; border-radius:15px; font-weight:bold; margin-bottom:10px; color:var(--text-main);">1º Educación Primaria</div>
+
+        <div class="info-section">
+            <div class="info-title">🎓 Base Pedagógica y Metodológica</div>
+            <div style="font-size:0.95rem; color:#444; margin-bottom:10px; background:#f9f9f9; padding:12px; border-radius:10px;">
+                Diseñado bajo los principios de la <b>Lectoescritura Constructivista y Fonética</b>, alineado con el currículo de Andalucía <b>(Decreto 101/2023 y Orden de 30 de mayo)</b>.
+            </div>
+            <div class="pedagogy-grid">
+                <div class="pedagogy-item"><h4>1. Conciencia Fonológica</h4><p>(Oído y Rimas)</p></div>
+                <div class="pedagogy-item"><h4>2. Discriminación Visual</h4><p>(Atención y Grafía)</p></div>
+                <div class="pedagogy-item"><h4>3. Principio Alfabético</h4><p>(Decodificación)</p></div>
+                <div class="pedagogy-item"><h4>4. Conciencia Silábica</h4><p>(Construcción)</p></div>
+                <div class="pedagogy-item"><h4>5. Comprensión Lectora</h4><p>(Frase y Contexto)</p></div>
+                <div class="pedagogy-item"><h4>6. Diseño DUA</h4><p>(Audio + Visual + Táctil)</p></div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-title">ℹ️ Créditos del Proyecto</div>
+            <div style="font-size:1rem; color:#555; line-height:1.5;">
+                <b>Diseño y Desarrollo Pedagógico:</b> Carlos Garrido - IA Gemini<br>
+                <b>Estructura de la aplicación:</b> 12 Grupos de Trabadas x 6 Niveles x 5 Actividades.<br>
+                <b>Finalidad:</b> Aprendizaje y refuerzo visual, auditivo y lector de las sílabas trabadas.
+            </div>
+        </div>
+
+        <button class="btn-start" onclick="showScreen('map')">IR AL MAPA DE TRABADAS</button>
+    </div>
+
+    <div id="screen-map" class="screen">
+        <h2 style="color:var(--text-main); font-size:2.5rem; margin-bottom:10px;">Elige tu grupo</h2>
+        <div class="grid-map" id="map-container"></div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <h2 id="game-instruction" style="color:var(--text-main); text-align:center; font-size:1.8rem; font-weight:800; margin-bottom:5px;"></h2>
+        <div id="sub-progress" style="font-weight:700; color:#888; margin-bottom:15px; font-size:1.2rem;"></div>
+        <button class="circle-btn" style="margin-bottom:20px;" onclick="playAudio()">🔊</button>
+        <div id="game-zone" class="game-zone"></div>
+    </div>
+
+    <div id="screen-input" class="screen" style="justify-content:center;">
+        <h2 style="color:var(--text-main); font-size:3rem; margin-bottom:10px;">¡Excelente Trabajo!</h2>
+        <div class="card" style="margin:10px; width:120px; min-height:120px; cursor:default; box-shadow:none;"><span style="font-size:6rem;">🏆</span></div>
+        <div style="width:100%; text-align:center; margin:20px 0;">
+            <label style="display:block; margin-bottom:15px; font-weight:700; color:#555; font-size:1.4rem;">Escribe tu nombre para el informe:</label>
+            <input type="text" id="student-name" style="padding:15px; font-size:1.8rem; border-radius:15px; border:3px solid #ddd; width:70%; text-align:center; font-family:'Fredoka';" placeholder="Ej: Lucas Pérez">
+        </div>
+        <button class="btn-start" onclick="generateReport()">VER INFORME FINAL</button>
+    </div>
+
+    <div id="screen-report" class="screen">
+        <div class="report-card">
+            <h2 style="text-align:center; color:var(--text-main); font-size:2.5rem; margin-bottom:20px;">Informe Pedagógico de Lectoescritura</h2>
+            <div id="report-header-info" style="border-bottom:2px solid #eee; padding-bottom:15px; margin-bottom:20px;"></div>
+            
+            <h3 style="color:var(--header-bg); font-size:1.3rem; margin-bottom:15px;">1. Desempeño por Competencias</h3>
+            <div id="stats-container"></div>
+            
+            <h3 style="color:var(--header-bg); font-size:1.3rem; margin-top:20px; margin-bottom:10px;">2. Análisis del Proceso de Aprendizaje</h3>
+            <div style="font-size:1rem; color:#444; line-height:1.5;">
+                El alumno ha completado un itinerario secuencial diseñado para estructurar el cerebro lector:
+                <ul style="margin-top:5px; padding-left:20px;">
+                    <li><b>Conciencia Fonológica (Auditiva):</b> Identificar el fonema sin apoyo visual y reconocer rimas.</li>
+                    <li><b>Discriminación Visual:</b> Habilidad para aislar el grafema en entornos complejos.</li>
+                    <li><b>Principio Alfabético:</b> Asociación directa de la palabra con la imagen (significado).</li>
+                    <li><b>Conciencia Silábica:</b> Segmentación y ordenación de sílabas para formar palabras.</li>
+                    <li><b>Contexto (Frase):</b> Nivel superior donde la palabra cobra sentido gramatical.</li>
+                </ul>
+            </div>
+
+            <h3 style="color:var(--header-bg); font-size:1.3rem; margin-top:20px; margin-bottom:10px;">3. Recomendaciones para Casa</h3>
+            <div style="font-size:1rem; color:#444; line-height:1.5;">
+                Para reforzar el grupo trabajado (<b id="rec-letter" style="color:var(--text-main);"></b>), se sugiere realizar las siguientes actividades lúdicas:
+                <ul style="margin-top:5px; padding-left:20px;">
+                    <li>Buscar el grupo <b id="rec-letter-2"></b> en carteles de la calle, libros o revistas.</li>
+                    <li>Dibujar 3 objetos que contengan la sílaba trabada <b id="rec-letter-3"></b>.</li>
+                    <li>Hacer juegos de palabras y practicar trabalenguas divertidos orales.</li>
+                </ul>
+            </div>
+
+            <div style="margin-top:25px; font-size:1rem; color:#888; text-align:center; background:#f9f9f9; padding:15px; border-radius:10px;" class="hide-on-print">
+                <b>Evaluación:</b> Análisis realizado según los estándares del Primer Ciclo de Educación Primaria.
+            </div>
+        </div>
+        <div style="margin-top:25px; display:flex; gap:20px; justify-content:center; width:100%;" class="hide-on-print">
+            <button class="btn-start" style="padding:12px 30px; font-size:1.3rem; margin-top:0;" onclick="showScreen('map')">Volver al Mapa</button>
+            <button class="btn-start" style="padding:12px 30px; font-size:1.3rem; margin-top:0;" onclick="window.print()">🖨️ Generar PDF</button>
+        </div>
+    </div>
+
+    <div id="custom-alert" class="modal-overlay">
+        <div class="modal-content">
+            <div style="font-size: 5rem; margin-bottom: 10px;">😅</div>
+            <h2 style="color: var(--error); font-size: 2.8rem; margin: 0; font-weight: 800;">¡Vuelve a intentarlo!</h2>
+            <p style="font-size: 1.4rem; color: #666; font-weight: 600; margin-top: 10px;">Seguro que la próxima vez lo haces genial.</p>
+            <button class="btn-start" style="font-size: 1.6rem; padding: 15px 50px; margin-top: 20px; background: var(--error); color: white; box-shadow: 0 8px 0 #C62828;" onclick="closeCustomAlert()">¡Vale!</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- DATOS PEDAGÓGICOS ---
+    const SKILLS = [
+        "1. Comprensión Oral",
+        "2. Conciencia de Rimas",
+        "3. Discriminación de Grafía",
+        "4. Lectura de Palabras",
+        "5. Construcción Silábica",
+        "6. Comprensión de Frases"
+    ];
+
+    // Base de datos con palabras, emojis y SÍLABAS CORRECTAS
+    const VOCABULARIO = {
+        'PR': { w: ["PRADO","PRÍNCIPE","PRECIO","PRUEBA","PROMESA"], e: ["🌱","🤴","💰","📝","🤝"], s: [["PRA","DO"],["PRÍN","CI","PE"],["PRE","CIO"],["PRUE","BA"],["PRO","ME","SA"]], dist: "TR" },
+        'PL': { w: ["PLANCHA","PLÁTANO","PLANETA","PLUMA","PLAZA"], e: ["💨","🍌","🪐","🪶","⛲"], s: [["PLAN","CHA"],["PLÁ","TA","NO"],["PLA","NE","TA"],["PLU","MA"],["PLA","ZA"]], dist: "BL" },
+        'BR': { w: ["CABRA","SOBRE","BRAZO","BRUJA","BROCHA"], e: ["🐐","✉️","💪","🧙‍♀️","🖌️"], s: [["CA","BRA"],["SO","BRE"],["BRA","ZO"],["BRU","JA"],["BRO","CHA"]], dist: "PR" },
+        'BL': { w: ["PUEBLO","NIEBLA","BLOQUE","BLUSA","CABLE"], e: ["🏘️","🌫️","🧱","👚","🔌"], s: [["PUE","BLO"],["NIE","BLA"],["BLO","QUE"],["BLU","SA"],["CA","BLE"]], dist: "PL" },
+        'CR': { w: ["CROMO","CRUCE","CREMA","CRISTAL","CROQUETA"], e: ["🃏","🚦","🧴","🪟","🍘"], s: [["CRO","MO"],["CRU","CE"],["CRE","MA"],["CRIS","TAL"],["CRO","QUE","TA"]], dist: "GR" },
+        'CL': { w: ["CLAVEL","CLAVO","CHICLE","TECLADO","ANCLA"], e: ["🌺","🔨","🍬","⌨️","⚓"], s: [["CLA","VEL"],["CLA","VO"],["CHI","CLE"],["TE","CLA","DO"],["AN","CLA"]], dist: "CR" },
+        'GR': { w: ["OGRO","GRÚA","GRILLO","TIGRE","GRUTA"], e: ["👹","🏗️","🦗","🐯","⛰️"], s: [["O","GRO"],["GRÚ","A"],["GRI","LLO"],["TI","GRE"],["GRU","TA"]], dist: "CR" },
+        'GL': { w: ["IGLESIA","GLOBO","REGLA","JUNGLA","GLOTÓN"], e: ["⛪","🎈","📏","🌴","😋"], s: [["I","GLE","SIA"],["GLO","BO"],["RE","GLA"],["JUN","GLA"],["GLO","TÓN"]], dist: "CL" },
+        'FR': { w: ["COFRE","FRUTA","FRÍO","FRENTE","FRESA"], e: ["🏴‍☠️","🍎","🥶","👤","🍓"], s: [["CO","FRE"],["FRU","TA"],["FRÍ","O"],["FREN","TE"],["FRE","SA"]], dist: "FL" },
+        'FL': { w: ["FLAN","FLAMENCO","FLOR","FLECHA","FLAUTA"], e: ["🍮","💃","🌻","🏹","🪈"], s: [["FLAN"],["FLA","MEN","CO"],["FLOR"],["FLE","CHA"],["FLAU","TA"]], dist: "FR" },
+        'TR': { w: ["TRIGO","TREN","TRAMPA","TROMPETA","TRÉBOL"], e: ["🌾","🚂","🪤","🎺","🍀"], s: [["TRI","GO"],["TREN"],["TRAM","PA"],["TROM","PE","TA"],["TRÉ","BOL"]], dist: "DR" },
+        'DR': { w: ["PIEDRA","CUADRO","MADRE","DRAGÓN","LADRILLO"], e: ["🪨","🖼️","👩‍👧","🐉","🧱"], s: [["PIE","DRA"],["CUA","DRO"],["MA","DRE"],["DRA","GÓN"],["LA","DRI","LLO"]], dist: "TR" }
+    };
+
+    // Distractores genéricos
+    const MALAS_PALABRAS = ["MESA","PERRO","CASA","SOL","COCHE","GATO","LUNA","PELOTA","BARCO","ZAPATO"];
+    const MALOS_EMOJIS = ["🪑","🐶","🏠","☀️","🚗","🐱","🌙","⚽","⛵","👞"];
+
+    // ESTADO DE LA APP (Añadido hasError para controlar el 1º intento)
+    let state = {
+        letter: '', level: 0, sub: 0, stars: 0,
+        stats: { l1:0, l2:0, l3:0, l4:0, l5:0, l6:0 },
+        hasError: false
+    };
+
+    window.onload = () => { renderMap(); };
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-' + id).classList.add('active');
+        window.scrollTo(0,0);
+    }
+
+    function renderMap() {
+        const c = document.getElementById('map-container');
+        c.innerHTML = '';
+        Object.keys(VOCABULARIO).forEach(g => {
+            let btn = document.createElement('button');
+            btn.className = 'trabada-btn';
+            btn.innerText = g;
+            btn.onclick = () => startGroup(g);
+            c.appendChild(btn);
+        });
+    }
+
+    function startGroup(g) {
+        state.letter = g;
+        state.level = 0; state.sub = 0; state.stars = 0;
+        state.stats = { l1:0, l2:0, l3:0, l4:0, l5:0, l6:0 };
+        state.hasError = false;
+        document.getElementById('stars-count').innerText = "0";
+        showScreen('game');
+        renderGame();
+    }
+
+    // FUNCIÓN PARA OBTENER EL ARTÍCULO CORRECTO ("el" o "la")
+    function getArticle(w) {
+        const femeninas = ["PRUEBA","PROMESA","PLANCHA","PLUMA","PLAZA","CABRA","BRUJA","BROCHA","NIEBLA","BLUSA","CREMA","CROQUETA","GRÚA","GRUTA","IGLESIA","REGLA","JUNGLA","FRUTA","FRENTE","FRESA","FLOR","FLECHA","FLAUTA","TRAMPA","TROMPETA","PIEDRA","MADRE"];
+        if(femeninas.includes(w)) {
+            return "la";
+        }
+        return "el";
+    }
+
+    // LÓGICA DE ALERTA PERSONALIZADA
+    let alertCallback = null;
+    function showCustomAlert(cb) {
+        document.getElementById('custom-alert').style.display = 'flex';
+        alertCallback = cb;
+    }
+    function closeCustomAlert() {
+        document.getElementById('custom-alert').style.display = 'none';
+        if(alertCallback) alertCallback();
+    }
+
+    function renderGame() {
+        const zone = document.getElementById('game-zone');
+        const instr = document.getElementById('game-instruction');
+        const subP = document.getElementById('sub-progress');
+        const skill = document.getElementById('skill-display');
+        
+        const data = VOCABULARIO[state.letter];
+        const wordT = data.w[state.sub];
+        const emojiT = data.e[state.sub];
+        
+        // Random distractor
+        const rDist = Math.floor(Math.random() * MALAS_PALABRAS.length);
+        const wordW = MALAS_PALABRAS[rDist];
+        const emojiW = MALOS_EMOJIS[rDist];
+
+        skill.innerText = SKILLS[state.level];
+        subP.innerText = `Actividad ${state.sub + 1} de 5`;
+        zone.innerHTML = '';
+        
+        document.getElementById('progress-fill').style.width = (((state.level*5 + state.sub)/30)*100) + "%";
+
+        // MOTOR DE NIVELES
+        if(state.level === 0) { // OÍDO
+            instr.innerText = `Escucha y encuentra: ${wordT}`;
+            zone.innerHTML = `<div class="card-container"></div>`;
+            appendCards(zone.querySelector('.card-container'), wordT, emojiT, true, wordW, emojiW);
+        } 
+        else if(state.level === 1) { // RIMAS
+            instr.innerText = `¿Cuál lleva la trabada ${state.letter}?`;
+            zone.innerHTML = `<div class="card-container"></div>`;
+            appendCards(zone.querySelector('.card-container'), wordT, emojiT, true, wordW, emojiW);
+        }
+        else if(state.level === 2) { // SOPA VISUAL (Modificado a "grupo")
+            instr.innerText = `Toca el grupo ${state.letter}`;
+            let grid = document.createElement('div'); grid.className = 'sopa-grid';
+            let targets = 0;
+            for(let i=0; i<12; i++){
+                let isT = Math.random() > 0.5;
+                let val = isT ? state.letter : data.dist;
+                if(isT) targets++;
+                let cell = document.createElement('div'); cell.className = 'sopa-cell'; cell.innerText = val;
+                cell.onclick = () => {
+                    if(val === state.letter) { 
+                        cell.style.background = "var(--success)"; cell.style.color="white";
+                        cell.style.pointerEvents = "none";
+                        targets--; if(targets <= 0) record(true);
+                    } else { 
+                        state.hasError = true; // El alumno falló
+                        cell.style.background = "var(--error)"; setTimeout(()=>cell.style.background="white",300); 
+                    }
+                };
+                grid.appendChild(cell);
+            }
+            if(targets === 0) { renderGame(); return; } // Recargar si no hay targets
+            zone.appendChild(grid);
+        }
+        else if(state.level === 3) { // LECTURA
+            instr.innerText = "¿Qué dibujo corresponde a la palabra?";
+            zone.innerHTML = `<div style="font-size:4rem; font-weight:900; color:var(--text-main); margin-bottom:20px;">${wordT}</div><div class="card-container"></div>`;
+            appendCards(zone.querySelector('.card-container'), "", emojiT, true, "", emojiW);
+        }
+        else if(state.level === 4) { // SÍLABAS 
+            instr.innerText = "Toca las sílabas para formar la palabra";
+            let parts = data.s[state.sub]; // Extrae las sílabas correctas del diccionario
+            zone.innerHTML = `
+                <div style="font-size:5rem; margin-bottom:15px;">${emojiT}</div>
+                <div id="syllable-box" style="display:flex; gap:10px; min-height:80px; width:100%; justify-content:center; background:rgba(255,255,255,0.4); border-radius:20px; padding:10px; border:3px dashed #ccc; margin-bottom:20px;"></div>
+                <div id="pool" class="card-container"></div>
+            `;
+            let build = [];
+            [...parts].sort(()=>Math.random()-0.5).forEach(s => {
+                let scard = document.createElement('div'); scard.className = 'card'; scard.style.minHeight='auto'; scard.style.height='70px'; scard.style.width='auto'; scard.style.padding='10px 30px';
+                scard.innerHTML = `<span style="font-size:2.5rem;">${s}</span>`;
+                scard.onclick = () => {
+                    document.getElementById('syllable-box').appendChild(scard);
+                    build.push(s);
+                    if(build.length === parts.length) {
+                        if(build.join('') === parts.join('')) record(true);
+                        else { 
+                            state.hasError = true; // El alumno falló
+                            showCustomAlert(() => renderGame()); 
+                        }
+                    }
+                };
+                document.getElementById('pool').appendChild(scard);
+            });
+        }
+        else if(state.level === 5) { // FRASES 
+            instr.innerText = "Completa la frase";
+            let articulo = getArticle(wordT);
+            zone.innerHTML = `
+                <div style="background:white; padding:25px; border-radius:20px; font-size:1.8rem; font-weight:bold; color:var(--text-main); margin-bottom:20px; box-shadow:0 4px 0 #ddd;">
+                    Aquí está ${articulo} <span style="font-size:3rem; vertical-align:middle;">${emojiT}</span>
+                </div>
+                <div class="card-container"></div>
+            `;
+            // Pasamos 'true' al final para que las tarjetas salgan en tipografía grande y mayúscula
+            appendCards(zone.querySelector('.card-container'), wordT, "", true, wordW, "", true);
+        }
+        playAudio();
+    }
+
+    // Creador de tarjetas interactivo 
+    function appendCards(container, c1txt, c1emoji, c1correct, c2txt, c2emoji, isLevel6 = false) {
+        let cards = [
+            {t:c1txt, e:c1emoji, ok:true},
+            {t:c2txt, e:c2emoji, ok:false}
+        ].sort(()=>Math.random()-0.5);
+        
+        cards.forEach(c => {
+            let div = document.createElement('div'); div.className = 'card';
+            
+            // Si es Nivel 6, aplicamos el tamaño grande, negrita y mayúscula al texto
+            let spanStyle = isLevel6 ? ` style="font-size: 1.8rem; font-weight: bold; text-transform: uppercase; font-family: 'Fredoka', sans-serif;"` : ``;
+            
+            div.innerHTML = (c.e ? `<span class="emoji">${c.e}</span>` : "") + (c.t ? `<span${spanStyle}>${c.t}</span>` : "");
+            
+            div.onclick = () => {
+                if(c.ok) { 
+                    div.style.background = "var(--success)"; div.style.color = "white"; 
+                    record(true); 
+                }
+                else { 
+                    state.hasError = true; // El alumno falló
+                    div.style.background = "var(--error)"; 
+                    setTimeout(()=>div.style.background="var(--card-bg)", 400); 
+                }
+            };
+            container.appendChild(div);
+        });
+    }
+
+    // Guardar acierto y avanzar teniendo en cuenta si se ha equivocado antes
+    function record(ok) {
+        if(ok) {
+            if(!state.hasError) {
+                // Solo suma el punto de estadística si NO hubo error previo (Acierto a la primera)
+                state.stats['l'+(state.level+1)]++;
+                state.stars += 10;
+            } else {
+                // Si hubo error, le damos menos estrellas para motivarlo pero NO suma el punto para el informe
+                state.stars += 5;
+            }
+            document.getElementById('stars-count').innerText = state.stars;
+            setTimeout(next, 600);
+        }
+    }
+
+    function next() {
+        state.sub++;
+        state.hasError = false; // Resetear error para la siguiente pregunta
+        if(state.sub >= 5) {
+            state.level++; state.sub = 0;
+            if(state.level >= 6) showScreen('input');
+            else renderGame();
+        } else renderGame();
+    }
+
+    // Sistema de Voz (TTS)
+    function playAudio() {
+        const text = document.getElementById('game-instruction').innerText;
+        window.speechSynthesis.cancel();
+        let u = new SpeechSynthesisUtterance(text);
+        u.lang = 'es-ES'; u.rate = 0.9;
+        window.speechSynthesis.speak(u);
+    }
+
+    // Generar PDF 
+    function generateReport() {
+        const name = document.getElementById('student-name').value;
+        if(!name) { alert("¡Por favor, escribe tu nombre para el diploma!"); return; }
+        
+        const dateStr = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+        
+        // Estructura del Encabezado con 1º de Primaria a la derecha y Maestro debajo
+        document.getElementById('report-header-info').innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-size:1.6rem; font-weight:800; color:var(--text-main);">Alumno/a: ${name}</div>
+                <div style="font-size:1.6rem; font-weight:800; color:var(--text-main);">1º Educación Primaria</div>
+            </div>
+            <div style="font-size:1.4rem; font-weight:700; color:#555; margin-top:5px;">Maestro: Carlos Garrido</div>
+            <div style="color:var(--header-bg); font-weight:700; font-size:1.2rem; margin-top:15px;">Trabada evaluada: Grupo ${state.letter}</div>
+            <div style="font-size:1rem; color:#999; margin-top:5px;">Fecha de finalización: ${dateStr}</div>
+            <div style="font-size:1.4rem; font-weight:bold; color:var(--btn-yellow); margin-top:10px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">Puntuación Total: ${state.stars} ⭐</div>
+        `;
+
+        // Llenado de las estadísticas con LÓGICA DE COLORES POR ACIERTO
+        const cont = document.getElementById('stats-container'); cont.innerHTML = '';
+        SKILLS.forEach((s, i) => {
+            let ok = state.stats['l'+(i+1)];
+            let pct = (ok/5)*100;
+            
+            // Asignación dinámica de colores según el número de aciertos
+            let color;
+            if(ok === 5) color = '#66BB6A'; // Verde oscuro
+            else if(ok === 4) color = '#AED581'; // Verde claro/Lima
+            else if(ok === 3) color = '#FFCA28'; // Amarillo
+            else if(ok === 2) color = '#FFA726'; // Naranja
+            else color = '#EF5350'; // Rojo (1 o 0 aciertos)
+
+            // Se le añade el estilo inline del color-adjust para forzar que salga impreso en PDF
+            cont.innerHTML += `
+                <div class="stat-row" style="-webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                    <div class="stat-label">${s}</div>
+                    <div class="stat-bar-bg" style="-webkit-print-color-adjust: exact; print-color-adjust: exact; background:#eee;">
+                        <div class="stat-bar-fill" style="width:${pct}%; background:${color}; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
+                    </div>
+                    <div style="font-weight:bold; font-size:1.2rem; color:#555;">${ok}/5</div>
+                </div>
+            `;
+        });
+
+        // Actualizar datos en "Recomendaciones para casa"
+        document.getElementById('rec-letter').innerText = state.letter;
+        document.getElementById('rec-letter-2').innerText = state.letter;
+        document.getElementById('rec-letter-3').innerText = state.letter;
+
+        showScreen('report');
+    }
+</script>
+
+</body>
+</html>
