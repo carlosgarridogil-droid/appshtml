@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aventura Numérica DUA - 1º Primaria</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka+One&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-sky: #87CEEB; --game-yellow: #FFD700; }
+        body { font-family: 'Quicksand', sans-serif; background: var(--bg-sky); background-image: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.3) 0%, transparent 20%); min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; padding: 20px; }
+        
+        .game-card { background: rgba(255, 255, 255, 0.98); border-radius: 60px; border: 12px solid var(--game-yellow); width: 100%; max-width: 1200px; padding: 50px; position: relative; box-shadow: 0 30px 0 rgba(0,0,0,0.1); }
+        
+        /* PANTALLA INICIAL */
+        .header-wrapper { display: flex; align-items: center; justify-content: center; gap: 40px; margin-bottom: 20px; flex-wrap: wrap; }
+        .side-badge { font-family: 'Fredoka One', cursive; color: white; padding: 10px 25px; border-radius: 20px; border: 4px solid white; font-size: 1.3rem; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
+        .badge-left { background: #ff7675; transform: rotate(-8deg); }
+        .badge-right { background: #00cec9; transform: rotate(8deg); }
+        .main-title { font-family: 'Luckiest Guy', cursive; font-size: 5rem; color: #6c5ce7; text-transform: uppercase; line-height: 0.9; text-shadow: 4px 4px 0px #fff; margin: 0; }
+        
+        .btn-family { font-family: 'Fredoka One', cursive; font-size: 1rem; color: white; padding: 15px 5px; border-radius: 20px; border-bottom: 6px solid rgba(0,0,0,0.2); cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; min-width: 110px; }
+        .f10 { background: #ef5350; } .f20 { background: #ffa726; } .f30 { background: #fb8c00; }
+        .f40 { background: #66bb6a; } .f50 { background: #26a69a; } .f60 { background: #29b6f6; }
+        .f70 { background: #5c6bc0; } .f80 { background: #7e57c2; } .f90 { background: #ec407a; }
+
+        .section-box { background: #ffffff; border-radius: 35px; padding: 30px; border: 4px solid #e2e8f0; box-shadow: 0 8px 15px rgba(0,0,0,0.05); height: 100%; }
+        .section-box h3 { font-size: 1.8rem; margin-bottom: 20px; font-family: 'Fredoka One'; }
+        .section-box ul li, .section-box p { font-size: 1.15rem; line-height: 1.6; margin-bottom: 12px; }
+        .dua-badge { background: #ff7675; color: white; padding: 6px 15px; border-radius: 12px; font-family: 'Fredoka One', cursive; font-size: 0.9rem; display: inline-block; margin-bottom: 8px; }
+        .credits { margin-top: 40px; font-family: 'Fredoka One', cursive; font-size: 1.6rem; color: #0984e3; background: #e1f5fe; display: inline-block; padding: 15px 50px; border-radius: 60px; border: 4px dashed #0984e3; }
+
+        .btn-info-circle { background: #6c5ce7; color: white; width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; margin-left: 15px; vertical-align: middle; border-bottom: 4px solid #4834d4; transition: 0.2s; }
+        .btn-info-circle:hover { transform: scale(1.1) rotate(10deg); }
+
+        #modal-dua { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); }
+        .modal-body { background: white; margin: 5vh auto; padding: 40px; border-radius: 40px; width: 90%; max-width: 900px; max-height: 85vh; overflow-y: auto; border: 8px solid #6c5ce7; font-family: 'Quicksand', sans-serif; }
+        .modal-body h2 { font-family: 'Fredoka One'; color: #6c5ce7; font-size: 2rem; margin-bottom: 20px; text-align: center; }
+        .modal-section { margin-bottom: 25px; padding: 20px; border-radius: 25px; background: #f8fafc; border-left: 10px solid #6c5ce7; }
+        .modal-section h4 { font-family: 'Fredoka One'; color: #4f46e5; margin-bottom: 10px; font-size: 1.3rem; }
+
+        /* JUEGO */
+        .btn-home { background: #ff7675; color: white; width: 80px; height: 80px; border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; border-bottom: 6px solid #d63031; cursor: pointer; }
+        .tabla-posicional { background: white; border-radius: 30px; overflow: hidden; border: 6px solid #f1f5f9; }
+        .header-d { background: #ef4444; width: 120px; padding: 10px 0; color: white; text-align: center; font-family: 'Fredoka One'; font-size: 2.5rem;}
+        .header-u { background: #3b82f6; width: 120px; padding: 10px 0; color: white; text-align: center; font-family: 'Fredoka One'; font-size: 2.5rem;}
+        .input-posicional { width: 100px; height: 100px; font-size: 4rem; text-align: center; font-weight: bold; border-radius: 20px; border: 4px solid #f1f5f9; font-family: 'Fredoka One'; outline: none; }
+        .input-suma { width: 110px; height: 90px; font-size: 3rem; text-align: center; border-radius: 25px; border: 3px solid #e2e8f0; font-family: 'Fredoka One'; outline: none; }
+        .etiqueta-gigante { font-family: 'Fredoka One'; font-size: 2.1rem; padding: 15px 35px; background: white; border: 5px solid #6c5ce7; color: #6c5ce7; border-radius: 35px; cursor: grab; margin: 8px; box-shadow: 0 8px 0 rgba(108, 92, 231, 0.15); transition: 0.2s; }
+        .drop-zone-active { border: 6px dashed #6c5ce7 !important; background: #f5f3ff !important; }
+        .regleta-d { width: 40px; height: 160px; background: #ff4757; border: 4px solid #b33939; border-radius: 8px; position: relative; }
+        .regleta-d::after { content: ''; position: absolute; width: 100%; height: 100%; background-image: linear-gradient(to bottom, transparent 90%, rgba(0,0,0,0.1) 90%); background-size: 100% 16px; }
+        .cubito-u { width: 35px; height: 35px; background: #1e90ff; border: 3px solid #0984e3; border-radius: 6px; }
+    </style>
+</head>
+<body>
+
+    <div id="modal-dua">
+        <div class="modal-body">
+            <div class="flex justify-between items-start">
+                <h2>🌈 Guía DUA, TEA y TDAH</h2>
+                <button onclick="cerrarInfo()" class="text-4xl font-bold text-gray-400 hover:text-red-500">×</button>
+            </div>
+            <p class="mb-6 text-gray-700 font-bold">Este juego se ajusta a los principios del Diseño Universal para el Aprendizaje (DUA), así como a necesidades específicas del alumnado con TEA y TDAH.</p>
+            
+            <div class="modal-section">
+                <h4>🎯 Múltiples formas de Compromiso (El "PORQUÉ")</h4>
+                <p>• <b>Feedback Inmediato y Positivo:</b> El uso de confeti y frases de ánimo aleatorias mantiene la motivación intrínseca.<br>
+                • <b>Desafío Ajustado:</b> Al permitir elegir la "familia numérica", el juego se adapta a la zona de desarrollo próximo de cada alumno, evitando la frustración o el aburrimiento.</p>
+            </div>
+
+            <div class="modal-section" style="border-left-color: #4f46e5;">
+                <h4>👁️ Múltiples formas de Representación (El "QUÉ")</h4>
+                <p>• <b>Dualidad de Codificación:</b> El número se presenta de forma concreta (regletas y cubos), simbólica (cifras en la tabla posicional) y abstracta/lingüística (nombre escrito y audio).<br>
+                • <b>Apoyos Visuales Dinámicos:</b> La barra de progreso ayuda a los alumnos a situarse en el tiempo y el espacio de la tarea.</p>
+            </div>
+
+            <div class="modal-section" style="border-left-color: #10b981;">
+                <h4>✍️ Múltiples formas de Acción y Expresión (El "CÓMO")</h4>
+                <p>• <b>Modalidades de Respuesta:</b> El alumno interactúa escribiendo (teclado) y manipulando (arrastrar etiquetas), lo que favorece diferentes destrezas motoras y cognitivas.</p>
+            </div>
+
+            <div class="modal-section" style="border-left-color: #f43f5e;">
+                <h4>🧩 Ventajas para el Alumnado con TEA</h4>
+                <p>• <b>Previsibilidad y Estructura:</b> El contador "1/10" y la barra de progreso eliminan la incertidumbre.<br>
+                • <b>Voz Sintetizada:</b> La voz del sistema es constante, clara y predecible, facilitando el procesamiento auditivo.<br>
+                • <b>Corrección Sin Juicio:</b> La transición al color amarillo permite ver la solución correcta sin sentir castigo.<br>
+                • <b>Interés Sensorial Controlado:</b> Colores vivos pero fondo limpio para evitar sobrecarga.</p>
+            </div>
+
+            <div class="modal-section" style="border-left-color: #f59e0b;">
+                <h4>⚡ Ventajas para el Alumnado con TDAH</h4>
+                <p>• <b>Fragmentación de la Tarea (Scaffolding):</b> No muestra todo de golpe. Primero cálculo y luego nombre.<br>
+                • <b>Feedback de Dopamina:</b> Refuerzo inmediato esencial para mantener el foco.<br>
+                • <b>Memoria de Trabajo:</b> Soporte audio para la memoria de trabajo y botón de comprobación para el control de impulsividad.</p>
+            </div>
+
+            <div class="bg-indigo-600 text-white p-6 rounded-3xl">
+                <h4 class="font-bold text-xl mb-2">🎓 Resumen Pedagógico</h4>
+                <p class="text-sm opacity-90">Este juego no es solo una actividad de matemáticas; es una herramienta de inclusión. Al integrar el audio, la corrección asistida en amarillo y la representación con regletas, estás eliminando las barreras de aprendizaje antes de que el alumno se encuentre con ellas, que es la esencia del DUA.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-card">
+        <div id="pantalla-menu" class="text-center">
+            <div class="header-wrapper">
+                <div class="side-badge badge-left">1º PRIMARIA</div>
+                <div>
+                    <h1 class="main-title">AVENTURA</h1>
+                    <h1 class="main-title" style="color: #00cec9;">NUMÉRICA</h1>
+                </div>
+                <div class="side-badge badge-right">MATEMÁTICAS</div>
+            </div>
+
+            <p class="text-gray-500 font-bold text-2xl mb-6">Elige una familia para empezar:</p>
+            <div class="grid grid-cols-3 md:grid-cols-9 gap-3 mb-12" id="menu-familias"></div>
+            
+            <div class="grid md:grid-cols-2 gap-8 text-left mb-10">
+                <div class="section-box">
+                    <h3 class="text-indigo-600 font-bold flex items-center gap-3">📍 Concreción Curricular (1º Primaria)</h3>
+                    <ul class="text-gray-700 font-medium">
+                        <li><strong>Competencia Específica 1 y 2:</strong> Interpretar situaciones de la vida cotidiana y resolver problemas planteados mediante diferentes estrategias y herramientas matemáticas del entorno, integrando los conocimientos adquiridos.</li>
+                        <li><strong>Criterio Evaluación 1.1.b:</strong> Comprender las preguntas planteadas a través de diferentes soportes (mensajes orales, mensajes visuales, material táctil) en situaciones de la vida cotidiana.</li>
+                        <li><strong>Criterio Evaluación 2.2.b:</strong> Obtener soluciones guiadas de un problema, de forma individual o colectiva, en situaciones de la vida cotidiana.</li>
+                        <li><strong>Saberes Básicos (MAT.1.A.2.2):</strong> Sistema de numeración decimal. Lectura y escritura de números. Composición y descomposición de números hasta el 99.</li>
+                        <li><strong>Perfil Competencial:</strong> STEM1, STEM2, CD2, CPSAA5.</li>
+                    </ul>
+                </div>
+
+                <div class="section-box bg-pink-50 border-pink-100">
+                    <h3 class="text-pink-600 font-bold flex items-center">
+                        🌈 Enfoque DUA
+                        <div class="btn-info-circle" onclick="abrirInfo()">i</div>
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <span class="dua-badge">MOTIVACIÓN Y COMPROMISO</span>
+                            <p class="text-gray-700 italic">Proporcionar múltiples formas de implicación captando el interés del alumnado mediante el feedback inmediato, audios de ánimo aleatorios tras cada acierto y retos ajustados por niveles.</p>
+                        </div>
+                        <div>
+                            <span class="dua-badge">REPRESENTACIÓN VISUAL</span>
+                            <p class="text-gray-700 italic">Ofrecer múltiples formas de representación mediante el uso de apoyos visuales concretos: regletas rojas (decenas) y cubos azules (unidades).</p>
+                        </div>
+                        <div>
+                            <span class="dua-badge">ACCIÓN Y EXPRESIÓN</span>
+                            <p class="text-gray-700 italic">Proporcionar múltiples medios de acción permitiendo la manipulación directa de etiquetas de texto por arrastre y la entrada de datos numérica.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="credits">Elaborado por Carlos Garrido - IA Gemini</div>
+        </div>
+
+        <div id="pantalla-juego" class="hidden">
+            <div class="flex justify-between items-center mb-8">
+                <div onclick="location.reload()" class="btn-home">🏠</div>
+                <div class="w-1/2 h-8 bg-gray-200 rounded-full border-4 border-white overflow-hidden ml-4">
+                    <div id="progreso" class="h-full bg-gradient-to-r from-green-400 to-blue-500 w-0 transition-all"></div>
+                </div>
+                <span id="contador" class="font-bold text-indigo-600 text-2xl px-6 py-2 bg-indigo-50 rounded-full border-2 border-indigo-100">1/10</span>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-12">
+                <div class="bg-blue-50 p-12 rounded-[60px] border-4 border-white flex flex-col items-center">
+                    <div class="flex items-end gap-8 mb-4 flex-wrap justify-center">
+                        <div id="decenas-box" class="flex gap-3"></div>
+                        <div id="unidades-box" class="grid grid-cols-3 gap-3"></div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-10 items-center">
+                    <div class="tabla-posicional">
+                        <div class="flex"><div class="header-d">D</div><div class="header-u">U</div></div>
+                        <div class="flex p-4 gap-4 justify-center">
+                            <input type="number" id="in-d" class="input-posicional text-red-600">
+                            <input type="number" id="in-u" class="input-posicional text-blue-600">
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-6 bg-slate-50 p-6 rounded-3xl border-4 border-white">
+                        <input type="number" id="op-d" class="input-suma text-red-500">
+                        <span class="text-4xl font-black">+</span>
+                        <input type="number" id="op-u" class="input-suma text-blue-500">
+                        <span class="text-4xl font-black">=</span>
+                        <input type="number" id="op-total" class="input-suma text-purple-600">
+                    </div>
+                    <button id="btn-check" onclick="verificar()" class="w-full bg-green-500 text-white font-['Fredoka_One'] text-4xl py-7 rounded-[40px] shadow-xl border-b-8 border-green-700 active:translate-y-1">¡COMPROBAR! ✅</button>
+                </div>
+            </div>
+
+            <div id="zona-nombre" class="mt-12 hidden flex flex-col items-center">
+                <div id="drop-target" class="w-full max-w-4xl h-36 border-4 border-dashed border-indigo-200 rounded-[50px] flex items-center justify-center bg-white text-3xl font-bold text-indigo-200 uppercase gap-4">CONSTRUYE EL NOMBRE</div>
+                <div id="etiquetas-pool" class="flex flex-wrap justify-center mt-10"></div>
+                <button id="btn-next" onclick="proxima()" class="hidden bg-blue-600 text-white px-24 py-7 rounded-full mt-10 text-4xl font-bold shadow-2xl">SIGUIENTE ➡️</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    function abrirInfo() { document.getElementById('modal-dua').style.display = 'block'; }
+    function cerrarInfo() { document.getElementById('modal-dua').style.display = 'none'; }
+
+    const animos = ["¡Excelente!", "¡Muy bien!", "¡Genial!", "¡Eres increíble!"];
+    const unidadesNombres = ["cero", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
+    const nombres10 = ["diez", "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve"];
+    const decenasPuras = {30:"treinta", 40:"cuarenta", 50:"cincuenta", 60:"sesenta", 70:"setenta", 80:"ochenta", 90:"noventa"};
+    const decenasY = {30:"treinta y ", 40:"cuarenta y ", 50:"cincuenta y ", 60:"sesenta y ", 70:"setenta y ", 80:"ochenta y ", 90:"noventa y "};
+
+    let familia, preguntas, actual, pD = false, pU = false;
+
+    const menu = document.getElementById('menu-familias');
+    [10,20,30,40,50,60,70,80,90].forEach(f => {
+        const b = document.createElement('button');
+        b.className = `btn-family f${f}`;
+        b.innerHTML = `<span>Familia</span><span class="text-2xl">${f}</span>`;
+        b.onclick = () => { familia = f; decir(`Familia del ${f}`); iniciar(); };
+        menu.appendChild(b);
+    });
+
+    function iniciar() {
+        preguntas = [0,1,2,3,4,5,6,7,8,9].sort(() => Math.random()-0.5);
+        actual = 0;
+        document.getElementById('pantalla-menu').classList.add('hidden');
+        document.getElementById('pantalla-juego').classList.remove('hidden');
+        cargar();
+    }
+
+    function cargar() {
+        if(actual >= 10) { finalizar(); return; }
+        pD = false; pU = false;
+        const u = preguntas[actual], d = familia/10;
+        document.getElementById('progreso').style.width = `${(actual / 10) * 100}%`;
+        document.getElementById('contador').innerText = `${actual+1}/10`;
+        document.getElementById('decenas-box').innerHTML = '<div class="regleta-d"></div>'.repeat(d);
+        document.getElementById('unidades-box').innerHTML = '<div class="cubito-u"></div>'.repeat(u);
+        ['in-d','in-u','op-d','op-u','op-total'].forEach(id => {
+            const el = document.getElementById(id); el.value = ''; el.style.backgroundColor = 'white';
+        });
+        document.getElementById('zona-nombre').classList.add('hidden');
+        document.getElementById('btn-next').classList.add('hidden');
+        document.getElementById('btn-check').classList.remove('hidden');
+        renderPool();
+    }
+
+    function renderPool() {
+        const pool = document.getElementById('etiquetas-pool'); pool.innerHTML = '';
+        let items = (familia === 10) ? [...nombres10] : 
+                    (familia === 20) ? ["veinte", "veinti", ...unidadesNombres.slice(1)] :
+                    [decenasPuras[familia], decenasY[familia], ...unidadesNombres.slice(1)];
+        items.sort(() => Math.random() - 0.5).forEach(n => {
+            const d = document.createElement('div');
+            d.className = 'etiqueta-gigante'; d.innerText = n; d.draggable = true;
+            d.onclick = () => decir(n);
+            d.ondragstart = (e) => { e.dataTransfer.setData("text", n); decir(n); }; // Audio activado aquí
+            pool.appendChild(d);
+        });
+    }
+
+    async function verificar() {
+        const u = preguntas[actual], d = familia/10;
+        const res = {'in-d':d, 'in-u':u, 'op-d':familia, 'op-u':u, 'op-total':familia+u};
+        let errores = [];
+        for(let [id, v] of Object.entries(res)) {
+            const el = document.getElementById(id);
+            if(parseInt(el.value) === v) el.style.backgroundColor = '#dcfce7';
+            else { el.style.backgroundColor = '#fee2e2'; errores.push(id); }
+        }
+        if(errores.length === 0) {
+            decir(animos[Math.floor(Math.random()*animos.length)]);
+            confetti({particleCount: 40});
+            prepararNombre();
+        } else {
+            decir("Revisa los números.");
+            setTimeout(() => {
+                errores.forEach(id => {
+                    const el = document.getElementById(id);
+                    el.value = res[id];
+                    el.style.backgroundColor = '#fef08a';
+                });
+                prepararNombre();
+            }, 1200);
+        }
+    }
+
+    function prepararNombre() {
+        pD = false; pU = false;
+        document.getElementById('btn-check').classList.add('hidden');
+        document.getElementById('zona-nombre').classList.remove('hidden');
+        const target = document.getElementById('drop-target');
+        target.innerHTML = 'CONSTRUYE EL NOMBRE';
+        target.ondragover = (e) => { e.preventDefault(); target.classList.add('drop-zone-active'); };
+        target.ondragleave = () => target.classList.remove('drop-zone-active');
+        target.ondrop = handleDrop;
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        const target = document.getElementById('drop-target');
+        target.classList.remove('drop-zone-active');
+        const data = e.dataTransfer.getData("text");
+        const u = preguntas[actual];
+
+        if(familia === 10 && data === nombres10[u]) {
+            target.innerHTML = ''; crearEtiqFinal(data, 'bg-green-500'); terminarP();
+        } 
+        else if(familia === 20) {
+            if(u === 0 && data === "veinte") { target.innerHTML = ''; crearEtiqFinal(data, 'bg-green-500'); terminarP(); }
+            else if(u > 0) {
+                if(data === "veinti" && !pD) { if(target.innerText.includes('CONS')) target.innerHTML=''; crearEtiqFinal(data, 'bg-indigo-500'); pD=true; }
+                else if(data === unidadesNombres[u] && !pU) { if(target.innerText.includes('CONS')) target.innerHTML=''; crearEtiqFinal(data, 'bg-blue-500'); pU=true; }
+                if(pD && pU) terminarP();
+            }
+        } 
+        else {
+            if(u === 0 && data === decenasPuras[familia]) { target.innerHTML = ''; crearEtiqFinal(data, 'bg-green-500'); terminarP(); }
+            else if(u > 0) {
+                if(data === decenasY[familia] && !pD) { if(target.innerText.includes('CONS')) target.innerHTML=''; crearEtiqFinal(data, 'bg-indigo-500'); pD=true; }
+                else if(data === unidadesNombres[u] && !pU) { if(target.innerText.includes('CONS')) target.innerHTML=''; crearEtiqFinal(data, 'bg-blue-500'); pU=true; }
+                if(pD && pU) terminarP();
+            }
+        }
+    }
+
+    function crearEtiqFinal(t, c) {
+        const el = document.createElement('div');
+        el.className = `etiqueta-gigante ${c} text-white border-white shadow-none`;
+        el.innerText = t; 
+        document.getElementById('drop-target').appendChild(el);
+        // Audio eliminado de aquí para evitar repetición
+    }
+
+    function terminarP() { document.getElementById('btn-next').classList.remove('hidden'); decir("¡Muy bien!"); }
+    function proxima() { actual++; cargar(); }
+    function decir(t) { const m = new SpeechSynthesisUtterance(t); m.lang = 'es-ES'; m.rate = 0.9; speechSynthesis.speak(m); }
+    function finalizar() {
+        document.getElementById('pantalla-juego').innerHTML = `<div class="text-center py-20"><h1 class="main-title" style="font-size:8rem">¡LOGRADO!</h1><div class="text-9xl my-10">🏆</div><button onclick="location.reload()" class="bg-pink-500 text-white font-['Fredoka_One'] text-4xl px-20 py-8 rounded-full shadow-2xl">INICIO 🔄</button></div>`;
+        decir("¡Enhorabuena! Has completado el reto.");
+        confetti({particleCount: 200, spread: 100});
+    }
+</script>
+</body>
+</html>
