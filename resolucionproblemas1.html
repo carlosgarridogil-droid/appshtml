@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resolución de Problemas - 1º Primaria</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --error: #ff4757;
+            --blue: #3498db;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #f0f9ff;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        /* --- PANTALLA INICIAL --- */
+        .text-center { text-align: center; }
+        .titulo-visual { color: var(--primary); font-size: 3rem; margin-bottom: 5px; text-shadow: 2px 2px #eee; }
+        .subtitulo { color: #555; font-size: 1.5rem; margin-bottom: 20px; }
+        
+        .iconos-3d-inicio {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            font-size: 60px;
+            margin: 30px 0;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));
+        }
+
+        .autor-footer { color: #888; margin-top: 40px; font-size: 1.1rem; border-top: 1px solid #eee; padding-top: 20px; }
+
+        /* --- ELEMENTOS DE JUEGO --- */
+        .instruccion-colores {
+            background: #fff9db;
+            padding: 15px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            border: 2px solid #f1c40f;
+            color: #856404;
+        }
+
+        .texto-problema {
+            font-size: 1.8rem;
+            line-height: 2;
+            margin: 20px 0;
+            padding: 25px;
+            border: 4px dashed #ddd;
+            border-radius: 20px;
+            background: #fff;
+        }
+
+        .clicable { cursor: pointer; padding: 2px 8px; border-radius: 8px; transition: 0.3s; border-bottom: 3px solid transparent; }
+        .subrayado-rojo { background-color: var(--error); color: white; border-bottom-color: darkred; }
+        .subrayado-azul { background-color: var(--blue); color: white; border-bottom-color: #1a5276; }
+
+        .bloque-paso {
+            background: #f8fbfd;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #e1e8ed;
+            font-size: 1.4rem;
+        }
+
+        .input-casilla {
+            width: 60px;
+            padding: 10px;
+            font-size: 1.3rem;
+            text-align: center;
+            border: 3px solid #cbd5e0;
+            border-radius: 12px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-casilla:focus { border-color: var(--secondary); }
+        .error-campo { border-color: var(--error) !important; background: #fff5f5; }
+
+        /* --- SELECTOR OPERACIÓN --- */
+        .operacion-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .op-card {
+            padding: 15px 25px;
+            border: 3px solid #eee;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+        }
+
+        .op-card.selected { border-color: var(--secondary); background: #e6fffa; font-weight: bold; }
+        .check-mark { color: var(--secondary); display: none; font-size: 1.5rem; }
+        .selected .check-mark { display: inline; }
+
+        .fila-calculo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            font-size: 2.5rem;
+            margin: 25px 0;
+        }
+
+        .btn-interactivo {
+            padding: 18px 45px;
+            font-size: 1.4rem;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+            box-shadow: 0 6px 0 #bbb;
+        }
+
+        .btn-comprobar { background: var(--primary); color: white; box-shadow: 0 6px 0 #d63031; }
+        .btn-siguiente { background: var(--secondary); color: white; box-shadow: 0 6px 0 #36b3a8; }
+        .btn-interactivo:active { transform: translateY(4px); box-shadow: 0 2px 0 #888; }
+
+        /* --- INFORME --- */
+        #informe-final { display: none; }
+        .header-informe { display: flex; justify-content: space-between; border-bottom: 5px solid var(--secondary); padding-bottom: 15px; }
+        .box-resultado { background: #f1f5f9; padding: 20px; border-radius: 15px; margin-top: 15px; border-left: 6px solid var(--primary); }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="inicio" class="text-center">
+        <h1 class="titulo-visual">Aprendemos a realizar problemas</h1>
+        <div class="subtitulo">1º Primaria - Resolución de problemas</div>
+        <div class="iconos-3d-inicio">
+            <span>🧩</span><span>💡</span><span>🚀</span>
+        </div>
+        <input type="text" id="nombreInput" placeholder="Escribe tu nombre aquí..." style="padding:15px; width:70%; border-radius:15px; border:2px solid #ddd; font-size:1.2rem; text-align:center;"><br><br>
+        <button class="btn-interactivo btn-siguiente" onclick="comenzar()">¡EMPEZAR A JUGAR!</button>
+        <div class="autor-footer">Elaborado por <b>Carlos Garrido</b></div>
+    </div>
+
+    <div id="juego" class="hidden">
+        <div class="instruccion-colores text-center">
+            🖍️ PULSA PARA SUBRAYAR: <span style="color:red">DATOS DE ROJO</span> Y <span style="color:blue">PREGUNTA DE AZUL</span>
+        </div>
+
+        <div id="enunciado-container" class="texto-problema"></div>
+
+        <div id="paso-datos" class="bloque-paso"></div>
+
+        <div class="text-center" style="font-size: 1.4rem; margin-bottom:10px;">¿Qué tenemos que hacer?</div>
+        <div class="operacion-selector">
+            <div class="op-card" id="cardSuma" onclick="seleccionarOperacion('+')">
+                <span class="check-mark">✓</span> SUMAR (+)
+            </div>
+            <div class="op-card" id="cardResta" onclick="seleccionarOperacion('-')">
+                <span class="check-mark">✓</span> RESTAR (-)
+            </div>
+        </div>
+
+        <div class="fila-calculo">
+            <input type="number" id="num1" class="input-casilla">
+            <span id="signo-op">?</span>
+            <input type="number" id="num2" class="input-casilla">
+            <span>=</span>
+            <input type="number" id="numRes" class="input-casilla">
+        </div>
+
+        <div id="paso-respuesta" class="bloque-paso text-center"></div>
+
+        <div class="text-center" style="margin-top: 30px;">
+            <button class="btn-interactivo btn-comprobar" id="btnCheck" onclick="validarProblema()">Comprobar</button>
+            <button class="btn-interactivo btn-siguiente hidden" id="btnNext" onclick="siguienteProblema()">Siguiente Problema ➡️</button>
+        </div>
+    </div>
+
+    <div id="informe-final">
+        <div class="header-informe">
+            <div>
+                <h1 style="margin:0; font-size:1.8rem;">INFORME RESOLUCIÓN DE PROBLEMAS</h1>
+                <p style="font-size:1.3rem;">Alumno/a: <span id="inf-alumno" style="font-weight:bold; color:var(--primary);"></span></p>
+            </div>
+            <div style="text-align:right">
+                <p style="margin:0; font-weight:bold; font-size:1.2rem;">Maestro: Carlos Garrido</p>
+                <p id="inf-fecha" style="margin:0; color:#666;"></p>
+            </div>
+        </div>
+
+        <div id="inf-nota-grande" class="text-center" style="font-size:3.5rem; font-weight:bold; margin:30px 0; color:var(--secondary);"></div>
+        
+        <div id="comentarios-pedagogicos"></div>
+
+        <button class="btn-interactivo btn-siguiente" style="width:100%; margin-top:30px;" onclick="location.reload()">VOLVER A EMPEZAR</button>
+    </div>
+</div>
+
+<script>
+    let currentIdx = 0;
+    let selectedSign = "";
+    let dataHistory = [];
+
+    const problemas = [
+        {
+            enunciado: "El elefante Dupi tiene <span class='clicable' onclick='toggleColor(this,\"rojo\")'>1 lápiz</span> en su mano derecha y <span class='clicable' onclick='toggleColor(this,\"rojo\")'>3 lápices</span> en la trompa. <span class='clicable' onclick='toggleColor(this,\"azul\")'>¿Cuántos lápices tiene Dupi?</span>",
+            datos: "En la mano derecha tiene <input type='number' id='inD1' class='input-casilla'> ✏️<br>En la trompa tiene <input type='number' id='inD2' class='input-casilla'> ✏️",
+            solucion: "En total tiene <input type='number' id='inFinal' class='input-casilla'> lápices.",
+            v1: 1, v2: 3, tipo: '+', total: 4, audio: "El elefante Dupi tiene un lápiz en su mano derecha y tres lápices en la trompa. ¿Cuántos lápices tiene Dupi?"
+        },
+        {
+            enunciado: "Había <span class='clicable' onclick='toggleColor(this,\"rojo\")'>4 patitos</span> nadando, pero <span class='clicable' onclick='toggleColor(this,\"rojo\")'>se marchan 3</span>. <span class='clicable' onclick='toggleColor(this,\"azul\")'>¿Cuántos patitos quedan ahora?</span>",
+            datos: "Había nadando <input type='number' id='inD1' class='input-casilla'> 🦆<br>Se marchan <input type='number' id='inD2' class='input-casilla'> 🦆",
+            solucion: "Ahora queda <input type='number' id='inFinal' class='input-casilla'> patito.",
+            v1: 4, v2: 3, tipo: '-', total: 1, audio: "Había cuatro patitos nadando, pero se marchan tres. ¿Cuántos patitos quedan ahora?"
+        },
+        {
+            enunciado: "En un árbol hay <span class='clicable' onclick='toggleColor(this,\"rojo\")'>5 pájaros</span> y llegan <span class='clicable' onclick='toggleColor(this,\"rojo\")'>2 pájaros</span> más. <span class='clicable' onclick='toggleColor(this,\"azul\")'>¿Cuántos pájaros hay en total?</span>",
+            datos: "Hay en el árbol <input type='number' id='inD1' class='input-casilla'> 🐦<br>Llegan volando <input type='number' id='inD2' class='input-casilla'> 🐦",
+            solucion: "En total hay <input type='number' id='inFinal' class='input-casilla'> pájaros.",
+            v1: 5, v2: 2, tipo: '+', total: 7, audio: "En un árbol hay cinco pájaros y llegan dos pájaros más. ¿Cuántos pájaros hay en total?"
+        },
+        {
+            enunciado: "Tengo <span class='clicable' onclick='toggleColor(this,\"rojo\")'>8 caramelos</span> y <span class='clicable' onclick='toggleColor(this,\"rojo\")'>me como 5</span>. <span class='clicable' onclick='toggleColor(this,\"azul\")'>¿Cuántos caramelos me quedan?</span>",
+            datos: "Tenía <input type='number' id='inD1' class='input-casilla'> 🍭<br>Me he comido <input type='number' id='inD2' class='input-casilla'> 🍭",
+            solucion: "Me quedan <input type='number' id='inFinal' class='input-casilla'> caramelos.",
+            v1: 8, v2: 5, tipo: '-', total: 3, audio: "Tengo ocho caramelos y me como cinco. ¿Cuántos caramelos me quedan?"
+        }
+    ];
+
+    function toggleColor(el, color) { el.classList.toggle('subrayado-' + color); }
+
+    function comenzar() {
+        if(!document.getElementById('nombreInput').value) return alert("Por favor, escribe tu nombre.");
+        document.getElementById('inicio').classList.add('hidden');
+        document.getElementById('juego').classList.remove('hidden');
+        cargarProblema();
+    }
+
+    function cargarProblema() {
+        const p = problemas[currentIdx];
+        document.getElementById('enunciado-container').innerHTML = p.enunciado;
+        document.getElementById('paso-datos').innerHTML = p.datos;
+        document.getElementById('paso-respuesta').innerHTML = p.solucion;
+        
+        // Reset campos
+        document.getElementById('num1').value = ""; document.getElementById('num2').value = ""; document.getElementById('numRes').value = "";
+        document.getElementById('signo-op').innerText = "?";
+        selectedSign = "";
+        document.getElementById('cardSuma').classList.remove('selected');
+        document.getElementById('cardResta').classList.remove('selected');
+        document.getElementById('btnNext').classList.add('hidden');
+        
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(p.audio));
+    }
+
+    function seleccionarOperacion(op) {
+        selectedSign = op;
+        document.getElementById('signo-op').innerText = op;
+        document.getElementById('cardSuma').classList.toggle('selected', op === '+');
+        document.getElementById('cardResta').classList.toggle('selected', op === '-');
+    }
+
+    function validarProblema() {
+        const p = problemas[currentIdx];
+        const d1 = document.getElementById('inD1').value;
+        const d2 = document.getElementById('inD2').value;
+        const n1 = document.getElementById('num1').value;
+        const n2 = document.getElementById('num2').value;
+        const nr = document.getElementById('numRes').value;
+        const nf = document.getElementById('inFinal').value;
+
+        // Feedback visual de errores
+        document.getElementById('inD1').classList.toggle('error-campo', d1 != p.v1);
+        document.getElementById('inD2').classList.toggle('error-campo', d2 != p.v2);
+        document.getElementById('numRes').classList.toggle('error-campo', nr != p.total);
+        document.getElementById('inFinal').classList.toggle('error-campo', nf != p.total);
+
+        dataHistory.push({
+            datos: (d1 == p.v1 && d2 == p.v2),
+            pregunta: document.querySelector('.subrayado-azul') !== null,
+            operacion: (selectedSign === p.tipo),
+            calculo: (nr == p.total && nf == p.total)
+        });
+
+        document.getElementById('btnNext').classList.remove('hidden');
+    }
+
+    function siguienteProblema() {
+        currentIdx++;
+        if(currentIdx < problemas.length) cargarProblema();
+        else mostrarInforme();
+    }
+
+    function mostrarInforme() {
+        document.getElementById('juego').classList.add('hidden');
+        document.getElementById('informe-final').style.display = 'block';
+        document.getElementById('inf-alumno').innerText = document.getElementById('nombreInput').value;
+        document.getElementById('inf-fecha').innerText = new Date().toLocaleDateString();
+
+        let sD = 0, sP = 0, sO = 0, sC = 0;
+        dataHistory.forEach(h => {
+            if(h.datos) sD++; if(h.pregunta) sP++; if(h.operacion) sO++; if(h.calculo) sC++;
+        });
+
+        const notaFinal = ((sD + sP + sO + sC) / 16) * 10;
+        document.getElementById('inf-nota-grande').innerText = notaFinal.toFixed(1);
+
+        document.getElementById('comentarios-pedagogicos').innerHTML = `
+            <div class="box-resultado"><b>Identificación de Datos:</b> ${sD >= 3 ? "Excelente. Identifica perfectamente los datos numéricos." : "Debe practicar más la extracción de números del texto."}</div>
+            <div class="box-resultado"><b>Comprensión de la Pregunta:</b> ${sP >= 3 ? "Muy bien. Identifica qué es lo que el problema pide resolver." : "A veces olvida señalar la pregunta azul del enunciado."}</div>
+            <div class="box-resultado"><b>Selección de Operación:</b> ${sO >= 3 ? "Domina la elección entre suma y resta según el contexto." : "Confunde en ocasiones si debe sumar o restar."}</div>
+            <div class="box-resultado"><b>Precisión en el Cálculo:</b> ${sC >= 3 ? "Cálculo perfecto. No comete errores en la resolución final." : "Debe repasar las operaciones básicas para evitar errores de cálculo."}</div>
+        `;
+    }
+</script>
+</body>
+</html>
