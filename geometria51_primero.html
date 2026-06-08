@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprendemos Geometría - 1º Primaria</title>
+    <style>
+        /* --- CSS (DISEÑO Y ESTILOS) --- */
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background-color: #e0f7fa;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 { color: #006064; font-size: 2.5em; margin-bottom: 10px; }
+        h2 { color: #00838f; }
+
+        .pantalla {
+            display: none; 
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            animation: aparecer 0.5s ease-in-out;
+        }
+
+        .pantalla.activa { display: flex; }
+
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- ESTILOS PANTALLA DE INICIO --- */
+        .panel-amarillo {
+            background-color: #fffde7;
+            border: 5px solid #fbc02d;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            box-shadow: 0px 8px 20px rgba(251, 192, 45, 0.4);
+            margin-bottom: 20px;
+        }
+
+        .contenedor-titulo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .etiqueta-visual {
+            background-color: #ffeb3b;
+            color: #d32f2f;
+            border: 3px solid #f44336;
+            padding: 8px 15px;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            transform: rotate(-5deg);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .etiqueta-visual.derecha {
+            transform: rotate(5deg);
+            color: #1976d2;
+            border-color: #2196f3;
+        }
+
+        .titulo-principal {
+            font-size: 55px;
+            font-weight: 900;
+            color: white;
+            text-shadow: 
+                -3px -3px 0 #00838f,  
+                 3px -3px 0 #00838f,
+                -3px  3px 0 #00838f,
+                 3px  3px 0 #00838f,
+                 4px  4px 10px rgba(0,0,0,0.3);
+            margin: 0;
+            letter-spacing: 2px;
+        }
+
+        .curriculo-box {
+            background-color: white;
+            border-left: 6px solid #ff9800;
+            padding: 15px;
+            text-align: left;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Arial', sans-serif;
+            box-shadow: inset 0px 0px 10px rgba(0,0,0,0.05);
+        }
+
+        .curriculo-box h3 { color: #e65100; margin-top: 0; font-size: 18px;}
+        .curriculo-box p { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 10px; text-align: justify;}
+        
+        .iconos-3d { font-size: 50px; letter-spacing: 20px; margin: 20px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .firma { font-size: 18px; font-weight: bold; color: #5e35b1; margin-bottom: 25px; }
+
+        .contenedor-botones-inicio { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        .btn-entrenamiento { background-color: #4caf50; box-shadow: 0px 4px 0px #2e7d32; font-size: 22px; padding: 15px 30px; }
+        .btn-evaluacion { background-color: #f44336; box-shadow: 0px 4px 0px #c62828; font-size: 22px; padding: 15px 30px; }
+
+        /* Botones Generales */
+        .boton {
+            padding: 15px 30px; font-size: 20px; font-weight: bold; color: white;
+            border: none; border-radius: 10px; cursor: pointer; transition: transform 0.2s;
+            margin: 10px; font-family: 'Comic Sans MS', sans-serif;
+        }
+        .boton:hover { transform: scale(1.05); }
+        .boton:active { transform: scale(0.95); }
+        
+        .btn-juego { background-color: #ff9800; box-shadow: 0px 4px 0px #e65100; }
+        .btn-siguiente { background-color: #2196f3; box-shadow: 0px 4px 0px #1976d2; display: none; margin-top: 20px; font-size: 22px; animation: latir 1.5s infinite;}
+        .btn-volver { background-color: #757575; box-shadow: 0px 4px 0px #424242; font-size: 18px; margin-top: 20px; }
+        .btn-pdf { background-color: #e91e63; box-shadow: 0px 4px 0px #ad1457; font-size: 22px; }
+
+        @keyframes latir { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        /* Juegos */
+        .instrucciones { font-size: 20px; color: #555; background-color: #fff9c4; padding: 15px; border-radius: 10px; border: 2px dashed #fbc02d; margin-bottom: 20px;}
+        .mensajes { margin-top: 15px; font-size: 22px; font-weight: bold; min-height: 35px; }
+
+        /* Nivel 1 */
+        .contenedor-unir { display: flex; justify-content: space-around; width: 100%; margin-top: 20px; gap: 20px; }
+        .columna-unir { display: flex; flex-direction: column; gap: 20px; width: 45%; }
+        .item-match { padding: 15px; border: 4px solid #e0e0e0; border-radius: 15px; cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; background-color: white; min-height: 80px; }
+        .palabra-match { border-radius: 40px; font-size: 22px; font-weight: bold; color: #5e35b1; border-color: #b39ddb; background-color: #f3e5f5; text-transform: uppercase;}
+        .item-match:hover { transform: scale(1.05); }
+        .item-match.seleccionado { border-color: #ff9800; background-color: #fff3e0; box-shadow: 0 0 15px rgba(255, 152, 0, 0.5); transform: scale(1.1); }
+        .item-match.resuelto { border-color: #4caf50; background-color: #e8f5e9; opacity: 0.6; pointer-events: none; transform: scale(0.95); }
+
+        /* Niveles 2, 3, 4 */
+        .cuadricula-general { display: flex; justify-content: center; gap: 20px; width: 100%; flex-wrap: wrap; margin-bottom: 20px;}
+        .item-figura { border: 4px solid #e0e0e0; border-radius: 15px; padding: 20px; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; background-color: white; user-select: none; min-width: 120px;}
+        .item-figura:hover { transform: scale(1.05); }
+        .item-figura.seleccionado { border-color: #ff9800; background-color: #fff3e0; box-shadow: 0 0 15px rgba(255, 152, 0, 0.5); transform: scale(1.1); }
+        
+        .correcto-anim { border-color: #4caf50 !important; background-color: #e8f5e9 !important; transform: scale(1.1); pointer-events: none;}
+        .error-anim { animation: vibrar 0.4s; border-color: #f44336 !important; background-color: #ffcdd2 !important;}
+
+        @keyframes vibrar {
+            0% { transform: translateX(0); } 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-8px); } 100% { transform: translateX(0); }
+        }
+
+        /* Nivel 5: Lados y vértices */
+        .fila-lv { display: flex; align-items: center; justify-content: space-between; background: #f3e5f5; border: 4px solid #ce93d8; border-radius: 15px; padding: 15px 25px; margin-bottom: 15px; width: 90%; max-width: 600px; flex-wrap: wrap; gap: 15px;}
+        .caja-input-lv { display: flex; align-items: center; gap: 10px; }
+        .etiqueta-lv { font-size: 20px; font-weight: bold; color: #6a1b9a; }
+        .input-lv { width: 60px; font-size: 24px; text-align: center; border: 3px solid #ab47bc; border-radius: 10px; font-family: 'Comic Sans MS'; padding: 5px; outline: none; transition: 0.3s;}
+        .input-lv:focus { border-color: #ff9800; box-shadow: 0 0 10px #ff9800; }
+        .input-correcto { border-color: #4caf50; background-color: #e8f5e9; color: #2e7d32; pointer-events: none;}
+        .input-error { border-color: #f44336; background-color: #ffcdd2; color: #c62828; animation: vibrar 0.4s;}
+
+        /* Resultados */
+        .resultado-box { background-color: #f3e5f5; border: 4px solid #ce93d8; border-radius: 15px; padding: 20px; width: 80%; margin: 20px 0; }
+        .nota-final { font-size: 60px; font-weight: bold; color: #6a1b9a; margin: 10px 0; }
+        .lista-stats { text-align: left; font-size: 18px; list-style-type: none; padding: 0; width: 100%;}
+        .lista-stats li { margin: 10px 0; padding: 10px; background: white; border-radius: 8px; border-left: 5px solid #ab47bc; display: flex; justify-content: space-between;}
+        .stat-perfecto { color: #2e7d32; font-weight: bold;}
+        .stat-regular { color: #e65100; font-weight: bold;}
+        
+        .datos-alumno { display: none; margin-top: 20px; padding: 20px; background-color: #e1bee7; border-radius: 10px; border: 2px dashed #9c27b0; }
+        .input-nombre { font-size: 20px; padding: 10px; border-radius: 8px; border: 2px solid #8e24aa; font-family: 'Comic Sans MS', sans-serif; text-align: center; width: 80%; max-width: 300px; margin-bottom: 15px;}
+
+        /* Rúbrica Explicativa */
+        .rubrica-box {
+            background-color: #e1f5fe;
+            border-left: 6px solid #03a9f4;
+            padding: 15px 20px;
+            margin: 10px auto;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 15px;
+            width: 90%;
+            box-sizing: border-box;
+            box-shadow: 0px 3px 10px rgba(0,0,0,0.05);
+            font-family: 'Arial', sans-serif;
+        }
+        .rubrica-box h3 {
+            color: #0277bd;
+            margin-top: 0;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .rubrica-box ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .rubrica-box li {
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        /* --- IMPRESIÓN --- */
+        @media print {
+            @page { size: A4; margin: 10mm; } 
+            body { background-color: white; color: black; font-family: 'Arial', sans-serif; padding: 0; margin: 0; }
+            .pantalla { box-shadow: none; max-width: 100%; border-radius: 0; padding: 0; }
+            .boton, .btn-volver, .datos-alumno input, #botones-finales { display: none !important; } 
+            .datos-alumno { border: none; background: transparent; padding: 0; display: block !important; margin-top: 0; margin-bottom: 10px;}
+            #nombre-impresion { display: block !important; font-size: 18px; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 5px;}
+            
+            #cabecera-impresion h1 { font-size: 22px; margin: 5px 0; color: #000 !important;}
+            #cabecera-impresion h2 { font-size: 16px; margin: 5px 0; }
+            .curriculo-box { border-left: 4px solid #333; padding: 10px; margin-bottom: 10px; margin-top: 10px; box-shadow: none;}
+            .curriculo-box p { font-size: 11px; margin-bottom: 5px; line-height: 1.3;}
+            .resultado-box { border: 2px solid #333; background-color: transparent; padding: 10px; margin: 10px 0; width: 100%; box-sizing: border-box;}
+            .nota-final { font-size: 35px; margin: 5px 0; color: #000; }
+            h2 { font-size: 16px; margin: 10px 0 5px 0; }
+            .lista-stats li { border-left: 3px solid #333; padding: 6px 10px; margin: 4px 0; font-size: 13px; background: transparent; }
+            .stat-perfecto, .stat-regular { color: #000; font-weight: bold; }
+            
+            /* Ajustes para rúbrica impresa y todo un folio */
+            .rubrica-box {
+                background-color: transparent;
+                border: 1px dashed #555;
+                border-left: 4px solid #333;
+                box-shadow: none;
+                padding: 10px;
+                margin: 10px 0;
+                width: 100%;
+                font-size: 11px;
+            }
+            .rubrica-box h3 { font-size: 13px; color: #000; margin-bottom: 6px; }
+            .rubrica-box li { margin-bottom: 3px; line-height: 1.2; }
+
+            /* Ajustes para que los inputs se vean bonitos en papel */
+            .input-lv { border: none; border-bottom: 2px solid #000; border-radius: 0; background: transparent; color: #000; width: 40px;}
+            .fila-lv { border: 2px solid #333; background: transparent; padding: 10px; gap: 5px; margin-bottom: 8px;}
+            .etiqueta-lv { color: #000; }
+        }
+
+        #nombre-impresion { display: none; }
+
+        @media (max-width: 600px) {
+            .contenedor-unir { flex-direction: column; } .columna-unir { width: 100%; }
+            .titulo-principal { font-size: 35px; } .etiqueta-visual { font-size: 14px; }
+            .fila-lv { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="pantalla-inicio" class="pantalla activa">
+        <div class="panel-amarillo">
+            <div class="contenedor-titulo">
+                <div class="etiqueta-visual">1º PRIMARIA</div>
+                <h1 class="titulo-principal">Aprendemos Geometría</h1>
+                <div class="etiqueta-visual derecha">Matemáticas</div>
+            </div>
+            
+            <div class="curriculo-box">
+                <h3>Competencia Específica 5:</h3>
+                <p>Reconocer y utilizar conexiones entre las diferentes ideas matemáticas, así como identificar las matemáticas implicadas en otras áreas o en la vida cotidiana, interrelacionando conceptos y procedimientos, para interpretar situaciones y contextos diversos.</p>
+                <h3>Criterio de Evaluación (Primer Ciclo):</h3>
+                <p><b>5.1.</b> Realizar conexiones entre los diferentes elementos matemáticos, aplicando conocimientos y experiencias propias, resolviendo situaciones matemáticas en su contexto cotidiano.</p>
+            </div>
+
+            <div class="iconos-3d">🧊 🟡 📐</div>
+            <div class="firma">Elaborado por Carlos Garrido - IA Gemini</div>
+
+            <div class="contenedor-botones-inicio">
+                <button class="boton btn-entrenamiento" onclick="iniciarAventura('entrenamiento')">🕹️ Modo Entrenamiento</button>
+                <button class="boton btn-evaluacion" onclick="iniciarAventura('evaluacion')">📝 Modo Evaluación</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pantalla-juego1" class="pantalla">
+        <h2>Nivel 1: Los nombres de las figuras</h2>
+        <p class="instrucciones">👆 Toca una figura y luego su nombre correcto para unirlos.</p>
+        <div class="contenedor-unir">
+            <div class="columna-unir">
+                <div class="item-match figura-match" onclick="seleccionarItem('cuadrado', this, 'figura')"><svg width="100" height="80"><rect x="25" y="15" width="50" height="50" fill="#ce93d8" stroke="#ab47bc" stroke-width="3"/></svg></div>
+                <div class="item-match figura-match" onclick="seleccionarItem('rectangulo', this, 'figura')"><svg width="100" height="80"><rect x="10" y="25" width="80" height="30" fill="#ce93d8" stroke="#ab47bc" stroke-width="3"/></svg></div>
+                <div class="item-match figura-match" onclick="seleccionarItem('rombo', this, 'figura')"><svg width="100" height="80"><polygon points="50,10 80,40 50,70 20,40" fill="#ce93d8" stroke="#ab47bc" stroke-width="3"/></svg></div>
+                <div class="item-match figura-match" onclick="seleccionarItem('circulo', this, 'figura')"><svg width="100" height="80"><circle cx="50" cy="40" r="30" fill="#ce93d8" stroke="#ab47bc" stroke-width="3"/></svg></div>
+            </div>
+            <div class="columna-unir">
+                <div class="item-match palabra-match" onclick="seleccionarItem('rombo', this, 'palabra')">Rombo</div>
+                <div class="item-match palabra-match" onclick="seleccionarItem('circulo', this, 'palabra')">Círculo</div>
+                <div class="item-match palabra-match" onclick="seleccionarItem('cuadrado', this, 'palabra')">Cuadrado</div>
+                <div class="item-match palabra-match" onclick="seleccionarItem('rectangulo', this, 'palabra')">Rectángulo</div>
+            </div>
+        </div>
+        <p class="mensajes" id="mensaje-j1"></p>
+        <button id="btn-sig-1" class="boton btn-siguiente" onclick="irPantalla('pantalla-juego2')">Siguiente Nivel ➡️</button>
+    </div>
+
+    <div id="pantalla-juego2" class="pantalla">
+        <h2>Nivel 2: El intruso</h2>
+        <p class="instrucciones">🕵️‍♂️ ¿Cuál de estas figuras <b>NO es un polígono</b>? Táchala tocándola.</p>
+        <div class="cuadricula-general">
+            <div class="item-figura" data-tipo="poligono" onclick="comprobarJ2(this)"><svg width="100" height="100"><rect x="15" y="15" width="70" height="70" fill="#81c784" stroke="#388e3c" stroke-width="4"/></svg></div>
+            <div class="item-figura" data-tipo="circulo" onclick="comprobarJ2(this)"><svg width="100" height="100"><circle cx="50" cy="50" r="35" fill="#ffb74d" stroke="#f57c00" stroke-width="4"/></svg></div>
+            <div class="item-figura" data-tipo="poligono" onclick="comprobarJ2(this)"><svg width="100" height="100"><polygon points="50,15 85,85 15,85" fill="#4dd0e1" stroke="#0097a7" stroke-width="4"/></svg></div>
+        </div>
+        <p class="mensajes" id="mensaje-j2"></p>
+        <button id="btn-sig-2" class="boton btn-siguiente" onclick="irPantalla('pantalla-juego3')">Siguiente Nivel ➡️</button>
+    </div>
+
+    <div id="pantalla-juego3" class="pantalla">
+        <h2>Nivel 3: ¡Cazadores de Cuadriláteros!</h2>
+        <p class="instrucciones">🟩 Toca <b>solo las figuras que sean CUADRILÁTEROS</b> (recuerda: tienen 4 lados).</p>
+        <div class="cuadricula-general">
+            <div class="item-figura item-j3" data-cuad="si" onclick="this.classList.toggle('seleccionado')"><svg width="80" height="80"><rect x="10" y="10" width="60" height="60" fill="#f48fb1" stroke="#c2185b" stroke-width="3"/></svg></div>
+            <div class="item-figura item-j3" data-cuad="no" onclick="this.classList.toggle('seleccionado')"><svg width="80" height="80"><polygon points="40,10 75,70 5,70" fill="#ce93d8" stroke="#7b1fa2" stroke-width="3"/></svg></div>
+            <div class="item-figura item-j3" data-cuad="si" onclick="this.classList.toggle('seleccionado')"><svg width="80" height="80"><rect x="5" y="25" width="70" height="30" fill="#90caf9" stroke="#1976d2" stroke-width="3"/></svg></div>
+            <div class="item-figura item-j3" data-cuad="no" onclick="this.classList.toggle('seleccionado')"><svg width="80" height="80"><circle cx="40" cy="40" r="35" fill="#ffe082" stroke="#ffa000" stroke-width="3"/></svg></div>
+            <div class="item-figura item-j3" data-cuad="si" onclick="this.classList.toggle('seleccionado')"><svg width="80" height="80"><polygon points="40,5 75,40 40,75 5,40" fill="#a5d6a7" stroke="#388e3c" stroke-width="3"/></svg></div>
+        </div>
+        <div><button id="btn-comprobar-j3" class="boton btn-juego" onclick="comprobarJ3()">¡Comprobar!</button></div>
+        <p class="mensajes" id="mensaje-j3"></p>
+        <button id="btn-sig-3" class="boton btn-siguiente" onclick="irPantalla('pantalla-juego4')">Siguiente Nivel ➡️</button>
+    </div>
+
+    <div id="pantalla-juego4" class="pantalla">
+        <h2>Nivel 4: Conecta con la realidad</h2>
+        <p class="instrucciones">🚦 Toca la señal de tráfico que cumple estas dos condiciones:<br><b>1. Es un polígono.<br>2. NO es un cuadrilátero.</b></p>
+        <div class="cuadricula-general">
+            <div class="item-figura" data-tipo="cuadrilatero" onclick="comprobarJ4(this)">
+                <svg width="100" height="100"><rect x="15" y="15" width="70" height="70" fill="#1976d2" rx="5" ry="5"/><text x="50" y="65" fill="white" font-size="50" font-family="Arial" font-weight="bold" text-anchor="middle">P</text></svg>
+            </div>
+            <div class="item-figura" data-tipo="circulo" onclick="comprobarJ4(this)">
+                <svg width="100" height="100"><circle cx="50" cy="50" r="40" fill="white" stroke="#d32f2f" stroke-width="10"/><line x1="25" y1="50" x2="75" y2="50" stroke="#d32f2f" stroke-width="10"/></svg>
+            </div>
+            <div class="item-figura" data-tipo="triangulo" onclick="comprobarJ4(this)">
+                <svg width="100" height="100"><polygon points="50,85 10,15 90,15" fill="white" stroke="#d32f2f" stroke-width="10" stroke-linejoin="round"/></svg>
+            </div>
+        </div>
+        <p class="mensajes" id="mensaje-j4"></p>
+        <button id="btn-sig-4" class="boton btn-siguiente" onclick="irPantalla('pantalla-juego5')">Siguiente Nivel ➡️</button>
+    </div>
+
+    <div id="pantalla-juego5" class="pantalla">
+        <h2>Nivel 5: Lados y Vértices</h2>
+        <p class="instrucciones">✏️ Cuenta los lados y los vértices de cada figura y escribe el número.<br><i>(Recuerda: los lados son las líneas rectas y los vértices son las esquinas señaladas con puntos azules).</i></p>
+        
+        <div class="fila-lv">
+            <svg width="80" height="80">
+                <polygon points="40,10 75,70 5,70" fill="#ffe082" stroke="#ffa000" stroke-width="4"/>
+                <circle cx="40" cy="10" r="4" fill="#1565c0"/>
+                <circle cx="75" cy="70" r="4" fill="#1565c0"/>
+                <circle cx="5" cy="70" r="4" fill="#1565c0"/>
+            </svg>
+            <div class="caja-input-lv"><span class="etiqueta-lv">Lados:</span><input type="number" id="lados-tri" class="input-lv" data-correct="3" min="0"></div>
+            <div class="caja-input-lv"><span class="etiqueta-lv">Vértices:</span><input type="number" id="vert-tri" class="input-lv" data-correct="3" min="0"></div>
+        </div>
+        
+        <div class="fila-lv">
+            <svg width="80" height="80">
+                <rect x="15" y="15" width="50" height="50" fill="#a5d6a7" stroke="#388e3c" stroke-width="4"/>
+                <circle cx="15" cy="15" r="4" fill="#1565c0"/>
+                <circle cx="65" cy="15" r="4" fill="#1565c0"/>
+                <circle cx="65" cy="65" r="4" fill="#1565c0"/>
+                <circle cx="15" cy="65" r="4" fill="#1565c0"/>
+            </svg>
+            <div class="caja-input-lv"><span class="etiqueta-lv">Lados:</span><input type="number" id="lados-cua" class="input-lv" data-correct="4" min="0"></div>
+            <div class="caja-input-lv"><span class="etiqueta-lv">Vértices:</span><input type="number" id="vert-cua" class="input-lv" data-correct="4" min="0"></div>
+        </div>
+
+        <div class="fila-lv">
+            <svg width="80" height="80">
+                <rect x="5" y="25" width="70" height="30" fill="#90caf9" stroke="#1976d2" stroke-width="4"/>
+                <circle cx="5" cy="25" r="4" fill="#1565c0"/>
+                <circle cx="75" cy="25" r="4" fill="#1565c0"/>
+                <circle cx="75" cy="55" r="4" fill="#1565c0"/>
+                <circle cx="5" cy="55" r="4" fill="#1565c0"/>
+            </svg>
+            <div class="caja-input-lv"><span class="etiqueta-lv">Lados:</span><input type="number" id="lados-rec" class="input-lv" data-correct="4" min="0"></div>
+            <div class="caja-input-lv"><span class="etiqueta-lv">Vértices:</span><input type="number" id="vert-rec" class="input-lv" data-correct="4" min="0"></div>
+        </div>
+
+        <div class="fila-lv">
+            <svg width="80" height="80">
+                <polygon points="25,20 55,20 75,60 5,60" fill="#f48fb1" stroke="#c2185b" stroke-width="4"/>
+                <circle cx="25" cy="20" r="4" fill="#1565c0"/>
+                <circle cx="55" cy="20" r="4" fill="#1565c0"/>
+                <circle cx="75" cy="60" r="4" fill="#1565c0"/>
+                <circle cx="5" cy="60" r="4" fill="#1565c0"/>
+            </svg>
+            <div class="caja-input-lv"><span class="etiqueta-lv">Lados:</span><input type="number" id="lados-trap" class="input-lv" data-correct="4" min="0"></div>
+            <div class="caja-input-lv"><span class="etiqueta-lv">Vértices:</span><input type="number" id="vert-trap" class="input-lv" data-correct="4" min="0"></div>
+        </div>
+
+        <div><button id="btn-comprobar-j5" class="boton btn-juego" onclick="comprobarJ5()">¡Comprobar!</button></div>
+        <p class="mensajes" id="mensaje-j5"></p>
+
+        <button id="btn-sig-5" class="boton btn-siguiente" style="background-color: #9c27b0; box-shadow: 0px 4px 0px #6a1b9a;" onclick="mostrarResultados()">Ver Resultados Finales 🏆</button>
+    </div>
+
+    <div id="pantalla-resultados" class="pantalla">
+        
+        <div style="display:none;" id="cabecera-impresion">
+            <h1>INFORME DE RETROALIMENTACIÓN</h1>
+            <h2>Aprendemos Geometría - Matemáticas 1º Primaria</h2>
+            <p><b>Maestro:</b> Carlos Garrido</p>
+            <div class="curriculo-box" style="margin-bottom: 10px;">
+                <p><b>Competencia Específica 5:</b> Reconocer y utilizar conexiones entre las ideas matemáticas, identificando las matemáticas implicadas en otras áreas o en la vida cotidiana para interpretar situaciones diversas.</p>
+                <p><b>Criterio 5.1.</b> Realizar conexiones entre los diferentes elementos matemáticos, resolviendo situaciones matemáticas en su contexto cotidiano.</p>
+            </div>
+        </div>
+
+        <h1 id="titulo-resultados">¡Aventura Completada!</h1>
+        
+        <div id="caja-datos-alumno" class="datos-alumno">
+            <h3>Datos del Alumno/a</h3>
+            <input type="text" id="input-nombre-alumno" class="input-nombre" placeholder="Escribe aquí tu nombre" onkeyup="actualizarNombreImpresion()">
+            <div id="nombre-impresion">ALUMNO/A: <span id="nombre-texto"></span></div>
+        </div>
+
+        <div class="resultado-box">
+            <p style="font-size: 24px; margin: 0;">Calificación Final:</p>
+            <div class="nota-final" id="nota-numero">-- / 10</div>
+            <p id="nota-mensaje" style="font-size: 20px; font-weight: bold;"></p>
+        </div>
+        
+        <h2>Aspectos Evaluados (Estadística de aciertos):</h2>
+        <ul class="lista-stats">
+            <li><span>🏷️ Nivel 1: Nombres de las figuras:</span> <span id="stat-j1">0/2</span></li>
+            <li><span>🚫 Nivel 2: Figura que NO es polígono:</span> <span id="stat-j2">0/2</span></li>
+            <li><span>🟩 Nivel 3: Identificar cuadriláteros:</span> <span id="stat-j3">0/2</span></li> 
+            <li><span>🚦 Nivel 4: Asociar propiedades a señales:</span> <span id="stat-j4">0/2</span></li>
+            <li><span>✏️ Nivel 5: Contar lados y vértices:</span> <span id="stat-j5">0/2</span></li>
+        </ul>
+
+        <div class="rubrica-box">
+            <h3>¿Cómo se calcula la calificación? (Total: 10 Puntos)</h3>
+            <ul>
+                <li><b>Nivel 1:</b> 2 puntos totales (0,5 puntos por cada pareja unida correctamente al primer intento).</li>
+                <li><b>Nivel 2:</b> 2 puntos totales (encontrar la figura correcta sin fallar previamente).</li>
+                <li><b>Nivel 3:</b> 2 puntos totales (seleccionar todos los cuadriláteros sin marcar ningún error).</li>
+                <li><b>Nivel 4:</b> 2 puntos totales (identificar la señal correcta al primer intento).</li>
+                <li><b>Nivel 5:</b> 2 puntos totales (0,25 puntos por cada recuadro de lado o vértice acertado al primer intento).</li>
+            </ul>
+        </div>
+
+        <div id="botones-finales">
+            <button class="boton btn-volver" onclick="location.reload()">🔄 Volver al Inicio</button>
+            <button id="btn-generar-pdf" class="boton btn-pdf" style="display:none;" onclick="prepararEImprimir()">📥 Generar PDF</button>
+        </div>
+    </div>
+
+    <script>
+        // --- SISTEMA DE PUNTUACIÓN (TOTAL: 10 PUNTOS) ---
+        let modoActual = ''; 
+        let puntos = { j1: 0, j2: 0, j3: 0, j4: 0, j5: 0 };
+        const MAX_PUNTOS = { j1: 2, j2: 2, j3: 2, j4: 2, j5: 2 }; 
+
+        function irPantalla(idDestino) {
+            document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+            document.getElementById(idDestino).classList.add('activa');
+        }
+
+        function iniciarAventura(modo) {
+            modoActual = modo;
+            irPantalla('pantalla-juego1');
+        }
+
+        // --- NIVEL 1 ---
+        let figSel = null, palSel = null, aciertosJ1 = 0;
+        let fallosJ1Registrados = { cuadrado: false, rectangulo: false, rombo: false, circulo: false };
+
+        function seleccionarItem(tipo, el, cat) {
+            if(el.classList.contains('resuelto')) return;
+            if (cat === 'figura') { 
+                document.querySelectorAll('.figura-match').forEach(e => e.classList.remove('seleccionado')); 
+                el.classList.add('seleccionado'); figSel = {tipo, el}; 
+            } else { 
+                document.querySelectorAll('.palabra-match').forEach(e => e.classList.remove('seleccionado')); 
+                el.classList.add('seleccionado'); palSel = {tipo, el}; 
+            }
+            if (figSel && palSel) comprobarParejaJ1();
+        }
+
+        function comprobarParejaJ1() {
+            if (figSel.tipo === palSel.tipo) {
+                figSel.el.classList.add('resuelto'); palSel.el.classList.add('resuelto');
+                figSel.el.classList.remove('seleccionado'); palSel.el.classList.remove('seleccionado');
+                
+                if (!fallosJ1Registrados[figSel.tipo]) { puntos.j1 += 0.5; } // 0.5 ptos por acierto a la primera
+                
+                aciertosJ1++; figSel = null; palSel = null;
+                
+                if (aciertosJ1 === 4) {
+                    document.getElementById('mensaje-j1').textContent = '¡Excelente! Has unido todas las figuras con sus nombres. 🌟';
+                    document.getElementById('mensaje-j1').style.color = '#4caf50';
+                    document.getElementById('btn-sig-1').style.display = 'inline-block';
+                }
+            } else {
+                if (figSel) fallosJ1Registrados[figSel.tipo] = true; 
+                document.getElementById('mensaje-j1').textContent = 'Oops... Esa pareja no es correcta.';
+                document.getElementById('mensaje-j1').style.color = '#f44336';
+                
+                if(figSel) figSel.el.classList.add('error-anim');
+                if(palSel) palSel.el.classList.add('error-anim');
+
+                setTimeout(() => {
+                    if(figSel) figSel.el.classList.remove('seleccionado', 'error-anim');
+                    if(palSel) palSel.el.classList.remove('seleccionado', 'error-anim');
+                    figSel = null; palSel = null;
+                    document.getElementById('mensaje-j1').textContent = '';
+                }, 800);
+            }
+        }
+
+        // --- NIVEL 2 ---
+        let j2Evaluado = false, fallosJ2 = 0;
+        function comprobarJ2(elemento) {
+            if (elemento.dataset.tipo === 'circulo') {
+                elemento.classList.add('correcto-anim');
+                if (!j2Evaluado && fallosJ2 === 0) puntos.j2 = MAX_PUNTOS.j2; 
+                j2Evaluado = true;
+                document.getElementById('mensaje-j2').innerHTML = '¡Correcto! 🌟 El <b>círculo</b> NO es un polígono.';
+                document.getElementById('mensaje-j2').style.color = '#4caf50';
+                document.getElementById('btn-sig-2').style.display = 'inline-block';
+            } else {
+                fallosJ2++;
+                elemento.classList.add('error-anim');
+                setTimeout(() => elemento.classList.remove('error-anim'), 400);
+                document.getElementById('mensaje-j2').textContent = 'Ese SÍ es un polígono. Busca la figura que no tiene líneas rectas.';
+                document.getElementById('mensaje-j2').style.color = '#f44336';
+            }
+        }
+
+        // --- NIVEL 3 ---
+        let j3Evaluado = false;
+        function comprobarJ3() {
+            let correctos = 0, errores = 0;
+            document.querySelectorAll('.item-j3').forEach(el => {
+                let esCuad = el.dataset.cuad === 'si';
+                let seleccionado = el.classList.contains('seleccionado');
+                el.style.borderColor = "";
+                if (esCuad && seleccionado) { correctos++; el.style.borderColor = "#4caf50"; } 
+                if (!esCuad && seleccionado) { errores++; el.style.borderColor = "#f44336"; } 
+                if (esCuad && !seleccionado) { errores++; } 
+            });
+
+            const msj = document.getElementById('mensaje-j3');
+            if (errores === 0 && correctos === 3) {
+                if (!j3Evaluado) puntos.j3 = MAX_PUNTOS.j3; 
+                j3Evaluado = true;
+                msj.textContent = '¡Fantástico! 🌟 Has cazado todos los cuadriláteros.';
+                msj.style.color = '#4caf50';
+                document.getElementById('btn-comprobar-j3').style.display = 'none';
+                document.getElementById('btn-sig-3').style.display = 'inline-block';
+            } else {
+                j3Evaluado = true; 
+                msj.textContent = 'Hay algún error. ¡Fíjate bien, busca SOLO las que tengan 4 lados!';
+                msj.style.color = '#f44336';
+            }
+        }
+
+        // --- NIVEL 4 ---
+        let j4Evaluado = false, fallosJ4 = 0;
+        function comprobarJ4(elemento) {
+            if (elemento.dataset.tipo === 'triangulo') {
+                elemento.classList.add('correcto-anim');
+                if (!j4Evaluado && fallosJ4 === 0) puntos.j4 = MAX_PUNTOS.j4;
+                j4Evaluado = true;
+                document.getElementById('mensaje-j4').innerHTML = '¡Súper! 🌟 El <b>triángulo</b> es un polígono pero NO es cuadrilátero.';
+                document.getElementById('mensaje-j4').style.color = '#4caf50';
+                document.getElementById('btn-sig-4').style.display = 'inline-block';
+            } else {
+                fallosJ4++;
+                elemento.classList.add('error-anim');
+                setTimeout(() => elemento.classList.remove('error-anim'), 400);
+                const msj = document.getElementById('mensaje-j4');
+                msj.style.color = '#f44336';
+                if (elemento.dataset.tipo === 'circulo') msj.textContent = '¡Fallo! Esa señal NO es un polígono.';
+                else msj.textContent = '¡Fallo! Esa señal SÍ es un cuadrilátero.';
+            }
+        }
+
+        // --- NIVEL 5: Lados y Vértices ---
+        let inputsJ5Evaluados = new Set();
+
+        function comprobarJ5() {
+            let todosCorrectos = true;
+            let inputs = document.querySelectorAll('.input-lv');
+            
+            inputs.forEach(input => {
+                let valor = input.value.trim();
+                let correcto = input.dataset.correct;
+                
+                input.classList.remove('input-error', 'input-correcto');
+                
+                if (valor === correcto) {
+                    input.classList.add('input-correcto');
+                    // Si es la primera vez que se evalúa este input y está bien, suma 0.25 ptos
+                    if (!inputsJ5Evaluados.has(input.id)) {
+                        puntos.j5 += 0.25;
+                        inputsJ5Evaluados.add(input.id);
+                    }
+                } else {
+                    todosCorrectos = false;
+                    if(valor !== "") {
+                        input.classList.add('input-error');
+                        setTimeout(() => input.classList.remove('input-error'), 400);
+                    }
+                    inputsJ5Evaluados.add(input.id); // Ya se intentó, pierde el bonus de primera vez
+                }
+            });
+
+            const msj = document.getElementById('mensaje-j5');
+            if (todosCorrectos) {
+                msj.textContent = '¡Impecable! 🌟 Sabes contar perfectamente los lados y vértices.';
+                msj.style.color = '#4caf50';
+                document.getElementById('btn-comprobar-j5').style.display = 'none';
+                document.getElementById('btn-sig-5').style.display = 'inline-block';
+            } else {
+                msj.textContent = 'Revisa las casillas. ¡Vuelve a contar los lados y las puntas!';
+                msj.style.color = '#f44336';
+            }
+        }
+
+        // --- RESULTADOS FINALES Y PDF ---
+        function mostrarResultados() {
+            irPantalla('pantalla-resultados');
+            
+            let totalAciertos = puntos.j1 + puntos.j2 + puntos.j3 + puntos.j4 + puntos.j5;
+            let notaFinal = totalAciertos; 
+
+            document.getElementById('nota-numero').textContent = `${notaFinal} / 10`;
+            
+            let msjNota = document.getElementById('nota-mensaje');
+            if(notaFinal >= 9) { msjNota.textContent = "¡Eres un MAESTRO de la geometría! 👑"; msjNota.style.color = "#2e7d32"; }
+            else if(notaFinal >= 7) { msjNota.textContent = "¡Muy buen trabajo! ¡Sigue así! ⭐"; msjNota.style.color = "#00838f"; }
+            else if(notaFinal >= 5) { msjNota.textContent = "¡Aprobado! Pero seguro que puedes mejorarlo. 💪"; msjNota.style.color = "#f57c00"; }
+            else { msjNota.textContent = "¡No te rindas! Vuelve a jugar para practicar más. 🧠"; msjNota.style.color = "#d32f2f"; }
+
+            colocarStat('stat-j1', puntos.j1, MAX_PUNTOS.j1);
+            colocarStat('stat-j2', puntos.j2, MAX_PUNTOS.j2);
+            colocarStat('stat-j3', puntos.j3, MAX_PUNTOS.j3);
+            colocarStat('stat-j4', puntos.j4, MAX_PUNTOS.j4);
+            colocarStat('stat-j5', puntos.j5, MAX_PUNTOS.j5);
+
+            if (modoActual === 'evaluacion') {
+                document.getElementById('caja-datos-alumno').style.display = 'block';
+                document.getElementById('btn-generar-pdf').style.display = 'inline-block';
+            }
+        }
+
+        function colocarStat(id, puntaje, maximo) {
+            let el = document.getElementById(id);
+            el.textContent = `${puntaje} / ${maximo}`;
+            if(puntaje === maximo) { el.className = 'stat-perfecto'; }
+            else { el.className = 'stat-regular'; }
+        }
+
+        function actualizarNombreImpresion() {
+            document.getElementById('nombre-texto').textContent = document.getElementById('input-nombre-alumno').value;
+        }
+
+        function prepararEImprimir() {
+            const nombre = document.getElementById('input-nombre-alumno').value;
+            if(nombre.trim() === '') {
+                alert("Por favor, escribe tu nombre antes de generar el PDF.");
+                return;
+            }
+            document.getElementById('cabecera-impresion').style.display = 'block';
+            document.getElementById('titulo-resultados').style.display = 'none'; 
+            window.print(); 
+            setTimeout(() => {
+                document.getElementById('cabecera-impresion').style.display = 'none';
+                document.getElementById('titulo-resultados').style.display = 'block';
+            }, 500);
+        }
+    </script>
+</body>
+</html>

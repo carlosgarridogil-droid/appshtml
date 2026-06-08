@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprendemos Geometría - Medida y Espacio 1º</title>
+    <style>
+        /* --- CSS (DISEÑO Y ESTILOS) --- */
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background-color: #e0f7fa;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 { color: #006064; font-size: 2.5em; margin-bottom: 10px; }
+        h2 { color: #00838f; }
+
+        .pantalla {
+            display: none; 
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            animation: aparecer 0.5s ease-in-out;
+        }
+
+        .pantalla.activa { display: flex; }
+
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- ESTILOS PANTALLA DE INICIO --- */
+        .panel-amarillo {
+            background-color: #fffde7;
+            border: 5px solid #fbc02d;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            box-shadow: 0px 8px 20px rgba(251, 192, 45, 0.4);
+            margin-bottom: 20px;
+        }
+
+        .contenedor-titulo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .etiqueta-visual {
+            background-color: #ffeb3b;
+            color: #d32f2f;
+            border: 3px solid #f44336;
+            padding: 8px 15px;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            transform: rotate(-5deg);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .etiqueta-visual.derecha {
+            transform: rotate(5deg);
+            color: #1976d2;
+            border-color: #2196f3;
+        }
+
+        .titulo-principal {
+            font-size: 55px;
+            font-weight: 900;
+            color: white;
+            text-shadow: 
+                -3px -3px 0 #00838f,  
+                 3px -3px 0 #00838f,
+                -3px  3px 0 #00838f,
+                 3px  3px 0 #00838f,
+                 4px  4px 10px rgba(0,0,0,0.3);
+            margin: 0;
+            letter-spacing: 2px;
+        }
+
+        .curriculo-box {
+            background-color: white;
+            border-left: 6px solid #ff9800;
+            padding: 15px;
+            text-align: left;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Arial', sans-serif;
+            box-shadow: inset 0px 0px 10px rgba(0,0,0,0.05);
+        }
+
+        .curriculo-box h3 { color: #e65100; margin-top: 0; font-size: 18px;}
+        .curriculo-box p { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 10px; text-align: justify;}
+        
+        .iconos-3d { font-size: 50px; letter-spacing: 20px; margin: 20px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .firma { font-size: 18px; font-weight: bold; color: #5e35b1; margin-bottom: 25px; }
+
+        .contenedor-botones-inicio { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        .btn-entrenamiento { background-color: #4caf50; box-shadow: 0px 4px 0px #2e7d32; font-size: 22px; padding: 15px 30px; }
+        .btn-evaluacion { background-color: #f44336; box-shadow: 0px 4px 0px #c62828; font-size: 22px; padding: 15px 30px; }
+
+        /* Botones Generales */
+        .boton {
+            padding: 15px 30px; font-size: 20px; font-weight: bold; color: white;
+            border: none; border-radius: 10px; cursor: pointer; transition: transform 0.2s;
+            margin: 10px; font-family: 'Comic Sans MS', sans-serif;
+        }
+        .boton:hover { transform: scale(1.05); }
+        .boton:active { transform: scale(0.95); }
+        
+        .btn-siguiente { background-color: #2196f3; box-shadow: 0px 4px 0px #1976d2; display: none; margin-top: 20px; font-size: 22px; animation: latir 1.5s infinite;}
+        .btn-volver { background-color: #757575; box-shadow: 0px 4px 0px #424242; font-size: 18px; margin-top: 20px; }
+        .btn-pdf { background-color: #e91e63; box-shadow: 0px 4px 0px #ad1457; font-size: 22px; }
+
+        @keyframes latir { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        /* Juegos y Elementos Interactivos */
+        .instrucciones { font-size: 20px; color: #555; background-color: #fff9c4; padding: 15px; border-radius: 10px; border: 2px dashed #fbc02d; margin-bottom: 20px;}
+        .mensajes { margin-top: 15px; font-size: 22px; font-weight: bold; min-height: 35px; }
+
+        /* Nivel 1 (Unir) */
+        .contenedor-unir { display: flex; justify-content: space-around; width: 100%; margin-top: 20px; gap: 20px; }
+        .columna-unir { display: flex; flex-direction: column; gap: 20px; width: 45%; }
+        .item-match { padding: 15px; border: 4px solid #e0e0e0; border-radius: 15px; cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; background-color: white; min-height: 80px; }
+        .palabra-match { border-radius: 40px; font-size: 22px; font-weight: bold; color: #5e35b1; border-color: #b39ddb; background-color: #f3e5f5; text-transform: uppercase;}
+        .item-match:hover { transform: scale(1.05); }
+        .item-match.seleccionado { border-color: #ff9800; background-color: #fff3e0; box-shadow: 0 0 15px rgba(255, 152, 0, 0.5); transform: scale(1.1); }
+        .item-match.resuelto { border-color: #4caf50; background-color: #e8f5e9; opacity: 0.6; pointer-events: none; transform: scale(0.95); }
+
+        /* Niveles 2 y 3 (Grids Multiopción) */
+        .grid-preguntas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; margin-bottom: 20px;}
+        .tarjeta-pregunta { background: #f9fbfb; border: 3px solid #b2ebf2; border-radius: 12px; padding: 15px; text-align: center; }
+        .tarjeta-pregunta p { font-size: 18px; font-weight: bold; color: #00838f; margin-top: 0; min-height: 40px;}
+        .botones-opciones { display: flex; justify-content: space-around; gap: 10px; }
+        .boton-opcion { padding: 10px 15px; font-size: 16px; font-weight: bold; color: white; background-color: #ff9800; border: none; border-radius: 8px; cursor: pointer; flex: 1; transition: transform 0.2s; }
+        .boton-opcion:hover { transform: scale(1.05); }
+        
+        .opciones-img { display: flex; justify-content: space-around; gap: 10px; }
+        .item-figura-peq { border: 3px solid #e0e0e0; border-radius: 10px; padding: 10px; cursor: pointer; background: white; transition: transform 0.2s; }
+        .item-figura-peq:hover { transform: scale(1.05); }
+        .item-figura-peq svg { width: 80px; height: 80px; }
+
+        .correcto-anim { border-color: #4caf50 !important; background-color: #e8f5e9 !important; color: #2e7d32 !important; transform: scale(1.05); pointer-events: none;}
+        .error-anim { animation: vibrar 0.4s; border-color: #f44336 !important; background-color: #ffcdd2 !important; color: #c62828 !important;}
+
+        @keyframes vibrar {
+            0% { transform: translateX(0); } 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-8px); } 100% { transform: translateX(0); }
+        }
+
+        /* Resultados */
+        .resultado-box { background-color: #f3e5f5; border: 4px solid #ce93d8; border-radius: 15px; padding: 20px; width: 80%; margin: 20px 0; }
+        .nota-final { font-size: 60px; font-weight: bold; color: #6a1b9a; margin: 10px 0; }
+        .lista-stats { text-align: left; font-size: 18px; list-style-type: none; padding: 0; width: 100%;}
+        .lista-stats li { margin: 10px 0; padding: 10px; background: white; border-radius: 8px; border-left: 5px solid #ab47bc; display: flex; justify-content: space-between;}
+        .stat-perfecto { color: #2e7d32; font-weight: bold;}
+        .stat-regular { color: #e65100; font-weight: bold;}
+        
+        .datos-alumno { display: none; margin-top: 20px; padding: 20px; background-color: #e1bee7; border-radius: 10px; border: 2px dashed #9c27b0; }
+        .input-nombre { font-size: 20px; padding: 10px; border-radius: 8px; border: 2px solid #8e24aa; font-family: 'Comic Sans MS', sans-serif; text-align: center; width: 80%; max-width: 300px; margin-bottom: 15px;}
+
+        /* Rúbrica Explicativa */
+        .rubrica-box {
+            background-color: #e1f5fe;
+            border-left: 6px solid #03a9f4;
+            padding: 15px 20px;
+            margin: 10px auto;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 15px;
+            width: 90%;
+            box-sizing: border-box;
+            box-shadow: 0px 3px 10px rgba(0,0,0,0.05);
+            font-family: 'Arial', sans-serif;
+        }
+        .rubrica-box h3 { color: #0277bd; margin-top: 0; font-size: 18px; margin-bottom: 10px; }
+        .rubrica-box ul { margin: 0; padding-left: 20px; }
+        .rubrica-box li { margin-bottom: 5px; color: #333; }
+
+        /* --- IMPRESIÓN --- */
+        @media print {
+            @page { size: A4; margin: 10mm; } 
+            body { background-color: white; color: black; font-family: 'Arial', sans-serif; padding: 0; margin: 0; }
+            .pantalla { box-shadow: none; max-width: 100%; border-radius: 0; padding: 0; }
+            .boton, .btn-volver, .datos-alumno input, #botones-finales { display: none !important; } 
+            .datos-alumno { border: none; background: transparent; padding: 0; display: block !important; margin-top: 0; margin-bottom: 10px;}
+            #nombre-impresion { display: block !important; font-size: 18px; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 5px;}
+            
+            #cabecera-impresion h1 { font-size: 22px; margin: 5px 0; color: #000 !important;}
+            #cabecera-impresion h2 { font-size: 16px; margin: 5px 0; }
+            .curriculo-box { border-left: 4px solid #333; padding: 10px; margin-bottom: 10px; margin-top: 10px; box-shadow: none;}
+            .curriculo-box p { font-size: 11px; margin-bottom: 5px; line-height: 1.3;}
+            .resultado-box { border: 2px solid #333; background-color: transparent; padding: 10px; margin: 15px 0; width: 100%; box-sizing: border-box;}
+            .nota-final { font-size: 35px; margin: 5px 0; color: #000; }
+            h2 { font-size: 16px; margin: 10px 0 5px 0; }
+            .lista-stats li { border-left: 3px solid #333; padding: 6px 10px; margin: 4px 0; font-size: 13px; background: transparent; }
+            .stat-perfecto, .stat-regular { color: #000; font-weight: bold; }
+            
+            .rubrica-box { background-color: transparent; border: 1px dashed #555; border-left: 4px solid #333; box-shadow: none; padding: 10px; margin: 10px 0; width: 100%; font-size: 11px; }
+            .rubrica-box h3 { font-size: 13px; color: #000; margin-bottom: 6px; }
+            .rubrica-box li { margin-bottom: 3px; line-height: 1.2; }
+        }
+
+        #nombre-impresion { display: none; }
+
+        @media (max-width: 600px) {
+            .grid-preguntas { grid-template-columns: 1fr; }
+            .contenedor-unir { flex-direction: column; } .columna-unir { width: 100%; }
+            .titulo-principal { font-size: 35px; } .etiqueta-visual { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="pantalla-inicio" class="pantalla activa">
+        <div class="panel-amarillo">
+            <div class="contenedor-titulo">
+                <div class="etiqueta-visual">1º PRIMARIA</div>
+                <h1 class="titulo-principal">Aprendemos Geometría</h1>
+                <div class="etiqueta-visual derecha">Matemáticas</div>
+            </div>
+            
+            <div class="curriculo-box">
+                <h3>Competencia Específica 5:</h3>
+                <p>Reconocer y utilizar conexiones entre las diferentes ideas matemáticas, así como identificar las matemáticas implicadas en otras áreas o en la vida cotidiana, interrelacionando conceptos y procedimientos, para interpretar situaciones y contextos diversos.</p>
+                <h3>Criterio de Evaluación (Primer Ciclo):</h3>
+                <p><b>5.2.a.</b> Identificar las matemáticas presentes en la vida cotidiana y en otras áreas, estableciendo conexiones sencillas entre ellas con información gráfica cotidiana.</p>
+            </div>
+
+            <div class="iconos-3d">🧊 🟡 📐</div>
+            <div class="firma">Elaborado por Carlos Garrido - IA Gemini</div>
+
+            <div class="contenedor-botones-inicio">
+                <button class="boton btn-entrenamiento" onclick="iniciarAventura('entrenamiento')">🕹️ Modo Entrenamiento</button>
+                <button class="boton btn-evaluacion" onclick="iniciarAventura('evaluacion')">📝 Modo Evaluación</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pantalla-juego1" class="pantalla">
+        <h2>Nivel 1: ¿Con qué lo medimos?</h2>
+        <p class="instrucciones">👆 Toca el dibujo y luego la unidad correcta para medirlo.</p>
+        <div class="contenedor-unir">
+            <div class="columna-unir">
+                <div class="item-match figura-match" onclick="seleccionarItem('kilo', this, 'figura')">
+                    <svg width="100" height="80" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="40" fill="#4caf50"/><path d="M20 50 Q50 20 80 50" stroke="#2e7d32" stroke-width="5" fill="none"/>
+                    </svg>
+                </div>
+                <div class="item-match figura-match" onclick="seleccionarItem('litro', this, 'figura')">
+                    <svg width="100" height="80" viewBox="0 0 100 100">
+                        <rect x="35" y="30" width="30" height="60" rx="5" fill="#81d4fa"/><rect x="42" y="10" width="16" height="20" fill="#81d4fa"/><text x="50" y="70" text-anchor="middle" font-size="20" font-weight="bold" fill="#0277bd">1L</text>
+                    </svg>
+                </div>
+                <div class="item-match figura-match" onclick="seleccionarItem('pasos', this, 'figura')">
+                    <svg width="100" height="80" viewBox="0 0 100 100">
+                        <polygon points="20,10 30,50 10,50" fill="#4caf50"/><rect x="17" y="50" width="6" height="20" fill="#795548"/>
+                        <polygon points="80,10 90,50 70,50" fill="#4caf50"/><rect x="77" y="50" width="6" height="20" fill="#795548"/>
+                        <path d="M 40 60 Q 50 40 60 60" stroke="#000" stroke-width="3" stroke-dasharray="6" fill="none"/>
+                    </svg>
+                </div>
+                <div class="item-match figura-match" onclick="seleccionarItem('palmo', this, 'figura')">
+                    <svg width="100" height="80" viewBox="0 0 100 100">
+                        <rect x="40" y="20" width="20" height="50" fill="#ffb300"/><polygon points="40,20 60,20 50,5" fill="#ffcc80"/><polygon points="47,5 53,5 50,0" fill="#333"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="columna-unir">
+                <div class="item-match palabra-match" onclick="seleccionarItem('palmo', this, 'palabra')">En Palmos</div>
+                <div class="item-match palabra-match" onclick="seleccionarItem('litro', this, 'palabra')">En Litros</div>
+                <div class="item-match palabra-match" onclick="seleccionarItem('kilo', this, 'palabra')">En Kilos</div>
+                <div class="item-match palabra-match" onclick="seleccionarItem('pasos', this, 'palabra')">En Pasos</div>
+            </div>
+        </div>
+        <p class="mensajes" id="mensaje-j1"></p>
+        <button id="btn-sig-1" class="boton btn-siguiente" onclick="irPantalla('pantalla-juego2')">Siguiente Nivel ➡️</button>
+    </div>
+
+    <div id="pantalla-juego2" class="pantalla">
+        <h2>Nivel 2: El paso del tiempo</h2>
+        <p class="instrucciones">⏱️ Lee la pregunta y toca la respuesta correcta.</p>
+        <div class="grid-preguntas">
+            <div class="tarjeta-pregunta">
+                <p>1. ¿Cuántos días tiene una semana?</p>
+                <div class="botones-opciones">
+                    <button class="boton-opcion" onclick="comprobarJ2(this, 'q1', true)">7 días</button>
+                    <button class="boton-opcion" onclick="comprobarJ2(this, 'q1', false)">12 meses</button>
+                </div>
+            </div>
+            <div class="tarjeta-pregunta">
+                <p>2. ¿Qué usamos para saber la hora?</p>
+                <div class="botones-opciones">
+                    <button class="boton-opcion" onclick="comprobarJ2(this, 'q2', false)">El calendario</button>
+                    <button class="boton-opcion" onclick="comprobarJ2(this, 'q2', true)">El reloj</button>
+                </div>
+            </div>
+            <div class="tarjeta-pregunta">
+                <p>3. ¿Cuántos meses tiene un año entero?</p>
+                <div class="botones-opciones">
+                    <button class="boton-opcion" onclick="comprobarJ2(this, 'q3', true)">12 meses</button>
+                    <button class="boton-opcion" onclick="comprobarJ2(this, 'q3', false)">5 meses</button>
+                </div>
+            </div>
+            <div class="tarjeta-pregunta">
+                <p>4. ¿Dónde miramos qué día del mes es hoy?</p>
+                <div class="botones-opciones">
+                    <button class="boton-opcion" onclick="comprobarJ2(this, 'q4', false)">En la báscula</button>
+                    <button class="boton-opcion" onclick="comprobarJ2(this, 'q4', true)">En el calendario</button>
+                </div>
+            </div>
+        </div>
+        <p class="mensajes" id="mensaje-j2"></p>
+        <button id="btn-sig-2" class="boton btn-siguiente" onclick="irPantalla('pantalla-juego3')">Siguiente Nivel ➡️</button>
+    </div>
+
+    <div id="pantalla-juego3" class="pantalla">
+        <h2>Nivel 3: ¿Dónde están las cosas?</h2>
+        <p class="instrucciones">🧭 Fíjate bien y toca el dibujo correcto según lo que se pregunta.</p>
+        <div class="grid-preguntas">
+            
+            <div class="tarjeta-pregunta">
+                <p>1. ¿En cuál el pájaro está <b>ARRIBA</b> de la casa?</p>
+                <div class="opciones-img">
+                    <div class="item-figura-peq" onclick="comprobarJ3(this, 'q1', true)">
+                        <svg viewBox="0 0 100 100">
+                            <rect x="30" y="50" width="40" height="40" fill="#e0e0e0"/><polygon points="20,50 50,25 80,50" fill="#f44336"/>
+                            <circle cx="50" cy="15" r="8" fill="#2196f3"/>
+                        </svg>
+                    </div>
+                    <div class="item-figura-peq" onclick="comprobarJ3(this, 'q1', false)">
+                        <svg viewBox="0 0 100 100">
+                            <rect x="30" y="50" width="40" height="40" fill="#e0e0e0"/><polygon points="20,50 50,25 80,50" fill="#f44336"/>
+                            <circle cx="80" cy="85" r="8" fill="#2196f3"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tarjeta-pregunta">
+                <p>2. ¿En cuál el gato está <b>DELANTE</b> del muro?</p>
+                <div class="opciones-img">
+                    <div class="item-figura-peq" onclick="comprobarJ3(this, 'q2', false)">
+                        <svg viewBox="0 0 100 100">
+                            <circle cx="50" cy="45" r="15" fill="#ff9800"/><rect x="20" y="50" width="60" height="30" fill="#8d6e63"/>
+                        </svg>
+                    </div>
+                    <div class="item-figura-peq" onclick="comprobarJ3(this, 'q2', true)">
+                        <svg viewBox="0 0 100 100">
+                            <rect x="20" y="50" width="60" height="30" fill="#8d6e63"/><circle cx="50" cy="65" r="15" fill="#ff9800"/><polygon points="40,55 45,60 50,55" fill="#fff" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tarjeta-pregunta">
+                <p>3. ¿En cuál el árbol está más <b>CERCA</b>?</p>
+                <div class="opciones-img">
+                    <div class="item-figura-peq" onclick="comprobarJ3(this, 'q3', true)">
+                        <svg viewBox="0 0 100 100">
+                            <rect x="40" y="40" width="20" height="60" fill="#795548"/><circle cx="50" cy="30" r="30" fill="#4caf50"/>
+                        </svg>
+                    </div>
+                    <div class="item-figura-peq" onclick="comprobarJ3(this, 'q3', false)">
+                        <svg viewBox="0 0 100 100">
+                            <path d="M 20 100 L 45 40 L 55 40 L 80 100" fill="#e0e0e0"/><rect x="48" y="30" width="4" height="15" fill="#795548"/><circle cx="50" cy="25" r="10" fill="#4caf50"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tarjeta-pregunta">
+                <p>4. ¿En cuál el perro está <b>ENTRE</b> los dos árboles?</p>
+                <div class="opciones-img">
+                    <div class="item-figura-peq" onclick="comprobarJ3(this, 'q4', false)">
+                        <svg viewBox="0 0 100 100">
+                            <rect x="15" y="40" width="10" height="60" fill="#795548"/><circle cx="20" cy="30" r="20" fill="#4caf50"/>
+                            <rect x="45" y="40" width="10" height="60" fill="#795548"/><circle cx="50" cy="30" r="20" fill="#4caf50"/>
+                            <circle cx="80" cy="80" r="12" fill="#8d6e63"/>
+                        </svg>
+                    </div>
+                    <div class="item-figura-peq" onclick="comprobarJ3(this, 'q4', true)">
+                        <svg viewBox="0 0 100 100">
+                            <rect x="15" y="40" width="10" height="60" fill="#795548"/><circle cx="20" cy="30" r="20" fill="#4caf50"/>
+                            <rect x="75" y="40" width="10" height="60" fill="#795548"/><circle cx="80" cy="30" r="20" fill="#4caf50"/>
+                            <circle cx="50" cy="80" r="12" fill="#8d6e63"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <p class="mensajes" id="mensaje-j3"></p>
+        <button id="btn-sig-3" class="boton btn-siguiente" style="background-color: #9c27b0; box-shadow: 0px 4px 0px #6a1b9a;" onclick="mostrarResultados()">Ver Resultados Finales 🏆</button>
+    </div>
+
+    <div id="pantalla-resultados" class="pantalla">
+        
+        <div style="display:none;" id="cabecera-impresion">
+            <h1>INFORME DE RETROALIMENTACIÓN</h1>
+            <h2>Aprendemos Geometría - Matemáticas 1º Primaria</h2>
+            <p><b>Maestro:</b> Carlos Garrido</p>
+            <div class="curriculo-box" style="margin-bottom: 10px;">
+                <p><b>Competencia Específica 5:</b> Reconocer y utilizar conexiones entre las diferentes ideas matemáticas, así como identificar las matemáticas implicadas en otras áreas o en la vida cotidiana, interrelacionando conceptos y procedimientos, para interpretar situaciones y contextos diversos.</p>
+                <p><b>Criterio 5.2.a.</b> Identificar las matemáticas presentes en la vida cotidiana y en otras áreas, estableciendo conexiones sencillas entre ellas con información gráfica cotidiana.</p>
+            </div>
+        </div>
+
+        <h1 id="titulo-resultados">¡Aventura Completada!</h1>
+        
+        <div id="caja-datos-alumno" class="datos-alumno">
+            <h3>Datos del Alumno/a</h3>
+            <input type="text" id="input-nombre-alumno" class="input-nombre" placeholder="Escribe aquí tu nombre" onkeyup="actualizarNombreImpresion()">
+            <div id="nombre-impresion">ALUMNO/A: <span id="nombre-texto"></span></div>
+        </div>
+
+        <div class="resultado-box">
+            <p style="font-size: 24px; margin: 0;">Calificación Final:</p>
+            <div class="nota-final" id="nota-numero">-- / 10</div>
+            <p id="nota-mensaje" style="font-size: 20px; font-weight: bold;"></p>
+        </div>
+        
+        <h2>Aspectos Evaluados (Estadística de aciertos):</h2>
+        <ul class="lista-stats">
+            <li><span>⚖️ Identificar unidades de medida convencionales y no convencionales:</span> <span id="stat-j1">0/4</span></li>
+            <li><span>⏱️ Identificar y relacionar las unidades de medida del tiempo:</span> <span id="stat-j2">0/4</span></li>
+            <li><span>🧭 Reconocer la posición espacial relativa (arriba, abajo, delante, cerca...):</span> <span id="stat-j3">0/4</span></li>
+        </ul>
+
+        <div class="rubrica-box">
+            <h3>¿Cómo se calcula la calificación? (Total: 10 Puntos)</h3>
+            <ul>
+                <li><b>Nivel 1:</b> 4 aciertos posibles (1 punto por cada unidad de medida unida correctamente al primer intento).</li>
+                <li><b>Nivel 2:</b> 4 aciertos posibles (1 punto por cada pregunta sobre el tiempo acertada al primer intento).</li>
+                <li><b>Nivel 3:</b> 4 aciertos posibles (1 punto por cada imagen de posición espacial seleccionada correctamente al primer intento).</li>
+                <li>La nota final se obtiene calculando el total de aciertos (máximo 12), dividiéndolos entre 12 y multiplicando el resultado por 10.</li>
+            </ul>
+        </div>
+
+        <div id="botones-finales">
+            <button class="boton btn-volver" onclick="location.reload()">🔄 Volver al Inicio</button>
+            <button id="btn-generar-pdf" class="boton btn-pdf" style="display:none;" onclick="prepararEImprimir()">📥 Generar PDF</button>
+        </div>
+    </div>
+
+    <script>
+        // --- SISTEMA DE PUNTUACIÓN Y MODO ---
+        let modoActual = ''; 
+        let puntos = { j1: 0, j2: 0, j3: 0 };
+        const MAX_PUNTOS = { j1: 4, j2: 4, j3: 4 }; 
+
+        function irPantalla(idDestino) {
+            document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+            document.getElementById(idDestino).classList.add('activa');
+        }
+
+        function iniciarAventura(modo) {
+            modoActual = modo;
+            irPantalla('pantalla-juego1');
+        }
+
+        // --- NIVEL 1: Unir (Medida) ---
+        let figSel = null, palSel = null, aciertosJ1 = 0;
+        let fallosJ1Registrados = { kilo: false, litro: false, pasos: false, palmo: false };
+
+        function seleccionarItem(tipo, el, cat) {
+            if(el.classList.contains('resuelto')) return;
+            if (cat === 'figura') { 
+                document.querySelectorAll('.figura-match').forEach(e => e.classList.remove('seleccionado')); 
+                el.classList.add('seleccionado'); figSel = {tipo, el}; 
+            } else { 
+                document.querySelectorAll('.palabra-match').forEach(e => e.classList.remove('seleccionado')); 
+                el.classList.add('seleccionado'); palSel = {tipo, el}; 
+            }
+            if (figSel && palSel) comprobarParejaJ1();
+        }
+
+        function comprobarParejaJ1() {
+            if (figSel.tipo === palSel.tipo) {
+                figSel.el.classList.add('resuelto'); palSel.el.classList.add('resuelto');
+                figSel.el.classList.remove('seleccionado'); palSel.el.classList.remove('seleccionado');
+                
+                if (!fallosJ1Registrados[figSel.tipo]) { puntos.j1++; } // 1 pto por acierto a la primera
+                
+                aciertosJ1++; figSel = null; palSel = null;
+                
+                if (aciertosJ1 === MAX_PUNTOS.j1) {
+                    document.getElementById('mensaje-j1').textContent = '¡Excelente! Has unido todas correctamente. 🌟';
+                    document.getElementById('mensaje-j1').style.color = '#4caf50';
+                    document.getElementById('btn-sig-1').style.display = 'inline-block';
+                }
+            } else {
+                if (figSel) fallosJ1Registrados[figSel.tipo] = true; 
+                document.getElementById('mensaje-j1').textContent = 'Oops... Esa unidad no es la correcta.';
+                document.getElementById('mensaje-j1').style.color = '#f44336';
+                
+                if(figSel) figSel.el.classList.add('error-anim');
+                if(palSel) palSel.el.classList.add('error-anim');
+
+                setTimeout(() => {
+                    if(figSel) figSel.el.classList.remove('seleccionado', 'error-anim');
+                    if(palSel) palSel.el.classList.remove('seleccionado', 'error-anim');
+                    figSel = null; palSel = null;
+                    document.getElementById('mensaje-j1').textContent = '';
+                }, 800);
+            }
+        }
+
+        // --- NIVEL 2: Múltiple Opción (Tiempo) ---
+        let j2Evaluados = { q1: false, q2: false, q3: false, q4: false };
+        let aciertosJ2 = 0;
+
+        function comprobarJ2(btn, qId, isCorrect) {
+            if (j2Evaluados[qId]) return; 
+            let tarjeta = btn.parentElement;
+            let botones = tarjeta.querySelectorAll('.boton-opcion');
+            
+            if (isCorrect) {
+                btn.classList.add('correcto-anim');
+                if (!btn.dataset.fallado) { puntos.j2++; }
+                aciertosJ2++;
+                j2Evaluados[qId] = true;
+                
+                botones.forEach(b => b.style.pointerEvents = 'none');
+                
+                if (aciertosJ2 === MAX_PUNTOS.j2) {
+                    document.getElementById('mensaje-j2').textContent = '¡Genial! Has demostrado que dominas el tiempo. 🌟';
+                    document.getElementById('mensaje-j2').style.color = '#4caf50';
+                    document.getElementById('btn-sig-2').style.display = 'inline-block';
+                }
+            } else {
+                btn.classList.add('error-anim');
+                setTimeout(() => btn.classList.remove('error-anim'), 400);
+                botones.forEach(b => b.dataset.fallado = "true"); // Marca fallo para esta pregunta
+            }
+        }
+
+        // --- NIVEL 3: Elección de Imagen (Espacio) ---
+        let j3Evaluados = { q1: false, q2: false, q3: false, q4: false };
+        let aciertosJ3 = 0;
+
+        function comprobarJ3(imgDiv, qId, isCorrect) {
+            if (j3Evaluados[qId]) return; 
+            let tarjeta = imgDiv.parentElement;
+            let imagenes = tarjeta.querySelectorAll('.item-figura-peq');
+            
+            if (isCorrect) {
+                imgDiv.classList.add('correcto-anim');
+                if (!imgDiv.dataset.fallado) { puntos.j3++; }
+                aciertosJ3++;
+                j3Evaluados[qId] = true;
+                
+                imagenes.forEach(i => i.style.pointerEvents = 'none');
+                
+                if (aciertosJ3 === MAX_PUNTOS.j3) {
+                    document.getElementById('mensaje-j3').textContent = '¡Súper! Tienes un sentido espacial perfecto. 🌟';
+                    document.getElementById('mensaje-j3').style.color = '#4caf50';
+                    document.getElementById('btn-sig-3').style.display = 'inline-block';
+                }
+            } else {
+                imgDiv.classList.add('error-anim');
+                setTimeout(() => imgDiv.classList.remove('error-anim'), 400);
+                imagenes.forEach(i => i.dataset.fallado = "true");
+            }
+        }
+
+        // --- RESULTADOS FINALES Y PDF ---
+        function mostrarResultados() {
+            irPantalla('pantalla-resultados');
+            
+            let totalAciertos = puntos.j1 + puntos.j2 + puntos.j3; // Máximo 12
+            let notaDecimal = (totalAciertos / 12) * 10;
+            let notaFinal = Math.round(notaDecimal * 10) / 10; 
+
+            document.getElementById('nota-numero').textContent = `${notaFinal} / 10`;
+            
+            let msjNota = document.getElementById('nota-mensaje');
+            if(notaFinal >= 9) { msjNota.textContent = "¡Eres un MAESTRO de las matemáticas! 👑"; msjNota.style.color = "#2e7d32"; }
+            else if(notaFinal >= 7) { msjNota.textContent = "¡Muy buen trabajo! ¡Sigue así! ⭐"; msjNota.style.color = "#00838f"; }
+            else if(notaFinal >= 5) { msjNota.textContent = "¡Aprobado! Pero seguro que puedes mejorarlo. 💪"; msjNota.style.color = "#f57c00"; }
+            else { msjNota.textContent = "¡No te rindas! Vuelve a jugar para practicar más. 🧠"; msjNota.style.color = "#d32f2f"; }
+
+            colocarStat('stat-j1', puntos.j1, MAX_PUNTOS.j1);
+            colocarStat('stat-j2', puntos.j2, MAX_PUNTOS.j2);
+            colocarStat('stat-j3', puntos.j3, MAX_PUNTOS.j3);
+
+            if (modoActual === 'evaluacion') {
+                document.getElementById('caja-datos-alumno').style.display = 'block';
+                document.getElementById('btn-generar-pdf').style.display = 'inline-block';
+            }
+        }
+
+        function colocarStat(id, puntaje, maximo) {
+            let el = document.getElementById(id);
+            el.textContent = `${puntaje} / ${maximo}`;
+            if(puntaje === maximo) { el.className = 'stat-perfecto'; }
+            else { el.className = 'stat-regular'; }
+        }
+
+        function actualizarNombreImpresion() {
+            document.getElementById('nombre-texto').textContent = document.getElementById('input-nombre-alumno').value;
+        }
+
+        function prepararEImprimir() {
+            const nombre = document.getElementById('input-nombre-alumno').value;
+            if(nombre.trim() === '') {
+                alert("Por favor, escribe tu nombre antes de generar el PDF.");
+                return;
+            }
+            document.getElementById('cabecera-impresion').style.display = 'block';
+            document.getElementById('titulo-resultados').style.display = 'none'; 
+            window.print(); 
+            setTimeout(() => {
+                document.getElementById('cabecera-impresion').style.display = 'none';
+                document.getElementById('titulo-resultados').style.display = 'block';
+            }, 500);
+        }
+    </script>
+</body>
+</html>
