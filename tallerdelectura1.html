@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taller de Lecturas 1º Primaria</title>
+    <style>
+        /* --- FUENTES --- */
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Comic+Neue:wght@400;700&display=swap');
+
+        :root {
+            --app-bg: #E0F7FA;
+            --text-dark: #37474F;
+            --card-shadow: rgba(0,0,0,0.15);
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: var(--app-bg);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255,255,255,0.4) 10%, transparent 11%),
+                radial-gradient(circle at 90% 80%, rgba(255,255,255,0.4) 10%, transparent 11%);
+            background-size: 60px 60px;
+            margin: 0;
+            padding: 20px;
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        /* --- VISTA MENÚ --- */
+        #menu-view {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+            animation: fadeIn 0.8s;
+        }
+
+        header { margin-bottom: 40px; }
+
+        h1 {
+            font-size: 3.5rem;
+            color: #FF6F00;
+            margin: 0;
+            text-shadow: 2px 2px 0 #FFD54F;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 1.8rem;
+            color: #00838F;
+            background: #B2EBF2;
+            padding: 8px 30px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 10px;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+        }
+
+        .menu-credits {
+            font-family: 'Comic Neue', cursive;
+            font-size: 1.1rem;
+            color: #006064;
+            margin-top: 20px;
+            font-weight: bold;
+            border-top: 2px dashed #80DEEA;
+            display: inline-block;
+            padding-top: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            padding-bottom: 50px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 25px;
+            padding: 20px;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 10px 0 var(--card-shadow);
+            transition: all 0.2s;
+            border: 4px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .card:hover { transform: translateY(-8px); box-shadow: 0 18px 0 var(--card-shadow); }
+        .card:active { transform: translateY(0); box-shadow: 0 4px 0 var(--card-shadow); }
+
+        .card-num {
+            position: absolute; top: 15px; left: 15px;
+            width: 35px; height: 35px;
+            background: #333; color: white;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.1rem;
+        }
+
+        .card-icon { font-size: 4.5rem; margin: 15px 0; transition: transform 0.3s; }
+        .card:hover .card-icon { transform: scale(1.1) rotate(5deg); }
+
+        .card-title {
+            font-family: 'Comic Neue', cursive;
+            font-size: 1.4rem;
+            font-weight: bold;
+            line-height: 1.2;
+            margin-top: 5px;
+        }
+
+        /* --- VISTA JUEGO --- */
+        #game-view {
+            display: none;
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 35px;
+            border: 8px solid #333; /* Se cambia dinámicamente */
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            min-height: 750px;
+        }
+
+        .screen {
+            padding: 40px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            height: 100%;
+            animation: slideUp 0.5s ease-out;
+            justify-content: center; /* Centrar contenido verticalmente */
+        }
+        
+        .screen.active { display: flex; }
+
+        .btn-home {
+            position: absolute; top: 25px; left: 25px;
+            background: #ECEFF1; border: none;
+            padding: 10px 20px; border-radius: 30px;
+            cursor: pointer; color: #546E7A; font-weight: bold;
+            font-family: 'Fredoka', sans-serif;
+            box-shadow: 0 4px 0 #CFD8DC;
+            z-index: 100;
+        }
+        .btn-home:active { transform: translateY(2px); box-shadow: none; }
+
+        /* PANTALLA 1: PORTADA ORIGINAL */
+        .badge-curso {
+            background: #333; /* Se cambia */
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            display: inline-block;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+        }
+
+        .hero-title { font-size: 3.5rem; color: var(--theme-color); margin-bottom: 10px; line-height: 1.1; }
+        
+        .author-text {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.2rem;
+            color: white;
+            background: #333; /* Se cambia */
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            display: inline-block;
+            border: 2px solid rgba(0,0,0,0.1);
+        }
+
+        .hero-icons-container {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .hero-icon {
+            font-size: 6rem;
+            animation: bounce 3s infinite ease-in-out;
+            filter: drop-shadow(0 8px 0 rgba(0,0,0,0.15));
+        }
+        .hero-icon:nth-child(2) { animation-delay: 0.2s; }
+        .hero-icon:nth-child(3) { animation-delay: 0.4s; }
+
+        .motivational-text {
+            font-size: 1.5rem;
+            font-family: 'Comic Neue', cursive;
+            color: #555;
+            margin-bottom: 30px;
+            line-height: 1.4;
+            max-width: 80%;
+        }
+
+        /* PANTALLA 2: LECTURA */
+        .reading-box {
+            background: #FAFAFA;
+            padding: 30px;
+            border-radius: 20px;
+            border: 3px dashed #B0BEC5; /* Se cambia dinámicamente */
+            text-align: left;
+            font-family: 'Comic Neue', cursive;
+            font-size: 1.6rem;
+            line-height: 1.7;
+            width: 90%;
+            margin: 20px 0;
+            white-space: pre-line;
+            max-height: 400px;
+            overflow-y: auto;
+            color: #263238;
+        }
+
+        /* PANTALLA 3: PREGUNTAS */
+        .progress-bar-container {
+            width: 80%; height: 15px; background: #eee;
+            border-radius: 10px; margin-bottom: 30px; overflow: hidden; margin-top: 30px;
+        }
+        .progress-fill { height: 100%; background: #66BB6A; width: 0%; transition: 0.3s; }
+        
+        .quiz-question { font-size: 2rem; color: #37474F; margin-bottom: 30px; font-weight: bold; }
+        
+        .options-grid { display: grid; gap: 15px; width: 90%; }
+        .opt-btn {
+            background: white; border: 3px solid #ECEFF1;
+            padding: 20px; border-radius: 15px;
+            font-size: 1.5rem; cursor: pointer;
+            font-family: 'Comic Neue', cursive; font-weight: bold;
+            color: #455A64; transition: 0.1s;
+        }
+        .opt-btn:hover { background: #F5F5F5; transform: scale(1.02); }
+        .opt-btn.correct { background: #DCEDC8; border-color: #76FF03; color: #1B5E20; }
+        .opt-btn.wrong { background: #FFCDD2; border-color: #FF1744; color: #B71C1C; }
+
+        /* PANTALLA 4: FINAL */
+        .score-box {
+            background: #FFF9C4; padding: 20px 60px;
+            border-radius: 20px; font-size: 3.5rem; font-weight: bold;
+            color: #F57F17; border: 4px solid #FBC02D;
+            margin: 30px 0;
+        }
+
+        /* BOTONES */
+        .btn {
+            background: #333; /* Se cambia dinámicamente */
+            color: white; border: none;
+            padding: 15px 40px; font-size: 1.6rem;
+            border-radius: 50px; cursor: pointer;
+            font-family: 'Fredoka', sans-serif;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.3);
+            margin: 10px; display: inline-flex; align-items: center; gap: 10px;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
+        
+        .btn-audio { background: #FF9800 !important; box-shadow: 0 8px 0 #E65100 !important; }
+        .btn-audio:active { box-shadow: 0 2px 0 #E65100 !important; }
+        
+        .btn-stop { background: #F44336 !important; box-shadow: 0 8px 0 #B71C1C !important; }
+        .btn-stop:active { box-shadow: 0 2px 0 #B71C1C !important; }
+
+        /* ANIMACIONES */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes bounce { 
+            0% { transform: rotate(5deg); }
+            50% { transform: rotate(-5deg); }
+            100% { transform: rotate(5deg); }
+        }
+
+        #confetti-canvas { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; z-index: 50; }
+
+    </style>
+</head>
+<body>
+
+    <div id="menu-view">
+        <header>
+            <h1>📚 Taller de Lecturas</h1>
+            <div class="subtitle">1º Primaria</div>
+            <br>
+            <div class="menu-credits">Elaborado por Carlos Garrido - IA Gemini - Basado en Santillana</div>
+        </header>
+        <div class="grid" id="grid-container"></div>
+    </div>
+
+    <div id="game-view">
+        <canvas id="confetti-canvas"></canvas>
+        <button class="btn-home" onclick="showMenu()">🏠 MENÚ</button>
+
+        <div id="screen-intro" class="screen">
+            <div id="badge-curso" class="badge-curso">1º PRIMARIA</div>
+            
+            <h1 class="hero-title" id="intro-title">Título</h1>
+            
+            <div class="author-text">Carlos Garrido - IA Gemini</div>
+            
+            <div class="hero-icons-container" id="intro-icons"></div>
+            
+            <p class="motivational-text" id="intro-desc">Descripción motivadora...</p>
+            
+            <button class="btn" id="btn-start" onclick="nextScreen('screen-reading')">📖 EMPEZAR</button>
+        </div>
+
+        <div id="screen-reading" class="screen">
+            <h2 style="color:#555; margin-bottom:10px;">Vamos a leer</h2>
+            <div class="reading-box" id="story-text"></div>
+            <div>
+                <button class="btn btn-audio" onclick="playAudio()">🔊 Escuchar</button>
+                <button class="btn btn-stop" onclick="stopAudio()">⏹</button>
+            </div>
+            <br>
+            <button class="btn" id="btn-quiz" onclick="startQuiz()">PREGUNTAS ➡️</button>
+        </div>
+
+        <div id="screen-quiz" class="screen">
+            <div class="progress-bar-container"><div class="progress-fill" id="p-bar"></div></div>
+            <div class="quiz-question" id="q-text">Pregunta</div>
+            <div class="options-grid" id="opt-container"></div>
+            <div id="feedback" style="font-weight:bold; font-size:1.5rem; height:40px; margin-top:20px;"></div>
+        </div>
+
+        <div id="screen-end" class="screen">
+            <h1 style="color:#333;">¡Excelente!</h1>
+            <div style="font-size:6rem; margin:20px;">🏆</div>
+            <p style="font-size:1.6rem; color:#555;">¡Eres un gran lector!</p>
+            <div class="score-box" id="final-score">5 / 5</div>
+            <button class="btn" id="btn-menu-back" onclick="showMenu()">🏠 VOLVER</button>
+            <button class="btn btn-audio" onclick="nextScreen('screen-reading')">🔄 REPETIR</button>
+        </div>
+    </div>
+
+    <script>
+        // --- BASE DE DATOS COMPLETA (Textos corregidos según PDF y estilo) ---
+        const DB = [
+            { 
+                id: 1, title: "El Topo y Timoteo", color: "#6D4C41", icons: ["🐹", "📝", "🤖"],
+                desc: "Descubre a un topo poeta y a un autómata muy limpio. ¡Adelante!",
+                text: "El topo Tom, el topo poeta, sale al sol.\nToma los papeles, pasea, pasea y lee sus poemas.\nLee a las palomas, a los patos y a los osos, a las setas y amapolas.\nA la pista... ¡Tutuá, tutuá! ¡Pim, pam, pim, pam! A la pista salta ¡Aamaal!...\n\nTimoteo, el autómata, limpia el suelo, limpia la mesa, limpia la sala y la maleta.\n¿La pelota? ¡A su sitio!\nAsí, pasito a paso, el piso está limpio. Así está... ¡listo!",
+                quiz: [
+                    {q:"¿Quién es Tom?", o:["Un perro","Un topo","Un gato"], c:1},
+                    {q:"¿Qué hace el topo Tom?", o:["Lee poemas","Juega al fútbol","Duerme"], c:0},
+                    {q:"¿A quién lee sus poemas?", o:["A los niños","A las palomas y patos","A nadie"], c:1},
+                    {q:"¿Quién es Timoteo?", o:["Un niño","Un autómata","Un loro"], c:1},
+                    {q:"¿Qué limpia Timoteo?", o:["El coche","El suelo y la mesa","El tejado"], c:1}
+                ]
+            },
+            { 
+                id: 2, title: "El monito Napoleón", color: "#558B2F", icons: ["🐒", "🥥", "🌴"],
+                desc: "Napoleón es un monito peleón que aprenderá a portarse bien.",
+                text: "Napoleón es un monito muy peleón.\nMonta peleas sin ton ni son.\n\n-¡Napoleón, piénsatelo! -le dice su mamá.\n\nEste monito mete la pata y sus manías son una lata.\n\n-¡No seas tan malo, Napoleón! ¡Intenta ser bueno! ¡Sé un buenón!",
+                quiz: [
+                    {q:"¿Qué animal es Napoleón?", o:["Un león","Un monito","Un oso"], c:1},
+                    {q:"¿Cómo es Napoleón?", o:["Tranquilo","Peleón","Dormilón"], c:1},
+                    {q:"¿Qué monta Napoleón?", o:["Fiestas","Peleas","Bicicletas"], c:1},
+                    {q:"¿Quién le habla?", o:["Su papá","Su mamá","Su abuela"], c:1},
+                    {q:"¿Qué le pide su mamá?", o:["Que sea bueno","Que coma","Que duerma"], c:0}
+                ]
+            },
+            { 
+                id: 3, title: "En unos minutos", color: "#1E88E5", icons: ["⏰", "🏫", "🔔"],
+                desc: "¡Ding, dong! Todos miran el reloj esperando salir a jugar.",
+                text: "El reloj de la torre suena: ¡Ding, dong!\n-En unos minutos saldremos al recreo -dice la maestra.\nTodos los niños miran las agujas del reloj.\nCuando la aguja grande llegue al doce... ¡a jugar al patio!",
+                quiz: [
+                    {q:"¿Qué suena?", o:["El timbre","El reloj de la torre","El teléfono"], c:1},
+                    {q:"¿A dónde van a salir?", o:["A casa","Al recreo","Al cine"], c:1},
+                    {q:"¿Quién habla?", o:["El director","La maestra","Un alumno"], c:1},
+                    {q:"¿Qué miran los niños?", o:["La pizarra","Las agujas del reloj","El suelo"], c:1},
+                    {q:"¿Cuándo saldrán?", o:["Cuando la aguja llegue al doce","A las cinco","Mañana"], c:0}
+                ]
+            },
+            { 
+                id: 4, title: "El fantasma Rafael", color: "#7E57C2", icons: ["👻", "🏰", "🕸️"],
+                desc: "Un fantasma diferente que no asusta, ¡solo quiere divertirse!",
+                text: "Rafael es un fantasma que vive en el castillo.\nPero Rafael no asusta a nadie. ¡Es muy divertido!\nLe gusta jugar al escondite y contar chistes a los murciélagos.\nPor las noches, se pone una sábana blanca y baila rock and roll.",
+                quiz: [
+                    {q:"¿Quién es Rafael?", o:["Un vampiro","Un fantasma","Un esqueleto"], c:1},
+                    {q:"¿Dónde vive?", o:["En una cueva","En un castillo","En un piso"], c:1},
+                    {q:"¿Asusta a la gente?", o:["Sí, mucho","No, es divertido","A veces"], c:1},
+                    {q:"¿A qué juega?", o:["Al fútbol","Al escondite","A las cartas"], c:1},
+                    {q:"¿Qué baila?", o:["Salsa","Rock and roll","Ballet"], c:1}
+                ]
+            },
+            { 
+                id: 5, title: "Roe que te roe", color: "#FFC107", icons: ["🐭", "🧀", "🍞"],
+                desc: "¡Qué festín se va a dar este ratoncito gris!",
+                text: "El ratoncito gris roe que te roe.\nEncontró un trozo de pan duro y un poco de queso.\n-¡Qué festín! -pensó el ratón.\nLlevó la comida a su cueva para compartirla con sus hermanitos.",
+                quiz: [
+                    {q:"¿De qué color es el ratón?", o:["Blanco","Gris","Marrón"], c:1},
+                    {q:"¿Qué hacía el ratón?", o:["Dormía","Roe que te roe","Saltaba"], c:1},
+                    {q:"¿Qué comida encontró?", o:["Pan y queso","Jamón","Fruta"], c:0},
+                    {q:"¿Qué pensó el ratón?", o:["¡Qué asco!","¡Qué festín!","¡Qué poco!"], c:1},
+                    {q:"¿Con quién compartió?", o:["Con nadie","Con sus hermanitos","Con el gato"], c:1}
+                ]
+            },
+            { 
+                id: 6, title: "Muy a gusto", color: "#8D6E63", icons: ["🐱", "🛋️", "💤"],
+                desc: "Michi es un gato muy feliz que disfruta de los mimos.",
+                text: "El gato Michi está muy a gusto en el sofá.\nSe estira, bosteza y se limpia los bigotes.\nSu dueña, Ana, le acaricia la cabeza.\n-Rrron, rrron -hace Michi. ¡Qué feliz es!",
+                quiz: [
+                    {q:"¿Cómo se llama el gato?", o:["Tom","Michi","Garfield"], c:1},
+                    {q:"¿Dónde está tumbado?", o:["En la cama","En el sofá","En el suelo"], c:1},
+                    {q:"¿Qué se limpia?", o:["Las patas","Los bigotes","La cola"], c:1},
+                    {q:"¿Quién le acaricia?", o:["Ana","Luis","Pedro"], c:0},
+                    {q:"¿Qué hace el gato al final?", o:["Maúlla","Ronronea","Araña"], c:1}
+                ]
+            },
+            { 
+                id: 7, title: "Perdido en la feria", color: "#D32F2F", icons: ["🎡", "🎈", "👮"],
+                desc: "Tomás se ha perdido entre las luces y el ruido. ¿Lo encontrarán?",
+                text: "Tomás se ha perdido en la feria.\nHay muchas luces y ruido. ¡Pim, pam, pum!\nTomás busca a su papá cerca de la noria.\nUn policía muy amable le ayuda: -¡Mira, allí está tu papá comiendo algodón de azúcar!",
+                quiz: [
+                    {q:"¿Quién se ha perdido?", o:["Luis","Tomás","Ana"], c:1},
+                    {q:"¿Dónde está?", o:["En el parque","En la feria","En el zoo"], c:1},
+                    {q:"¿Cerca de qué busca?", o:["Del tiovivo","De la noria","Del coche"], c:1},
+                    {q:"¿Quién le ayuda?", o:["Un bombero","Un policía","Un médico"], c:1},
+                    {q:"¿Qué comía su papá?", o:["Palomitas","Algodón de azúcar","Manzanas"], c:1}
+                ]
+            },
+            { 
+                id: 8, title: "Buena suerte", color: "#43A047", icons: ["🍀", "📖", "👴"],
+                desc: "Algo verde y especial ha aparecido en el parque.",
+                text: "Hoy he tenido mucha buena suerte.\nIba caminando por el parque y vi algo verde en el suelo.\n¡Era un trébol de cuatro hojas!\nMi abuelo dice que eso da suerte, así que lo guardé en mi libro favorito.",
+                quiz: [
+                    {q:"¿Por dónde caminaba?", o:["Por la calle","Por el parque","Por la playa"], c:1},
+                    {q:"¿Qué encontró?", o:["Una moneda","Un trébol de 4 hojas","Un botón"], c:1},
+                    {q:"¿De qué color era?", o:["Verde","Rojo","Azul"], c:0},
+                    {q:"¿Qué dice el abuelo?", o:["Que da suerte","Que no sirve","Que es malo"], c:0},
+                    {q:"¿Dónde lo guardó?", o:["En el bolsillo","En un libro","En la caja"], c:1}
+                ]
+            },
+            { 
+                id: 9, title: "La cigarra y la zorra", color: "#E64A19", icons: ["🦊", "🎻", "🍂"],
+                desc: "La zorra tiene hambre y quiere engañar a la cigarra cantarina.",
+                text: "Una cigarra cantaba feliz en la rama de un árbol.\nUna zorra, que tenía hambre, le dijo:\n-¡Qué voz tan bonita tienes! Baja para que pueda verte mejor.\nPero la cigarra, sospechando las intenciones de la zorra, arrancó una ramita del árbol y la tiró al suelo.\nEntonces, la zorra corrió hacia lo que pensaba que era su suculento aperitivo.\n-¡Te has equivocado, amiga! -le dijo la cigarra- ¡Anda, tómate unas manzanas!",
+                quiz: [
+                    {q:"¿Dónde estaba la cigarra?", o:["En el suelo","En una rama","En una cueva"], c:1},
+                    {q:"¿Qué quería la zorra?", o:["Cantar","Comérsela","Bailar"], c:1},
+                    {q:"¿Qué tiró la cigarra?", o:["Una piedra","Una ramita","Un zapato"], c:1},
+                    {q:"¿Qué hizo la zorra?", o:["Se fue","Corrió hacia la ramita","Saltó al árbol"], c:1},
+                    {q:"¿Qué le dijo la cigarra al final?", o:["¡Comete unas manzanas!","¡Adiós!","¡Ven aquí!"], c:0}
+                ]
+            },
+            { 
+                id: 10, title: "Zumo de naranja", color: "#F57C00", icons: ["🍊", "👵", "👹"],
+                desc: "¡Pobrecita Genoveva! Unos gigantes le están robando sus naranjas.",
+                text: "Genoveva vivía en una vieja casa rodeada de un campo de naranjos.\nPero, desde hacía tiempo, una pareja de gigantes acudía a robar sus naranjas y, con sus enormes pies, lo pisoteaban y lo rompían todo.\nLa mujer estaba desesperada, pues las jugosas naranjas que vendía a sus vecinos eran su único medio de vida.\n-¡Ay, qué será de mí! -se lamentaba Genoveva.",
+                quiz: [
+                    {q:"¿Quién es la protagonista?", o:["Genoveva","María","Ana"], c:0},
+                    {q:"¿De qué estaba rodeada su casa?", o:["De manzanos","De naranjos","De pinos"], c:1},
+                    {q:"¿Quiénes robaban las naranjas?", o:["Unos niños","Unos gigantes","Unos pájaros"], c:1},
+                    {q:"¿Qué hacían con los pies?", o:["Bailaban","Lo pisoteaban todo","Corrían"], c:1},
+                    {q:"¿Cómo se sentía Genoveva?", o:["Feliz","Desesperada","Cansada"], c:1}
+                ]
+            },
+            { 
+                id: 11, title: "Un nuevo hogar", color: "#6D4C41", icons: ["🐿️", "🌲", "🌰"],
+                desc: "Agapita ha perdido su casa, pero sus amigos del bosque la ayudarán.",
+                text: "Agapita, la ardilla, estaba muy atareada. Se acercaba el invierno y ella se dedicaba a buscar avellanas y bellotas por todo el bosque.\nUna tarde, cuando volvía a su casa, vio con horror que habían cortado su árbol y se lo habían llevado. ¡Su hogar había desaparecido! Agapita se puso a llorar desconsolada.\n-¿Dónde voy a ir ahora? -se quejaba la ardilla con amargura.\nSus vecinos no tardaron en llegar. Todos querían que se fuese a vivir con ellos. Pero Agapita se negaba a abandonar el lugar donde había estado su hogar.\nEntonces, en medio del corrillo, apareció el pájaro carpintero. Al enterarse de lo que ocurría, dijo:\n-No te disgustes, Agapita. ¿Ves ese pino de ahí al lado? Hace unos días terminé un agujero estupendo. Será un hogar maravilloso para ti.\nY Agapita se puso a llorar de nuevo. Pero esta vez fue de felicidad, porque estaba orgullosa de sus amigos.",
+                quiz: [{q:"¿Quién es Agapita?", o:["Una ardilla","Una coneja","Una osa"], c:0}, {q:"¿Qué buscaba?", o:["Flores","Avellanas","Piedras"], c:1}, {q:"¿Qué le pasó a su árbol?", o:["Se cayó","Lo cortaron","Se quemó"], c:1}, {q:"¿Quién la ayudó?", o:["El topo","El pájaro carpintero","El búho"], c:1}, {q:"¿Por qué lloró al final?", o:["De pena","De felicidad","De dolor"], c:1}]
+            },
+            { 
+                id: 12, title: "La araña soñadora", color: "#4A148C", icons: ["🕷️", "🦋", "🕸️"],
+                desc: "La señora araña sueña con hacer hilos de seda. ¡Descubre su talento!",
+                text: "La señora araña,\nteje que te teje,\npasa la mañana.\n\nElla teje y sueña,\nporque quiere ser\ngusano de seda.\n\n-¡Ay, ojalá pudiera\nhacer hilos suaves\npara suaves telas!\nPues... ¿a quién le importan\nestas telarañas?\n¡Nadie las valora!\n\nY por allí pasa\nuna mariposa\nque mira y se para.\n\n-Araña pequeña,\nque tejes y sueñas,\n¿son ciertas tus quejas?\n\nPues quiero que sepas\nque tu tela es bella\ny sus finos hilos\nson de fina seda.\n\n-¡Cuánta razón tienes,\nmariposa hermosa!\nSí, mis telarañas\nson maravillosas.",
+                quiz: [{q:"¿Quién es la protagonista?", o:["Una araña","Una mosca","Una hormiga"], c:0}, {q:"¿Qué quiere ser?", o:["Mariposa","Gusano de seda","Abeja"], c:1}, {q:"¿Quién la consuela?", o:["Un grillo","Una mariposa","Un pájaro"], c:1}, {q:"¿Cómo son sus hilos?", o:["Feos","De fina seda","De lana"], c:1}, {q:"¿Cómo acaba la araña?", o:["Triste","Contenta","Enfadada"], c:1}]
+            },
+            { 
+                id: 13, title: "¡Ya estamos aquí!", color: "#D32F2F", icons: ["🤡", "🎪", "🎁"],
+                desc: "Yuri el payaso cree que pasará la Navidad solo... ¿O quizás no?",
+                text: "Yuri era el payaso de un famoso circo. Venía de un país muy lejano y vivía solo.\nEl día de Navidad, después de la función, Yuri decidió invitar a sus compañeros a cenar a su casa.\n-No puedo, Yuri - le dijo la malabarista.\n-Yo tampoco. Lo siento -respondió el jefe de pista.\nY lo mismo le contestaron el funámbulo, la maga, los músicos de la banda...\nEntonces, Yuri se quitó sus enormes zapatones y su ropa de payaso, se limpió el maquillaje de la cara y, muy apenado, salió a la calle. Se sentía tan solo...\nYuri estaba muy disgustado y se dirigió a su casa. Quería cenar y acostarse cuanto antes.\nEstaba ya ante la puerta cuando oyó unas potentes voces a su espalda.\n-¡Feliz Navidad, Yuri! ¿Nos invitas a pasar?\nEntonces, Yuri se dio media vuelta y... ¡allí estaban todos sus compañeros del circo!\nVenían con bandejas llenas de comida para cenar con él.\nFue una Navidad que Yuri nunca olvidaría.",
+                quiz: [{q:"¿Quién era Yuri?", o:["Un mago","Un payaso","Un domador"], c:1}, {q:"¿Qué día era?", o:["Navidad","Halloween","Su cumpleaños"], c:0}, {q:"¿Cómo se sentía al principio?", o:["Feliz","Solo y triste","Cansado"], c:1}, {q:"¿Quiénes aparecieron?", o:["Nadie","Sus compañeros","Sus padres"], c:1}, {q:"¿Qué trajeron?", o:["Regalos","Comida","Globos"], c:1}]
+            },
+            { 
+                id: 14, title: "Noche de Reyes", color: "#1A237E", icons: ["👑", "🎁", "🐫"],
+                desc: "Tres hermanos intentan mantenerse despiertos para ver a los Reyes.",
+                text: "Alexia, Yolanda y Kevin acaban de volver de la cabalgata y están cansadísimos. Vienen cargados de caramelos que los pajes de los Reyes han lanzado desde las carrozas.\n¡Han recogido un montón!\nPero es la noche de Reyes y, a pesar del agotamiento, están tan excitados que no quieren irse a la cama.\n-¿Por qué no nos quedamos despiertos a esperar a los Reyes? -les dice Alexia a sus hermanos.\n-¡Qué buena idea! -añade Kevin-. Invitaremos a los Reyes a leche, kiwis, turrón y mazapán.\n-¡Sí, sí! Nos haremos una foto juntos y se la enseñaremos a todo el mundo -dice Yolanda.\nEntonces, el papá de los niños, que está escuchando la conversación, les dice:\n-Chicos, os recuerdo que si los Reyes ven luz, pasarán de largo. Es mejor que os vayáis ya a dormir.\n-¡Papá, deja que nos quedemos! -le ruega Alexia.\nY allí se quedan. A oscuras, eso sí.\nLa noche es tan larga que Alexia, Yolanda y Kevin no pueden aguantar despiertos y se duermen en el sofá.\nEntonces llegan los Reyes, dejan los juguetes en el salón, comen, beben y... ¡se marchan sin hacer ruido!",
+                quiz: [{q:"¿De dónde volvían?", o:["Del colegio","De la cabalgata","Del parque"], c:1}, {q:"¿Qué traían?", o:["Caramelos","Juguetes","Carbón"], c:0}, {q:"¿Qué querían hacer?", o:["Dormir","Esperar a los Reyes","Jugar"], c:1}, {q:"¿Qué les dijo papá?", o:["Que se durmieran","Que hicieran fotos","Que comieran"], c:0}, {q:"¿Vieron a los Reyes?", o:["Sí","No, se durmieron","Solo uno"], c:1}]
+            },
+            { 
+                id: 15, title: "Priscila", color: "#2E7D32", icons: ["🐸", "👑", "📜"],
+                desc: "Priscila es una rana inteligente que no quiere casarse con nadie.",
+                text: "Érase una vez una ranita llamada Priscila, que era muy inteligente y divertida. Todos los sapos querían casarse con ella.\n-Yo no quiero casarme -les decía Priscila-. Soy feliz así.\nUn día llegó Plum, el príncipe de los arroyos.\n-Priscila, ¿quieres ser mi esposa? -preguntó el príncipe.\n-Lo siento -contestó Priscila-, pero no quiero casarme con nadie.\n-¡Pero soy un príncipe, sé chino y peluquería! -insistió Plum-. ¡Te prometo amor eterno!\n-¡Que no quiero casarme! -protestó Priscila.\nPlum, que no comprendía el rechazo, se puso a llorar.\n-No llores, por favor -le dijo la ranita.\n-Es urgente que me case -sollozó el príncipe-. Tengo muchos problemas: hay demasiados peces, serpientes... ¡y ahora ha llegado una familia de castores! Yo solo no puedo con todo.\n-Eso tiene fácil solución -dijo Priscila-. No hace falta casarse. Puedo ser tu consejera y ayudarte a resolver los problemas.\n-¿Harías eso por mí? -preguntó Plum sorprendido.\n-Sí. Pero solo puedo ayudarte dos días en semana.\n-¡Perfecto! Mañana temprano te espero en mi palacio.",
+                quiz: [{q:"¿Quién era Priscila?", o:["Una princesa","Una ranita","Una sapa"], c:1}, {q:"¿Qué quería Plum?", o:["Jugar","Casarse","Cantar"], c:1}, {q:"¿Qué sabía hacer Plum?", o:["Chino y peluquería","Cocinar","Bailar"], c:0}, {q:"¿Qué problemas tenía Plum?", o:["Muchos animales en el arroyo","Tenía hambre","Estaba solo"], c:0}, {q:"¿En qué quedaron?", o:["Se casaron","Priscila sería consejera","Se enfadaron"], c:1}]
+            },
+            { 
+                id: 16, title: "La biblioteca", color: "#33691E", icons: ["🦓", "📚", "🦒"],
+                desc: "¿Libros en la selva? La cebra Blanca tiene historias para todos.",
+                text: "La cebra Blanca ha abierto una biblioteca en la selva. La biblioteca está junto al río, bajo la arboleda.\nLos animales están asombrados y se preguntan para qué sirve una biblioteca.\n-Para almacenar libros y leerlos -explica Blanca.\n-Yo casi siempre estoy bajo el agua -dice Blas, el hipopótamo-. ¿Cómo voy a leer?\n-Te prestaré libros de plástico, que son impermeables -asegura Blanca.\n-¿Hay libros gigantes? -pregunta la elefanta Brenda-. Quiero usar uno como sombrero.\n-¡Qué bruta eres! -responde Blanca enfadada-. ¡Los libros se leen!\nUna familia de monos pide libros de humor. Blanca les da libros con paracaídas, por si se les caen al reírse.\nEl leopardo quiere un libro que le haga temblar de miedo. Blanca le da uno de brujas.\nBrígida, la jirafa, susurra triste: -Es que... yo no sé leer...\n-Yo te enseñaré -dice Blanca-. Mientras tanto, toma estos libros habladores y unos auriculares.\nAl anochecer, Blanca cierra. Pero entonces llegan los animales nocturnos... ¡Queremos leer! -le piden.",
+                quiz: [{q:"¿Quién abrió la biblioteca?", o:["La cebra Blanca","El león","La jirafa"], c:0}, {q:"¿Qué quería la elefanta?", o:["Leer","Un sombrero","Comer"], c:1}, {q:"¿Qué le dio al hipopótamo?", o:["Libros de papel","Libros de plástico","Revistas"], c:1}, {q:"¿Qué problema tenía la jirafa?", o:["No sabía leer","No veía","Era sorda"], c:0}, {q:"¿Quiénes llegaron de noche?", o:["Los niños","Los animales nocturnos","Nadie"], c:1}]
+            },
+            { 
+                id: 17, title: "Clementina", color: "#E65100", icons: ["🐔", "🚲", "🎾"],
+                desc: "¡Conoce a Clementina! La gallina que va en bici y toca el clarinete.",
+                text: "Hace unos meses, mi tío Cristóbal y mi tía Claudia hicieron un maravilloso crucero. En la isla de Creta compraron... ¡una gallina!\nSe llama Clementina y es una gallina muy rarita. Lleva una chaqueta de cuero con cremallera y masca chicle de menta. Además, hace cosas increíbles: baila claqué, escribe poemas en las paredes del gallinero, colecciona cromos de fútbol y... ¡preside un club de tenis!\nLas demás aves la critican. -Es tan cursi que solo sabe cantar ópera y pone los huevos en un tarro de cristal -dice Clotilde, la gallina.\n-Es tan creída que no duerme en el palo del gallinero, sino en un cojín de colores claros -dice el pato Cristino.\nYo creo que le tienen envidia porque Clementina es la preferida. Mi tía le enseña a tocar el clarinete y mi tío se la lleva a dar paseos en bicicleta. ¡Es un as del ciclismo!\nAnoche mi tío me contó un secreto: ha inscrito a Clementina en un concurso de la televisión.",
+                quiz: [{q:"¿Qué animal es Clementina?", o:["Una gallina","Un pato","Una oca"], c:0}, {q:"¿Qué ropa lleva?", o:["Vestido","Chaqueta de cuero","Bufanda"], c:1}, {q:"¿Qué deporte hace?", o:["Fútbol","Tenis y Ciclismo","Natación"], c:1}, {q:"¿Dónde duerme?", o:["En el palo","En el suelo","En un cojín"], c:2}, {q:"¿Dónde la han inscrito?", o:["En el colegio","En un concurso de TV","En el circo"], c:1}]
+            },
+            { 
+                id: 18, title: "La grulla Gladis", color: "#0097A7", icons: ["🦢", "🥣", "🦗"],
+                desc: "Gladis tiene las patas muy cortas... pero un gran apetito.",
+                text: "Gladis, la joven grulla, tenía un gracioso cuerpo de grulla, alas grandes... pero unas patas ¡de perdiz! Eran unas patas muy cortas, muy cortas...\nLas patas de Gladis eran tan cortas que no podía pescar cangrejos.\n-¡No vengas, minigrulla! ¡Nos espantas la pesca! -le gritaban con crueldad sus compañeras.\nCrispín, un pájaro carpintero muy simpático, le dijo un día: -Yo te haré unos largos zancos.\n¡Qué gran idea! Gladis se colocó los zancos de madera. Pero no supo mantener el equilibrio, cayó de cabeza en el agua y los cangrejos huyeron. ¡Lo único que Gladis pescó fue una gripe!\nEntonces, Gladis fue a consultar a la lechuza Gloria. -Pesca desde un globo. Así no te mojarás.\nPero esta vez, ¡pescó un gran mareo!\n-¡Ay, ay! ¡Qué hambre tengo! -gemía Gladis.\nPoco después pasó por allí Curro, un alegre grillo.\n-Sécate las lágrimas, grulla. Te invito a comer. Soy un gran cocinero.\nY Gladis tomó una deliciosa crema de flores y arroz.",
+                quiz: [{q:"¿Qué tenía corto Gladis?", o:["El pico","Las alas","Las patas"], c:2}, {q:"¿Qué le construyó el carpintero?", o:["Un barco","Unos zancos","Una casa"], c:1}, {q:"¿Qué pescó al caerse?", o:["Un pez","Una bota","Una gripe"], c:2}, {q:"¿Qué le pasó con el globo?", o:["Se mareó","Voló alto","Se rompió"], c:0}, {q:"¿Qué comió al final?", o:["Cangrejos","Crema de flores","Gusanitos"], c:1}]
+            },
+            { 
+                id: 19, title: "El príncipe Florián", color: "#C2185B", icons: ["🤴", "🍓", "🌺"],
+                desc: "Un príncipe con piel verde que huele a fresas. ¡Qué curioso!",
+                text: "El rey Frasquito III era un gran amante de la jardinería. Su hijo, el príncipe Florián, siempre olía a fresas y tenía la piel de color verdoso.\nUn día, Florián enfermó. Tenía fiebre y temblores. ¡Estaba muy mustio! Ningún médico sabía curarle.\nEntonces apareció el mago Fructuoso Bambú.\n-El príncipe necesita fortalecerse -dijo el mago.\nEl mago preparó una pócima y recitó un conjuro: ¡Ojos de lagarto flaco! ¡Escamas de caimán! ¡Fritada de arañas y fresco champán! ¡Fru, fru, fru!\nLuego, plantó a Florián en una maceta, lo regó y... ¡el príncipe floreció!\nFlorián sanó por completo, pero ahora tenía la cabeza cubierta de pétalos rojos.\nAl rey no le gustaba mucho ese aspecto, así que le compró un sombrero para tapar las flores.",
+                quiz: [{q:"¿A qué olía Florián?", o:["A queso","A fresas","A rosas"], c:1}, {q:"¿De qué color tenía la piel?", o:["Azul","Verdosa","Roja"], c:1}, {q:"¿Quién lo curó?", o:["Un médico","El mago Fructuoso","Su papá"], c:1}, {q:"¿Dónde lo plantaron?", o:["En el jardín","En una maceta","En el bosque"], c:1}, {q:"¿Qué le salió en la cabeza?", o:["Pelo","Cuernos","Pétalos rojos"], c:2}]
+            },
+            { 
+                id: 20, title: "El huevo misterioso", color: "#5D4037", icons: ["🥚", "🦖", "🚜"],
+                desc: "¡Recórcholis! Han encontrado un huevo enorme en la huerta.",
+                text: "Mis padrinos viven en el campo.\nMi madrina Trudi es pintora y mi padrino Andrés es hortelano.\nUn día, Andrés desenterró un huevo enorme y duro como una piedra.\n-¡Recórcholis! -exclamó mi madrina.\n-¡Repámpanos! -dijo mi padrino.\n-¡Rayos y truenos! -añadí yo.\nEl huevo pesaba ¡quince kilos! Era de color gris triste. ¿Sería de avestruz? ¿O de dinosaurio?\nDecidimos poner el huevo en la cocina, junto al horno, para que tuviera calorcito.\nPero de madrugada, un ruido nos despertó. El huevo se rompió y de él surgió... ¡un extraño lagarto verde!\nTrudi cogió la fregona y Andrés la escoba. Pero el bicho desplegó unas alitas... ¡y salió volando por la ventana!",
+                quiz: [{q:"¿Qué encontró Andrés?", o:["Un tesoro","Un huevo enorme","Una piedra"], c:1}, {q:"¿Cuánto pesaba?", o:["1 kilo","15 kilos","100 kilos"], c:1}, {q:"¿Dónde lo pusieron?", o:["En la nevera","Junto al horno","En el jardín"], c:1}, {q:"¿Qué salió del huevo?", o:["Un pollito","Un lagarto con alas","Un dragón"], c:1}, {q:"¿Qué hizo el bicho?", o:["Se quedó","Salió volando","Mordió"], c:1}]
+            }
+        ];
+
+        /* --- LÓGICA DE LA APP --- */
+        const menuView = document.getElementById('menu-view');
+        const gameView = document.getElementById('game-view');
+        const grid = document.getElementById('grid-container');
+        
+        let currentStory = null;
+        let qIndex = 0;
+        let score = 0;
+
+        // 1. GENERAR MENÚ
+        DB.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.borderColor = item.color;
+            card.innerHTML = `
+                <div class="card-num" style="background:${item.color}">${item.id}</div>
+                <div class="card-icon">${item.icons[0]}</div>
+                <div class="card-title" style="color:${item.color}">${item.title}</div>
+            `;
+            card.onclick = () => launchStory(item);
+            grid.appendChild(card);
+        });
+
+        // 2. LANZAR HISTORIA
+        function launchStory(data) {
+            currentStory = data;
+            
+            // Diseño temático
+            gameView.style.borderColor = data.color;
+            document.querySelector('#screen-reading .reading-box').style.borderColor = data.color;
+            
+            // Portada
+            document.getElementById('intro-title').innerText = data.title;
+            document.getElementById('intro-title').style.color = data.color;
+            document.getElementById('intro-desc').innerText = data.desc;
+            document.getElementById('badge-curso').style.backgroundColor = data.color;
+            document.querySelector('.author-text').style.borderColor = data.color;
+            document.querySelector('.author-text').style.backgroundColor = data.color;
+
+            // Iconos animados
+            const iconsDiv = document.getElementById('intro-icons');
+            iconsDiv.innerHTML = '';
+            data.icons.forEach(icon => {
+                let i = document.createElement('div');
+                i.className = 'hero-icon';
+                i.innerText = icon;
+                iconsDiv.appendChild(i);
+            });
+
+            // Botones
+            const btns = document.querySelectorAll('#btn-start, #btn-quiz, #btn-menu-back');
+            btns.forEach(b => b.style.backgroundColor = data.color);
+
+            // Texto
+            document.getElementById('story-text').innerText = data.text;
+
+            // Navegación
+            menuView.style.display = 'none';
+            gameView.style.display = 'block';
+            nextScreen('screen-intro');
+        }
+
+        function nextScreen(id) {
+            stopAudio();
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function showMenu() {
+            stopAudio();
+            gameView.style.display = 'none';
+            menuView.style.display = 'block';
+        }
+
+        // 3. AUDIO
+        function playAudio() {
+            stopAudio();
+            const utter = new SpeechSynthesisUtterance(currentStory.text);
+            utter.lang = 'es-ES';
+            utter.rate = 0.9;
+            window.speechSynthesis.speak(utter);
+        }
+
+        function stopAudio() {
+            window.speechSynthesis.cancel();
+        }
+
+        // 4. JUEGO
+        function startQuiz() {
+            stopAudio();
+            qIndex = 0; score = 0;
+            nextScreen('screen-quiz');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = currentStory.quiz[qIndex];
+            document.getElementById('q-text').innerText = (qIndex + 1) + ". " + q.q;
+            document.getElementById('feedback').innerText = "";
+            document.getElementById('p-bar').style.width = ((qIndex / 5) * 100) + "%";
+            
+            const cont = document.getElementById('opt-container');
+            cont.innerHTML = '';
+            
+            q.o.forEach((opt, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'opt-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(idx, btn);
+                cont.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(idx, btn) {
+            if(document.getElementById('feedback').innerText !== "") return;
+            const q = currentStory.quiz[qIndex];
+            
+            if(idx === q.c) {
+                btn.classList.add('correct');
+                score++;
+                document.getElementById('feedback').innerText = "¡SÍ! ¡MUY BIEN! 🎉";
+                document.getElementById('feedback').style.color = "#2E7D32";
+                playTone(true);
+            } else {
+                btn.classList.add('wrong');
+                document.querySelectorAll('.opt-btn')[q.c].classList.add('correct');
+                document.getElementById('feedback').innerText = "¡OH NO! 😅";
+                document.getElementById('feedback').style.color = "#C62828";
+                playTone(false);
+            }
+            
+            setTimeout(() => {
+                qIndex++;
+                if(qIndex < 5) loadQuestion();
+                else showEnd();
+            }, 2000);
+        }
+
+        function showEnd() {
+            document.getElementById('p-bar').style.width = "100%";
+            document.getElementById('final-score').innerText = score + " / 5";
+            nextScreen('screen-end');
+            if(score === 5) {
+                startConfetti();
+                playTone(true);
+            }
+        }
+
+        // 5. EXTRAS
+        function playTone(win) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                osc.connect(g); g.connect(ctx.destination);
+                osc.type = win ? 'sine' : 'sawtooth';
+                osc.frequency.setValueAtTime(win ? 600 : 150, ctx.currentTime);
+                g.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
+                osc.start(); osc.stop(ctx.currentTime + 0.3);
+            } catch(e) {}
+        }
+
+        function startConfetti() {
+            const c = document.getElementById('confetti-canvas');
+            const ctx = c.getContext('2d');
+            c.width = document.getElementById('game-view').offsetWidth;
+            c.height = document.getElementById('game-view').offsetHeight;
+            const p = [];
+            for(let i=0; i<60; i++) p.push({
+                x: Math.random()*c.width, y: Math.random()*c.height - c.height,
+                c: [currentStory.color, '#FFD700', '#FFF'][Math.floor(Math.random()*3)],
+                s: Math.random()*5+5, v: Math.random()*3+2
+            });
+            function draw() {
+                ctx.clearRect(0,0,c.width,c.height);
+                p.forEach(k => {
+                    k.y += k.v; if(k.y > c.height) k.y = -10;
+                    ctx.fillStyle = k.c; ctx.beginPath(); ctx.arc(k.x, k.y, k.s, 0, Math.PI*2); ctx.fill();
+                });
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+    </script>
+</body>
+</html>
