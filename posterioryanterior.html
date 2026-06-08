@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Aventura de los Números (1º Primaria)</title>
+    <style>
+        /* Estilos generales para hacerlo súper atractivo */
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #f76b1c 0%, #f9d423 100%); /* Colores cálidos y vibrantes */
+            color: #333;
+            text-align: center;
+        }
+
+        .contenedor {
+            background-color: white;
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+            box-sizing: border-box;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #e74c3c; /* Rojo brillante */
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-juego {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 10px;
+            background-color: #ecf0f1;
+            border-radius: 15px;
+        }
+
+        .pregunta {
+            margin: 30px 0;
+            padding: 20px;
+            border: 5px dashed #3498db; /* Borde divertido */
+            border-radius: 20px;
+            background-color: #fffde7; /* Amarillo muy claro */
+        }
+
+        .numero-central {
+            font-size: 5em;
+            color: #2c3e50; /* Azul oscuro */
+            margin: 10px 0;
+            padding: 10px 20px;
+            background-color: #ffeaa7; /* Fondo para resaltar el número */
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 4px #fab1a0;
+        }
+
+        .opciones-contenedor {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: #3498db; /* Azul */
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 25px;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-grow: 1;
+            min-width: 150px;
+            box-shadow: 0 5px #2980b9;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px #2980b9;
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px #2980b9;
+        }
+        
+        /* Botones de Ayuda (Pista y Guía) */
+        .botones-ayuda {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        #btn-pista, #btn-guia {
+            background-color: #f1c40f; /* Amarillo */
+            color: #333;
+            box-shadow: 0 5px #f39c12;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 10px 20px;
+            min-width: unset;
+        }
+        
+        #btn-pista:hover, #btn-guia:hover {
+            box-shadow: 0 8px #f39c12;
+        }
+        
+        /* Contenedor para mostrar la ayuda */
+        #contenedor-ayuda {
+            margin-top: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            min-height: 40px; /* Para que no salte el contenido */
+            padding: 10px;
+            border-radius: 10px;
+            background-color: #ecf0f1;
+        }
+
+        #contenedor-pista {
+            color: #27ae60;
+        }
+        
+        #contenedor-guia {
+            color: #333;
+            white-space: normal; /* Asegura que el texto se ajuste */
+            line-height: 1.6;
+        }
+
+        /* Colores para feedback */
+        .correcto {
+            background-color: #2ecc71 !important; /* Verde brillante */
+            box-shadow: 0 5px #27ae60 !important;
+        }
+
+        .incorrecto {
+            background-color: #e74c3c !important; /* Rojo brillante */
+            box-shadow: 0 5px #c0392b !important;
+        }
+
+        /* Resaltar el número en la guía */
+        .resaltado {
+            color: #e74c3c; /* Rojo para el número central */
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* Estilo para el confeti (mismo del anterior) */
+        .confeti-contenedor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .confeti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: transparent;
+            border-radius: 50%;
+            opacity: 0;
+            animation: caidaConfeti 3s forwards;
+        }
+
+        @keyframes caidaConfeti {
+            0% { transform: translateY(0) rotate(0); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Estilos del informe final y modal de felicitación (sin cambios grandes) */
+        .informe {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .informe h2 {
+            color: #2980b9;
+            font-size: 2em;
+            border-bottom: 2px solid #2980b9;
+            padding-bottom: 5px;
+        }
+        
+        .informe p {
+            font-size: 1.4em;
+            margin: 10px 0;
+        }
+        
+        .modal {
+            display: none; 
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal-contenido {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 5px solid #2ecc71;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            animation: zoomIn 0.5s;
+        }
+        
+        @keyframes zoomIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-contenido h2 {
+            color: #2ecc71;
+            font-size: 3em;
+            margin-top: 0;
+        }
+        
+        .modal-contenido p {
+            font-size: 1.5em;
+            color: #333;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <h1>✨ ¡La Aventura de los Números! ✨</h1>
+        
+        <div class="info-juego">
+            <span>🌟 Nivel: <span id="nivel-actual">1</span>/3</span>
+            <span>💯 Puntos: <span id="puntos-actuales">0</span></span>
+            <span>❤️ Vidas: <span id="vidas-restantes">3</span></span>
+            <span>❓ Pregunta: <span id="pregunta-numero">1</span>/10</span>
+        </div>
+
+        <div id="juego">
+            <div class="pregunta">
+                <p id="instruccion"></p>
+                <div class="numero-central" id="numero-central">?</div>
+            </div>
+            
+            <div class="opciones-contenedor" id="opciones-contenedor">
+                </div>
+            
+            <div class="botones-ayuda">
+                <button id="btn-pista" onclick="mostrarPista()">⭐ Pista (+/- 1) ⭐</button>
+                <button id="btn-guia" onclick="mostrarGuia()">📚 Guía Numérica 📚</button>
+            </div>
+            <div id="contenedor-ayuda">
+                <span id="contenedor-pista"></span>
+                <span id="contenedor-guia"></span>
+            </div>
+        </div>
+
+        <div id="informe" style="display:none;">
+            <h2>🎉 ¡Informe de Partida! 🎉</h2>
+            <p>✅ Aciertos Totales: <span id="total-aciertos"></span></p>
+            <p>❌ Errores Totales: <span id="total-errores"></span></p>
+            <p>📈 Puntuación Final: <span id="puntuacion-final"></span></p>
+            <p>🎯 Porcentaje de Efectividad: <span id="porcentaje-efectividad"></span></p>
+            <button onclick="reiniciarJuego()">¡Jugar de Nuevo!</button>
+        </div>
+        
+        <div id="fin-juego" style="display:none;">
+            <h2>💔 ¡Fin de la Partida! 💔</h2>
+            <p>¡Oh, no! Te has quedado sin vidas. ¡Pero no pasa nada! Lo has hecho muy bien. Mira tu informe.</p>
+            <button onclick="mostrarInforme()">Ver Informe Final</button>
+        </div>
+    </div>
+    
+    <div class="confeti-contenedor" id="confeti-contenedor"></div>
+    
+    <div id="modal-felicitacion" class="modal">
+      <div class="modal-contenido">
+        <h2>🥳 ¡FELICIDADES! 🥳</h2>
+        <p>¡Has superado el Nivel <span id="nivel-superado"></span>!</p>
+        <p>¡Eres un súper campeón de los números!</p>
+        <button onclick="cerrarModal()">¡A por el siguiente Nivel!</button>
+      </div>
+    </div>
+
+    <script>
+        // --- Variables del Juego ---
+        let puntos = 0;
+        let nivel = 1;
+        let vidas = 3;
+        let preguntaActual = 0;
+        let aciertosTotales = 0;
+        let erroresTotales = 0;
+        let numeroCorrecto;
+        let tipoPregunta; // 'anterior' o 'posterior'
+        let numeroCentralActual; // Para la guía numérica
+
+        // --- Elementos del DOM ---
+        const elemNivel = document.getElementById('nivel-actual');
+        const elemPuntos = document.getElementById('puntos-actuales');
+        const elemVidas = document.getElementById('vidas-restantes');
+        const elemPreguntaNumero = document.getElementById('pregunta-numero');
+        const elemInstruccion = document.getElementById('instruccion');
+        const elemNumeroCentral = document.getElementById('numero-central');
+        const elemOpcionesContenedor = document.getElementById('opciones-contenedor');
+        const elemJuego = document.getElementById('juego');
+        const elemInforme = document.getElementById('informe');
+        const elemFinJuego = document.getElementById('fin-juego');
+        const elemConfetiContenedor = document.getElementById('confeti-contenedor');
+        const elemContenedorPista = document.getElementById('contenedor-pista');
+        const elemContenedorGuia = document.getElementById('contenedor-guia');
+        const elemModal = document.getElementById('modal-felicitacion');
+        const elemLevlSuperado = document.getElementById('nivel-superado');
+        const elemBtnPista = document.getElementById('btn-pista');
+        const elemBtnGuia = document.getElementById('btn-guia');
+
+        // --- Funciones del Juego ---
+
+        // Genera un número aleatorio entre min y max (incluidos)
+        function generarNumero(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        
+        // Muestra el modal de felicitación
+        function mostrarModalFelicitacion(nivelSuperado) {
+            elemJuego.style.display = 'none';
+            elemLevlSuperado.textContent = nivelSuperado;
+            elemModal.style.display = 'block';
+        }
+        
+        // Cierra el modal y carga la siguiente pregunta del nuevo nivel
+        function cerrarModal() {
+            elemModal.style.display = 'none';
+            elemJuego.style.display = 'block';
+            generarPregunta();
+        }
+
+        // Crea la nueva pregunta
+        function generarPregunta() {
+            // Reiniciar estado de la ayuda
+            elemContenedorPista.textContent = '';
+            elemContenedorGuia.textContent = '';
+            elemBtnPista.disabled = false;
+            elemBtnGuia.disabled = false;
+            
+            preguntaActual++;
+            elemPreguntaNumero.textContent = preguntaActual;
+            
+            // Si llegamos a 11 preguntas, pasamos de nivel o terminamos el juego
+            if (preguntaActual > 10) {
+                if (nivel < 3) {
+                    nivel++;
+                    preguntaActual = 1;
+                    elemNivel.textContent = nivel;
+                    elemPreguntaNumero.textContent = 1; 
+                    mostrarModalFelicitacion(nivel - 1); 
+                    return; 
+                } else {
+                    finalizarJuego();
+                    return;
+                }
+            }
+
+            // Seleccionar el número central (evitando que el anterior/posterior se salgan del 1-20)
+            const minNum = 2; // Para que el anterior sea al menos 1
+            const maxNum = 19; // Para que el posterior sea como máximo 20
+            numeroCentralActual = generarNumero(minNum, maxNum); // Guardamos el número central
+            elemNumeroCentral.textContent = numeroCentralActual;
+
+            // Elegir aleatoriamente si preguntar por el 'anterior' o 'posterior'
+            tipoPregunta = Math.random() < 0.5 ? 'anterior' : 'posterior';
+
+            if (tipoPregunta === 'anterior') {
+                numeroCorrecto = numeroCentralActual - 1;
+                elemInstruccion.innerHTML = '¿Cuál es el número **ANTERIOR** a este?';
+            } else {
+                numeroCorrecto = numeroCentralActual + 1;
+                elemInstruccion.innerHTML = '¿Cuál es el número **POSTERIOR** a este?';
+            }
+
+            // Generar 3 opciones (la correcta y 2 incorrectas) y mezclar... (misma lógica anterior)
+            let opciones = [numeroCorrecto];
+            while (opciones.length < 3) {
+                let opcionFalsa = generarNumero(1, 20);
+                if (!opciones.includes(opcionFalsa) && opcionFalsa !== numeroCentralActual) {
+                    opciones.push(opcionFalsa);
+                }
+            }
+
+            opciones.sort(() => Math.random() - 0.5);
+
+            // Mostrar botones
+            elemOpcionesContenedor.innerHTML = '';
+            opciones.forEach(opcion => {
+                const boton = document.createElement('button');
+                boton.textContent = opcion;
+                boton.onclick = () => comprobarRespuesta(opcion, boton);
+                elemOpcionesContenedor.appendChild(boton);
+            });
+        }
+        
+        // Muestra la pista (+1 o -1)
+        function mostrarPista() {
+            // Se deshabilitan ambos contenedores y se usa solo la pista
+            elemContenedorGuia.textContent = '';
+            elemBtnPista.disabled = true; 
+            
+            if (tipoPregunta === 'posterior') {
+                elemContenedorPista.textContent = `Pista: ¡Recuerda, el posterior es el número + 1!`;
+            } else {
+                elemContenedorPista.textContent = `Pista: ¡Recuerda, el anterior es el número - 1!`;
+            }
+        }
+        
+        // Muestra la guía numérica con el número central resaltado
+        function mostrarGuia() {
+            // Se deshabilitan ambos contenedores y se usa solo la guía
+            elemContenedorPista.textContent = '';
+            elemBtnGuia.disabled = true;
+            
+            let guiaHTML = '';
+            for (let i = 1; i <= 20; i++) {
+                if (i === numeroCentralActual) {
+                    // Resaltar el número de la pregunta
+                    guiaHTML += `<span class="resaltado">${i}</span>`;
+                } else {
+                    guiaHTML += `${i}`;
+                }
+                // Añadir coma y espacio excepto en el último número
+                if (i < 20) {
+                    guiaHTML += ', ';
+                }
+            }
+            elemContenedorGuia.innerHTML = guiaHTML;
+        }
+
+        // Comprueba si la respuesta es correcta
+        function comprobarRespuesta(respuesta, boton) {
+            // Deshabilitar todos los botones para evitar doble clic
+            Array.from(elemOpcionesContenedor.children).forEach(btn => btn.disabled = true);
+            elemBtnPista.disabled = true; // Deshabilitar la ayuda al responder
+            elemBtnGuia.disabled = true;
+            
+            const esCorrecta = respuesta === numeroCorrecto;
+
+            if (esCorrecta) {
+                aciertosTotales++;
+                puntos += 10;
+                boton.classList.add('correcto');
+                lanzarConfeti();
+                setTimeout(() => {
+                    boton.classList.remove('correcto');
+                    generarPregunta();
+                }, 1000); 
+            } else {
+                erroresTotales++;
+                puntos -= 5;
+                vidas--;
+                boton.classList.add('incorrecto');
+                elemVidas.textContent = vidas;
+
+                // Mostrar la respuesta correcta
+                Array.from(elemOpcionesContenedor.children).forEach(btn => {
+                    if (parseInt(btn.textContent) === numeroCorrecto) {
+                        btn.classList.add('correcto');
+                    }
+                });
+
+                if (vidas <= 0) {
+                    setTimeout(mostrarFinJuego, 1500);
+                } else {
+                    setTimeout(() => {
+                        Array.from(elemOpcionesContenedor.children).forEach(btn => {
+                            btn.classList.remove('incorrecto', 'correcto');
+                        });
+                        generarPregunta();
+                    }, 1500); 
+                }
+            }
+
+            // Actualizar la puntuación
+            elemPuntos.textContent = puntos;
+        }
+        
+        // Efecto de confeti (misma lógica anterior)
+        function lanzarConfeti() {
+            const numConfeti = 30;
+            const colores = ['#f9d423', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6'];
+
+            for (let i = 0; i < numConfeti; i++) {
+                const confeti = document.createElement('div');
+                confeti.classList.add('confeti');
+                
+                confeti.style.backgroundColor = colores[generarNumero(0, colores.length - 1)];
+                confeti.style.left = `${generarNumero(0, 100)}vw`;
+                confeti.style.top = `${generarNumero(-50, -10)}px`; 
+                confeti.style.animationDuration = `${generarNumero(2, 4)}s`;
+                confeti.style.animationDelay = `${i * 0.05}s`;
+                
+                elemConfetiContenedor.appendChild(confeti);
+                
+                confeti.onanimationend = () => confeti.remove();
+            }
+        }
+        
+        // Funciones de Finalización e Informe (misma lógica anterior)
+        function mostrarFinJuego() {
+            elemJuego.style.display = 'none';
+            elemFinJuego.style.display = 'block';
+        }
+
+        function finalizarJuego() {
+            elemJuego.style.display = 'none';
+            mostrarInforme();
+        }
+
+        function mostrarInforme() {
+            elemFinJuego.style.display = 'none';
+            elemJuego.style.display = 'none';
+            elemInforme.style.display = 'block';
+            
+            const totalPreguntas = aciertosTotales + erroresTotales;
+            const efectividad = totalPreguntas > 0 ? ((aciertosTotales / totalPreguntas) * 100).toFixed(1) : 0;
+            
+            document.getElementById('total-aciertos').textContent = aciertosTotales;
+            document.getElementById('total-errores').textContent = erroresTotales;
+            document.getElementById('puntuacion-final').textContent = puntos;
+            document.getElementById('porcentaje-efectividad').textContent = `${efectividad}%`;
+        }
+
+        // Reinicia el juego
+        function reiniciarJuego() {
+            puntos = 0;
+            nivel = 1;
+            vidas = 3;
+            preguntaActual = 0;
+            aciertosTotales = 0;
+            erroresTotales = 0;
+
+            elemNivel.textContent = nivel;
+            elemPuntos.textContent = puntos;
+            elemVidas.textContent = vidas;
+            
+            elemJuego.style.display = 'block';
+            elemInforme.style.display = 'none';
+            elemFinJuego.style.display = 'none';
+            elemModal.style.display = 'none';
+            
+            generarPregunta();
+        }
+
+        // --- Inicio del Juego ---
+        reiniciarJuego();
+    </script>
+</body>
+</html>

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego: Par o Impar - 1º Primaria</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle, #ffecd2 0%, #fcb69f 100%);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #333;
+        }
+
+        .pantalla {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .activa { display: flex; }
+
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 4rem;
+            color: #ff5e5e;
+            text-shadow: 3px 3px 0px #fff, 5px 5px 0px #ffbd5e;
+            margin: 10px 0;
+            line-height: 1.1;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: #4a4e69;
+            background: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 4px dashed #ffbd5e;
+            margin-bottom: 20px;
+        }
+
+        .iconos-mates { font-size: 3rem; margin: 15px 0; letter-spacing: 15px; }
+
+        button {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.5rem;
+            padding: 15px 30px;
+            margin: 10px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #cc4a4a;
+            transition: all 0.2s;
+        }
+
+        button:active { transform: translateY(8px); box-shadow: 0 0 0 #cc4a4a; }
+
+        .btn-modo { background-color: #ffd166; color: #d62828; box-shadow: 0 8px 0 #cc9b33; }
+        .btn-modo.seleccionado { background-color: #06d6a0; color: white; box-shadow: 0 8px 0 #04a57b; transform: scale(1.1); }
+        .btn-comenzar { background-color: #ef476f; color: white; box-shadow: 0 8px 0 #b53554; font-size: 2rem; margin-top: 20px;}
+        .btn-accion { background-color: #118ab2; color: white; box-shadow: 0 8px 0 #0d6b8a; }
+        .btn-siguiente { background-color: #9d4edd; color: white; font-size: 2rem; box-shadow: 0 8px 0 #5a189a; margin-top: 20px; display: none; animation: latido 1s infinite; }
+        
+        .btn-opcion-par { background-color: #06d6a0; color: white; font-size: 2.5rem; width: 200px; box-shadow: 0 8px 0 #04a57b; }
+        .btn-opcion-impar { background-color: #ee6c4d; color: white; font-size: 2.5rem; width: 200px; box-shadow: 0 8px 0 #ba5239; }
+
+        @keyframes latido {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Lotería */
+        .bolas-contenedor { display: flex; gap: 20px; margin: 30px 0; }
+        .bola {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #fff 30%, #ddd 100%);
+            border: 5px solid #333;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5rem;
+            font-weight: bold;
+            font-family: 'Fredoka One', cursive;
+            color: #333;
+            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.2), 5px 5px 15px rgba(0,0,0,0.3);
+        }
+        .girando { animation: vibrar 0.1s infinite; color: #ccc; }
+
+        @keyframes vibrar {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        /* Resultados */
+        .caja-nota {
+            background: white;
+            border: 8px solid #ffd166;
+            border-radius: 30px;
+            padding: 30px;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .nota-gigante {
+            font-size: 8rem;
+            font-family: 'Fredoka One', cursive;
+            margin: -20px 0;
+            text-shadow: 4px 4px 0px #ccc;
+        }
+        .texto-calificacion { font-size: 3rem; font-weight: bold; font-family: 'Fredoka One', cursive; margin-top: 10px;}
+        
+        #marcador { position: absolute; top: 20px; right: 20px; font-size: 1.5rem; background: white; padding: 10px; border-radius: 15px; border: 3px solid #333;}
+        
+        /* Botón Bombilla y Modal */
+        #btn-bombilla {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 2.5rem;
+            background: #fff3b0;
+            border: 3px solid #e09f3e;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #e09f3e;
+            display: none;
+            padding: 0;
+            margin: 0;
+        }
+        #btn-bombilla:active { transform: translateY(6px); box-shadow: 0 0 0 #e09f3e; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-contenido {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            border: 5px solid #ffd166;
+            max-width: 80%;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        /* Confeti */
+        .confeti {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: #f00;
+            top: -20px;
+            z-index: 999;
+            animation: caer linear forwards;
+        }
+        @keyframes caer {
+            to { transform: translateY(110vh) rotate(720deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="pantalla-inicio" class="pantalla activa">
+        <h1>PAR o IMPAR</h1>
+        <h2>1º Educación Primaria - Matemáticas</h2>
+        <div class="iconos-mates">➕ 🔢 📐 ➖</div>
+        
+        <div style="margin: 20px 0;">
+            <button id="btn-juego" class="btn-modo seleccionado" onclick="seleccionarModo('juego')">🎮 MODO JUEGO</button>
+            <button id="btn-eval" class="btn-modo" onclick="seleccionarModo('evaluacion')">📝 MODO EVALUACIÓN</button>
+        </div>
+
+        <button class="btn-comenzar" onclick="irAExplicacion()">🚀 ¡COMENZAR!</button>
+
+        <div style="position: absolute; bottom: 10px; font-weight: bold; background: rgba(255,255,255,0.7); padding: 5px 15px; border-radius: 10px;">
+            Elaborado por Carlos Garrido con IA Gemini
+        </div>
+    </div>
+
+    <div id="pantalla-explicacion" class="pantalla">
+        <h1 style="font-size: 3rem;">¿Qué son los números pares e impares?</h1>
+        <p style="font-size: 1.8rem; max-width: 800px; background: white; padding: 20px; border-radius: 15px; border: 3px solid #118ab2;">
+            ¡Fíjate siempre en el <strong>ÚLTIMO NÚMERO</strong>!<br><br>
+            Si termina en <strong>0, 2, 4, 6, u 8</strong>, ¡es <strong>PAR</strong> y tienen pareja!<br>
+            Si termina en <strong>1, 3, 5, 7, o 9</strong>, ¡es <strong>IMPAR</strong> y uno se queda solo!
+        </p>
+
+        <div style="display: flex; gap: 20px; margin: 20px 0;">
+            <div style="background: white; padding: 20px; border-radius: 15px; border: 4px solid #118ab2; font-size: 1.5rem;">
+                <div style="font-size: 3rem; font-weight: bold; color: #ef476f;">12</div>
+                Termina en 2<br><b>¡Es PAR!</b> ✌️
+            </div>
+            <div style="background: white; padding: 20px; border-radius: 15px; border: 4px solid #118ab2; font-size: 1.5rem;">
+                <div style="font-size: 3rem; font-weight: bold; color: #ef476f;">7</div>
+                Es el 7<br><b>¡Es IMPAR!</b> ☝️
+            </div>
+            <div style="background: white; padding: 20px; border-radius: 15px; border: 4px solid #118ab2; font-size: 1.5rem;">
+                <div style="font-size: 3rem; font-weight: bold; color: #ef476f;">25</div>
+                Termina en 5<br><b>¡Es IMPAR!</b> 🖐️
+            </div>
+        </div>
+
+        <button class="btn-accion" style="font-size: 2rem;" onclick="iniciarPartida()">⏭️ Omitir / Jugar</button>
+    </div>
+
+    <div id="pantalla-juego" class="pantalla">
+        <button id="btn-bombilla" onclick="abrirPista()">💡</button>
+        <div id="marcador">Pregunta: <span id="num-pregunta">1</span>/<span id="total-preguntas">10</span></div>
+        <h1 style="font-size: 3rem; color: #118ab2;">¡Sorteo de números!</h1>
+        
+        <div class="bolas-contenedor">
+            <div>
+                <h3 style="margin: 0; color: #555;">Decenas</h3>
+                <div id="bola-decenas" class="bola">0</div>
+            </div>
+            <div>
+                <h3 style="margin: 0; color: #555;">Unidades</h3>
+                <div id="bola-unidades" class="bola">0</div>
+            </div>
+        </div>
+
+        <h2 id="instruccion-juego" style="display:none; border: none; background: transparent; font-size: 2.5rem;">¿Es PAR o IMPAR?</h2>
+
+        <div id="botones-respuesta" style="display: none; gap: 20px;">
+            <button class="btn-opcion-par" onclick="comprobarRespuesta('par')">PAR</button>
+            <button class="btn-opcion-impar" onclick="comprobarRespuesta('impar')">IMPAR</button>
+        </div>
+
+        <button id="btn-siguiente" class="btn-siguiente" onclick="avanzarTurno()">Siguiente ➡️</button>
+    </div>
+
+    <div id="modal-pista" class="modal">
+        <div class="modal-contenido">
+            <h2>💡 ¡Recuerda!</h2>
+            <p style="font-size: 1.8rem;">
+                Termina en <strong>0, 2, 4, 6, 8</strong> ➡️ <strong>PAR</strong><br><br>
+                Termina en <strong>1, 3, 5, 7, 9</strong> ➡️ <strong>IMPAR</strong>
+            </p>
+            <button class="btn-accion" onclick="cerrarPista()">¡Entendido!</button>
+        </div>
+    </div>
+
+    <div id="pantalla-resultado" class="pantalla">
+        <h1>¡Completado!</h1>
+        <div class="caja-nota">
+            <div id="nota-gigante" class="nota-gigante">10</div>
+            <div id="texto-calificacion" class="texto-calificacion" style="color: #06d6a0;">SOBRESALIENTE</div>
+        </div>
+        <button class="btn-accion" style="font-size: 2rem;" onclick="volverAlMenu()">🏠 Volver al Menú</button>
+    </div>
+
+    <script>
+        let modoActual = 'juego';
+        let totalPreguntas = 30;
+        let preguntaActual = 1;
+        let aciertos = 0;
+        let numeroSorteado = 0;
+        let permitiendoRespuesta = false;
+        
+        // Contexto de Audio para el sonido del sorteo
+        let audioCtx;
+
+        function inicializarAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Crear sonido de "clic" mecánico para el bombo
+        function reproducirSonidoBombo() {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            let osc = audioCtx.createOscillator();
+            let gainNode = audioCtx.createGain();
+            
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime); // Tono bajo tipo percusión
+            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.05);
+            
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+
+        function mostrarPantalla(id) {
+            document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+            document.getElementById(id).classList.add('activa');
+        }
+
+        function seleccionarModo(modo) {
+            modoActual = modo;
+            totalPreguntas = (modo === 'juego') ? 30 : 10;
+            document.getElementById('btn-juego').classList.remove('seleccionado');
+            document.getElementById('btn-eval').classList.remove('seleccionado');
+            if (modo === 'juego') document.getElementById('btn-juego').classList.add('seleccionado');
+            if (modo === 'evaluacion') document.getElementById('btn-eval').classList.add('seleccionado');
+        }
+
+        function hablar(texto, callback) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                let mensaje = new SpeechSynthesisUtterance(texto);
+                mensaje.lang = 'es-ES';
+                mensaje.rate = 0.9;
+                if(callback) mensaje.onend = callback;
+                window.speechSynthesis.speak(mensaje);
+            } else {
+                if(callback) callback();
+            }
+        }
+
+        function irAExplicacion() {
+            inicializarAudio(); // Iniciar contexto de audio al primer clic del usuario
+            mostrarPantalla('pantalla-explicacion');
+            let textoExplicacion = "¡Hola! Vamos a aprender a diferenciar los números. Fíjate siempre en el último número. Si termina en 0, 2, 4, 6 u 8, es par y tienen pareja. Si termina en 1, 3, 5, 7 o 9, es impar y uno se queda solo. Por ejemplo, el doce termina en 2, ¡es par! El siete, ¡es impar!. Puedes darle a omitir para empezar a jugar.";
+            hablar(textoExplicacion);
+        }
+
+        function iniciarPartida() {
+            window.speechSynthesis.cancel();
+            preguntaActual = 1;
+            aciertos = 0;
+            document.getElementById('total-preguntas').innerText = totalPreguntas;
+            
+            // Mostrar u ocultar la bombilla según el modo
+            document.getElementById('btn-bombilla').style.display = (modoActual === 'juego') ? 'flex' : 'none';
+            
+            mostrarPantalla('pantalla-juego');
+            siguientePregunta();
+        }
+
+        function siguientePregunta() {
+            permitiendoRespuesta = false;
+            document.getElementById('botones-respuesta').style.display = 'none';
+            document.getElementById('btn-siguiente').style.display = 'none';
+            document.getElementById('instruccion-juego').style.display = 'none';
+            document.getElementById('num-pregunta').innerText = preguntaActual;
+
+            let bolaD = document.getElementById('bola-decenas');
+            let bolaU = document.getElementById('bola-unidades');
+            
+            bolaD.classList.add('girando');
+            bolaU.classList.add('girando');
+
+            numeroSorteado = Math.floor(Math.random() * 99) + 1;
+            let decenas = Math.floor(numeroSorteado / 10);
+            let unidades = numeroSorteado % 10;
+
+            let contador = 0;
+            let intervalo = setInterval(() => {
+                reproducirSonidoBombo(); // Suena la carraca
+                bolaD.innerText = Math.floor(Math.random() * 10);
+                bolaU.innerText = Math.floor(Math.random() * 10);
+                contador++;
+
+                if (contador > 20) { // 2 segundos de giro
+                    clearInterval(intervalo);
+                    bolaD.classList.remove('girando');
+                    bolaU.classList.remove('girando');
+                    
+                    bolaD.innerText = decenas === 0 ? '' : decenas;
+                    bolaU.innerText = unidades;
+
+                    hablar("Ha salido el número " + numeroSorteado + ". ¿Es par o impar?", () => {
+                        document.getElementById('instruccion-juego').style.display = 'block';
+                        document.getElementById('botones-respuesta').style.display = 'flex';
+                        permitiendoRespuesta = true;
+                    });
+                }
+            }, 100); // Velocidad del giro
+        }
+
+        function comprobarRespuesta(respuestaAlumno) {
+            if (!permitiendoRespuesta) return;
+            permitiendoRespuesta = false;
+            
+            document.getElementById('botones-respuesta').style.display = 'none'; // Ocultar botones
+            document.getElementById('btn-siguiente').style.display = 'block'; // Mostrar botón Siguiente
+
+            let esPar = (numeroSorteado % 2 === 0);
+            let respuestaCorrecta = esPar ? 'par' : 'impar';
+            
+            if (respuestaAlumno === respuestaCorrecta) {
+                aciertos++;
+                hablar("¡Muy bien! ¡Correcto!");
+            } else {
+                hablar("¡Oh, vaya! Era " + respuestaCorrecta);
+            }
+        }
+
+        function avanzarTurno() {
+            window.speechSynthesis.cancel();
+            if (preguntaActual < totalPreguntas) {
+                preguntaActual++;
+                siguientePregunta();
+            } else {
+                mostrarResultados();
+            }
+        }
+
+        // Lógica de la pista (Bombilla)
+        function abrirPista() {
+            document.getElementById('modal-pista').style.display = 'flex';
+            hablar("Recuerda. Si termina en 0, 2, 4, 6, u 8, es par. Si termina en 1, 3, 5, 7, o 9, es impar.");
+        }
+
+        function cerrarPista() {
+            window.speechSynthesis.cancel();
+            document.getElementById('modal-pista').style.display = 'none';
+        }
+
+        // Lógica de Confeti
+        function lanzarConfeti() {
+            const colores = ['#ef476f', '#ffd166', '#06d6a0', '#118ab2', '#073b4c'];
+            for(let i=0; i<150; i++) {
+                let confeti = document.createElement('div');
+                confeti.classList.add('confeti');
+                confeti.style.left = Math.random() * 100 + 'vw';
+                confeti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                confeti.style.backgroundColor = colores[Math.floor(Math.random() * colores.length)];
+                // Retraso aleatorio para que no caigan todos a la vez
+                confeti.style.animationDelay = Math.random() * 2 + 's';
+                document.body.appendChild(confeti);
+                
+                // Limpiar el DOM después de la animación
+                setTimeout(() => confeti.remove(), 6000);
+            }
+        }
+
+        function mostrarResultados() {
+            mostrarPantalla('pantalla-resultado');
+            
+            let nota = (aciertos / totalPreguntas) * 10;
+            let notaDecimal = nota.toFixed(1);
+            if(notaDecimal.endsWith(".0")) notaDecimal = nota.toFixed(0); // Quitar el .0 si es exacto
+            
+            let calificacion = "";
+            let color = "";
+
+            if (nota < 5) {
+                calificacion = "INSUFICIENTE"; color = "#ee6c4d";
+            } else if (nota < 6) {
+                calificacion = "SUFICIENTE"; color = "#f4a261";
+                lanzarConfeti();
+            } else if (nota < 7) {
+                calificacion = "BIEN"; color = "#e9c46a";
+                lanzarConfeti();
+            } else if (nota < 9) {
+                calificacion = "NOTABLE"; color = "#2a9d8f";
+                lanzarConfeti();
+            } else {
+                calificacion = "SOBRESALIENTE"; color = "#06d6a0";
+                lanzarConfeti();
+            }
+
+            let notaNum = document.getElementById('nota-gigante');
+            notaNum.innerText = notaDecimal;
+            notaNum.style.color = color;
+            
+            let textoCal = document.getElementById('texto-calificacion');
+            textoCal.innerText = calificacion;
+            textoCal.style.color = color;
+
+            hablar(`¡Juego terminado! Tu calificación es ${calificacion}. Tienes un ${notaDecimal}.`);
+        }
+
+        function volverAlMenu() {
+            window.speechSynthesis.cancel();
+            // Borrar confetis si alguien vuelve al menú antes de que terminen de caer
+            document.querySelectorAll('.confeti').forEach(c => c.remove());
+            mostrarPantalla('pantalla-inicio');
+        }
+    </script>
+</body>
+</html>

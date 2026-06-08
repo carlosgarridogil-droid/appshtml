@@ -243,7 +243,6 @@
 
         <!-- 1º PRIMARIA -->
         <div id="1-primaria" class="tab-content active">
-            <!-- Orden del menú: Lengua, Matemáticas, Conocimiento del Medio -->
             <nav class="sub-nav-tabs">
                 <button class="sub-tab-btn active" onclick="openSubTab(event, '1-primaria', '1-lengua')">LENGUA</button>
                 <button class="sub-tab-btn" onclick="openSubTab(event, '1-primaria', '1-mate')">MATEMÁTICAS</button>
@@ -288,6 +287,20 @@
                         <h3>Aventura numérica</h3>
                         <p>Numeración: Familias del 10 al 90</p>
                         <a href="aventuranumerica.html" target="_blank" class="btn-open btn-red">ACCEDER AL RECURSO</a>
+                    </div>
+
+                    <!-- Nueva Ficha: Anterior y posterior -->
+                    <div class="card card-red">
+                        <h3>Anterior y posterior</h3>
+                        <p>Numeración</p>
+                        <a href="posterioryanterior.html" target="_blank" class="btn-open btn-red">ACCEDER AL RECURSO</a>
+                    </div>
+
+                    <!-- Nueva Ficha: Par e Impar -->
+                    <div class="card card-red">
+                        <h3>Par e Impar</h3>
+                        <p>Numeración</p>
+                        <a href="pareimpar1.html" target="_blank" class="btn-open btn-red">ACCEDER AL RECURSO</a>
                     </div>
 
                     <div class="card card-red">
@@ -359,7 +372,7 @@
                     </div>
                 </div>
             </div>
-            <div id="3-cono" class="sub-tab-content"><div class="section-info-edu">Area de Conocimiento del Medio - 3º de Primaria.</div><div class="grid"><div class="card card-green"><h3>Bloque de Contenidos</h3><p>Espacio reservado para conocimiento del medio de 3º.</p><a href="#" class="btn-open btn-green">Acceder</a></div></div></div>
+            <div id="3-cono" class="sub-tab-content"><div class="section-info-edu">Área de Conocimiento del Medio - 3º de Primaria.</div><div class="grid"><div class="card card-green"><h3>Bloque de Contenidos</h3><p>Espacio reservado para conocimiento del medio de 3º.</p><a href="#" class="btn-open btn-green">Acceder</a></div></div></div>
         </div>
 
         <!-- 4º PRIMARIA -->
@@ -438,7 +451,6 @@
         var scrollLeft = btn.offsetLeft - (nav.offsetWidth / 2) + (btn.offsetWidth / 2);
         nav.scrollTo({ left: scrollLeft, behavior: 'smooth' });
         
-        // Al cambiar de curso principal, activar por defecto la primera subpestaña (Lengua ahora)
         var parentContainer = document.getElementById(tabName);
         var firstSubBtn = parentContainer.querySelector('.sub-tab-btn');
         if(firstSubBtn) {
