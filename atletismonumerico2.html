@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLETISMO NUMÉRICO: EDICIÓN MAESTRA</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Quicksand:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* ESTILOS EXACTOS V31 */
+        :root {
+            --primary-orange: #e67e22; --bg-sky: #87CEEB; --correct: #2ECC71; --wrong: #E74C3C;
+            --game-yellow: #FFD700; --highlight-blue: #0056b3; --purple-hint: #9013fe;
+            --speaker-blue: #00BFFF; --solution-border: #e67e22;
+            --math-green: #2ECC71; --math-red: #E74C3C; --math-blue: #3498DB;
+            --pink-btn: #FF69B4;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: var(--bg-sky);
+            background-image: radial-gradient(circle at 20% 30%, white 5%, transparent 10%), radial-gradient(circle at 80% 10%, white 8%, transparent 12%);
+            margin: 0; display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; overflow: hidden; user-select: none;
+        }
+
+        #game-container {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 60px; border: 20px solid var(--game-yellow);
+            width: 92%; max-width: 950px; padding: 25px; text-align: center;
+            position: relative; box-shadow: 0 25px 0 rgba(0,0,0,0.1);
+            max-height: 95vh; overflow-y: auto;
+        }
+
+        /* CABECERAS Y BADGES */
+        .start-header-row { display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
+        
+        .badges-left-col { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        .badge-grade { background: var(--highlight-blue); color: white; font-family: 'Luckiest Guy'; font-size: 1.5rem; padding: 8px 15px; border-radius: 15px; transform: rotate(-3deg); box-shadow: 3px 3px 0 rgba(0,0,0,0.2); border: 3px solid white; }
+        .badge-math { background: #16a085; color: white; font-family: 'Luckiest Guy'; font-size: 1.3rem; padding: 8px 15px; border-radius: 15px; transform: rotate(2deg); box-shadow: 3px 3px 0 rgba(0,0,0,0.2); border: 3px solid white; }
+        
+        .main-title { font-family: 'Luckiest Guy'; color: var(--primary-orange); font-size: 3.5rem; margin: 0; line-height: 1; text-shadow: 2px 2px 0px white; }
+        .badge-version { background: #FF0055; color: white; font-family: 'Luckiest Guy'; font-size: 1.2rem; padding: 8px 12px; border-radius: 50%; transform: rotate(15deg); box-shadow: 2px 2px 0 rgba(0,0,0,0.2); border: 3px solid white; }
+
+        /* MENÚ DE SELECCIÓN */
+        #menu-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; min-height: 400px; }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; width: 100%; margin-top: 20px; margin-bottom: 20px; }
+        .menu-btn {
+            background: white; border: 4px solid var(--highlight-blue); color: var(--highlight-blue);
+            font-family: 'Luckiest Guy'; font-size: 1.3rem; padding: 15px 5px; border-radius: 20px;
+            cursor: pointer; transition: transform 0.1s; box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+        }
+        .menu-btn:hover { background: #f0f8ff; transform: translateY(-3px); }
+        .menu-btn:active { transform: translateY(2px); }
+        
+        /* CREDITOS */
+        .credits-text {
+            font-family: 'Quicksand'; font-size: 1.1rem; color: #7f8c8d; margin-top: 30px; font-weight: bold;
+        }
+
+        /* RESTO DEL JUEGO */
+        .objectives-container { background: #f0f8ff; border: 3px dashed var(--bg-sky); border-radius: 20px; padding: 15px; margin: 10px auto; max-width: 650px; }
+        .obj-speaker { background: var(--speaker-blue); border: 3px solid white; color: white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; display: inline-flex; justify-content: center; align-items: center; vertical-align: middle; margin-left: 10px; box-shadow: 0 3px 0 rgba(0,0,0,0.1); }
+        
+        .game-header { display: grid; grid-template-columns: 1.2fr 1.6fr 1.2fr; gap: 5px; margin-bottom: 15px; align-items: center; }
+        .stats-left-container { display: flex; align-items: center; gap: 20px; }
+        .stats-right-container { display: flex; align-items: center; justify-content: flex-end; gap: 15px; } 
+        .stats-block { font-family: 'Luckiest Guy'; font-size: 1.2rem; color: #444; line-height: 1.1; text-align: center; }
+        .score-plate { background: linear-gradient(145deg, #FFD700, #FFA500); border: 5px solid #fff; border-radius: 30px; padding: 5px 20px; box-shadow: 0 8px 0 #d48806; display: flex; align-items: center; justify-content: center; gap: 15px; }
+        .score-label { font-family: 'Luckiest Guy'; font-size: 1.8rem; color: rgba(255,255,255,0.9); text-shadow: 2px 2px 0 #d48806; letter-spacing: 1px; }
+        .score-number { font-family: 'Luckiest Guy'; font-size: 2.5rem; color: white; text-shadow: 3px 3px 0 #d48806; margin: 0; }
+        
+        #progress-bar-container { width: 100%; height: 15px; background: #eee; border-radius: 10px; margin-bottom: 15px; border: 2px solid #ddd; overflow: hidden; }
+        #progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #2ECC71, #27ae60); transition: width 0.5s; }
+        
+        .mute-btn-header { background: #FF6347; color: white; border: 3px solid white; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transition: transform 0.1s; }
+        
+        .hidden { display: none !important; }
+        
+        .btn-start { background: var(--pink-btn); color: white; font-family: 'Luckiest Guy'; font-size: 2.2rem; padding: 15px 40px; border-radius: 50px; border: none; box-shadow: 0 8px 0 #c71585; cursor: pointer; transition: transform 0.1s; }
+        .btn-start:active { transform: scale(0.95); }
+        .btn-opt { padding: 15px; font-size: 1.8rem; font-family: 'Luckiest Guy'; border-radius: 25px; background: white; border: 4px solid #f0f0f0; cursor: pointer; box-shadow: 0 6px 0 #ccc; color: #444; width: 100%; transition: transform 0.1s; position: relative; }
+        .btn-opt:active { transform: translateY(4px); box-shadow: 0 3px 0 #ccc; }
+        
+        .input-game { width: 80px; padding: 8px; font-size: 1.8rem; text-align: center; border: 4px solid #ddd; border-radius: 15px; font-family: 'Luckiest Guy'; color: #333; margin: 5px; transition: all 0.3s; }
+        .input-game:focus { outline: none; border-color: var(--primary-orange); }
+        #main-content { font-size: 1.8rem; font-family:'Luckiest Guy'; margin-bottom: 20px; color: #333; position: relative; display: inline-block; padding: 0 60px; }
+        .speak-trigger { position: absolute; right: -15px; top: 50%; transform: translateY(-50%); background: var(--speaker-blue); color: white; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.5rem; border: 3px solid white; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
+        
+        .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; width: 100%; }
+        .text-grid { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; max-height: 350px; overflow-y: auto; }
+        .neighbors-container { display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap; }
+        
+        .correct-answer { background-color: var(--correct) !important; color: white !important; border-color: #1e8449 !important; box-shadow: 0 6px 0 #1e8449 !important; }
+        .wrong-answer { background-color: var(--wrong) !important; color: white !important; border-color: #c0392b !important; box-shadow: 0 6px 0 #922b21 !important; }
+        
+        .bottom-tools { display: flex; justify-content: center; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+        .hint-btn { background: var(--purple-hint); color: white; font-family: 'Luckiest Guy'; font-size: 1.1rem; padding: 10px 20px; border-radius: 30px; border: none; box-shadow: 0 5px 0 #5b0fa1; cursor: pointer; }
+        .solution-btn { background: var(--solution-border); color: white; font-family: 'Luckiest Guy'; font-size: 1.1rem; padding: 10px 20px; border-radius: 30px; border: none; box-shadow: 0 5px 0 #d35400; cursor: pointer; }
+        .pdf-btn { background: #E74C3C; color: white; font-family: 'Luckiest Guy'; font-size: 1.5rem; padding: 12px 30px; border-radius: 30px; border: none; box-shadow: 0 6px 0 #c0392b; cursor: pointer; margin-top: 15px; display: flex; align-items: center; gap: 10px; justify-content: center;}
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        
+        /* SOLUCIÓN CARD - EXACTA A LA IMAGEN */
+        .solution-card, .clean-card { background: #ffffff; border-radius: 50px; padding: 40px; width: 90%; max-width: 600px; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.25); display: flex; flex-direction: column; align-items: center; }
+        .solution-card { border: 8px solid var(--solution-border); }
+        .clean-card { border: 4px solid #f4f4f4; }
+        
+        .sol-title { font-family: 'Luckiest Guy'; color: var(--solution-border); font-size: 2.5rem; margin: 0 0 15px 0; text-transform: uppercase; }
+        .sol-content { font-family: 'Quicksand'; font-size: 1.3rem; color: #333; margin-bottom: 10px; line-height: 1.5; font-weight: bold; }
+        .sol-value { color: var(--correct); font-size: 2.5rem; display: block; margin-top: 15px; margin-bottom: 20px; font-family: 'Luckiest Guy'; text-shadow: 2px 2px 0px rgba(0,0,0,0.1); }
+        
+        .btn-entendido { background: var(--pink-btn); color: white; font-family: 'Luckiest Guy'; font-size: 1.8rem; padding: 12px 40px; border-radius: 50px; border: none; box-shadow: 0 6px 0 #c71585; cursor: pointer; margin-top: 10px; }
+        .btn-entendido:active { transform: translateY(3px); box-shadow: 0 3px 0 #c71585; }
+
+        .visual-block-btn { background: #9013fe; color: white; border: none; width: 50px; height: 50px; border-radius: 10px; font-size: 1.5rem; cursor: pointer; margin-left: 10px; box-shadow: 0 4px 0 #5b0fa1; vertical-align: middle; }
+        #visual-hint { display: none; margin-top: 15px; background: #fff; border: 3px dashed #ccc; border-radius: 15px; padding: 10px; width: 95%; margin-left: auto; margin-right: auto; }
+        .btn-units-help { background: #20B2AA; color: white; font-family: 'Luckiest Guy'; font-size: 0.9rem; padding: 8px 12px; border-radius: 15px; border: 3px solid white; box-shadow: 0 4px 0 rgba(0,0,0,0.2); cursor: pointer; margin-right: 5px; }
+
+        .report-container { width: 100%; max-height: 40vh; overflow-y: auto; background: #f8f9fa; border-radius: 15px; padding: 5px; margin: 15px 0; border: 2px solid #eee; }
+        .report-table { width: 100%; border-collapse: collapse; font-family: 'Quicksand'; }
+        .report-table th { background: var(--primary-orange); color: white; padding: 10px; border-radius: 5px; position: sticky; top: 0; }
+        .report-table td { padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold; color: #444; font-size: 1rem; }
+        .grade-pill { padding: 4px 10px; border-radius: 15px; color: white; font-size: 0.9rem; display: inline-block; }
+        .g-sobresaliente { background: #27ae60; } .g-notable { background: #2ECC71; } .g-bien { background: #3498DB; } .g-suficiente { background: #F1C40F; } .g-insuficiente { background: #E74C3C; }
+        
+        #final-grade {
+            font-family: 'Luckiest Guy', cursive; 
+            font-size: 2.2rem;
+            color: #d35400; 
+            border: 3.5px dashed var(--primary-orange);
+            background-color: #fff8e1;
+            padding: 15px 25px;
+            border-radius: 20px;
+            margin: 20px auto;
+            width: fit-content;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+            transform: rotate(-1deg);
+        }
+
+        .floating-score { position: fixed; top: 50%; left: 50%; font-family: 'Luckiest Guy'; font-size: 8rem; z-index: 5000; pointer-events: none; text-shadow: 5px 5px 0px #000; animation: floatUpFade 1.2s ease-out forwards; white-space: nowrap; }
+        @keyframes floatUpFade { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } 20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 100% { transform: translate(-50%, -200%) scale(1); opacity: 0; } }
+        .opt-speaker { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 35px; height: 35px; background: var(--speaker-blue); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 1rem; border: 2px solid white; cursor: pointer; z-index: 10; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="menu-screen">
+            <div class="start-header-row">
+                <div class="badges-left-col">
+                    <div class="badge-grade">2º PRIMARIA</div>
+                    <div class="badge-math">MATEMÁTICAS</div>
+                </div>
+                <h1 class="main-title">ATLETISMO NUMÉRICO</h1>
+                <div class="badge-version" style="margin-left: 10px;">MASTER</div>
+            </div>
+            
+            <h2 style="font-family:'Luckiest Guy'; color:var(--highlight-blue); font-size: 2rem; margin-top:20px; text-shadow: 2px 2px 0px white;">ELIGE TU FAMILIA NUMÉRICA</h2>
+            
+            <div class="menu-grid">
+                <button class="menu-btn" onclick="setRange(0, 99)">Familia del 0</button>
+                <button class="menu-btn" onclick="setRange(100, 199)">Familia del 100</button>
+                <button class="menu-btn" onclick="setRange(200, 299)">Familia del 200</button>
+                <button class="menu-btn" onclick="setRange(300, 399)">Familia del 300</button>
+                <button class="menu-btn" onclick="setRange(400, 499)">Familia del 400</button>
+                <button class="menu-btn" onclick="setRange(500, 599)">Familia del 500</button>
+                <button class="menu-btn" onclick="setRange(600, 699)">Familia del 600</button>
+                <button class="menu-btn" onclick="setRange(700, 799)">Familia del 700</button>
+                <button class="menu-btn" onclick="setRange(800, 899)">Familia del 800</button>
+                <button class="menu-btn" onclick="setRange(900, 999)">Familia del 900</button>
+            </div>
+            <div class="credits-text">Elaborado por Carlos Garrido - IA Gemini</div>
+        </div>
+
+        <div id="start-screen" class="hidden">
+            <div class="start-header-row">
+                <div class="badges-left-col">
+                    <div class="badge-grade">2º PRIMARIA</div>
+                    <div class="badge-math">MATEMÁTICAS</div>
+                </div>
+                <h1 class="main-title">ATLETISMO NUMÉRICO</h1>
+                <div class="badge-version" id="version-display" style="margin-left: 10px;">v?</div>
+                <button id="mute-btn-start" class="mute-btn-header" onclick="toggleMusic()" style="margin-left:15px; width:40px; height:40px; font-size:1.2rem;">🔊</button>
+            </div>
+            
+            <div id="range-subtitle" style="font-size: 2rem; color: var(--highlight-blue); font-family: 'Luckiest Guy'; margin-top: 5px;"></div>
+
+            <div class="objectives-container">
+                <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 5px;">
+                    <strong style="color: var(--primary-orange); font-size: 1.1rem;">OBJETIVOS DE APRENDIZAJE</strong>
+                    <button class="obj-speaker" onclick="readObjectives()">🔊</button>
+                </div>
+                <p id="objectives-text" style="margin: 0; font-size: 1rem; color: #555; line-height: 1.4;">
+                    Identificar, comparar, ordenar y descomponer números.
+                </p>
+            </div>
+
+            <div style="display: inline-block; background: #9013fe; color: white; padding: 8px 25px; border-radius: 30px; font-family: 'Luckiest Guy'; border: 4px solid white; box-shadow: 0 4px 0 rgba(0,0,0,0.2); font-size: 1.1rem; margin-bottom: 5px;">✨ ENFOQUE DUA ✨</div>
+            
+            <div class="objectives-container" style="margin-top: 5px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 5px;">
+                    <strong style="color: var(--highlight-blue); font-size: 1.1rem; font-family:'Luckiest Guy';">INTEGRACIÓN DUA</strong>
+                    <button class="obj-speaker" onclick="readDUA()">🔊</button>
+                </div>
+                <ul style="text-align: left; margin: 5px 0 0 10px; color: #555; font-size: 0.95rem; list-style: none; padding: 0;">
+                    <li style="margin-bottom: 5px;">👁️ <strong>Representación:</strong> Audio lectura, colores semánticos y bloques visuales.</li>
+                    <li style="margin-bottom: 5px;">🙌 <strong>Acción:</strong> Andamiaje con pistas, navegación simple y alternativas.</li>
+                    <li>❤️ <strong>Implicación:</strong> Feedback inmediato, corrección positiva y motivación.</li>
+                </ul>
+            </div>
+            
+            <button class="btn-start" onclick="startGame()">¡A COMPETIR!</button>
+            <br><br>
+            <button class="hint-btn" style="background:#888;" onclick="location.reload()">⬅️ VOLVER AL MENÚ</button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div class="game-header">
+                <div class="stats-left-container">
+                    <div class="stats-block"><span style="color:var(--highlight-blue); display:block; font-size:0.9rem;">NIVEL</span><span id="level-num" style="font-size: 1.6rem;">1</span></div>
+                    <div class="stats-block"><span style="color:var(--correct); display:block; font-size:0.9rem;">ACIERTOS</span><span id="aciertos-display" style="font-size: 1.6rem;">0</span></div>
+                </div>
+                <div class="score-plate">
+                    <span class="score-label">PUNTOS</span>
+                    <div class="score-number" id="score-display">00000</div>
+                </div>
+                <div class="stats-right-container">
+                    <button id="mute-btn-header" class="mute-btn-header" onclick="toggleMusic()" title="Silenciar Música">🔊</button>
+                    <div class="stats-block" style="text-align: right;"><span style="color:var(--wrong); display:block; font-size:0.9rem;">FALLOS</span><span id="mistakes-display" style="font-size: 1.6rem;">0</span></div>
+                </div>
+            </div>
+            
+            <div id="progress-bar-container"><div id="progress-bar"></div></div>
+            <div style="margin-bottom: 5px; color: var(--primary-orange); font-weight: bold; font-size: 1.2rem;" id="level-title">TÍTULO NIVEL</div>
+            
+            <div id="main-content">
+                <span id="question-text">Pregunta...</span>
+                <button class="speak-trigger" onclick="readQuestion()" title="Leer pregunta">🔊</button>
+            </div>
+            
+            <div id="game-area"></div>
+            
+            <div class="bottom-tools">
+                <button class="hint-btn" onclick="toggleHint()">💡 PISTA VISUAL</button>
+                <button class="solution-btn" onclick="openSolution()">🔓 SOLUCIÓN</button>
+            </div>
+            <div id="visual-hint"></div>
+        </div>
+
+        <div id="solution-modal" class="hidden modal-overlay">
+            <div class="solution-card">
+                <h2 class="sol-title">LA SOLUCIÓN ES:</h2>
+                <div id="solution-content-area"></div>
+                <button class="btn-entendido" onclick="closeSolution()">¡ENTENDIDO!</button>
+            </div>
+        </div>
+        
+        <div id="level-win-screen" class="hidden modal-overlay">
+            <div class="clean-card">
+                <h1 style="font-family: 'Luckiest Guy'; font-size: 3.8rem; color: var(--correct); text-shadow: 3px 3px 0 #27ae60, 6px 6px 10px rgba(0,0,0,0.1); margin: 0 0 20px 0; letter-spacing: 2px;">¡NIVEL SUPERADO!</h1>
+                <div style="font-size: 110px; margin: 20px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));">🌟🚀</div>
+                <p id="level-win-msg" style="font-family: 'Quicksand'; font-size: 1.6rem; color: #555; font-weight: bold; margin-bottom: 30px; letter-spacing: 1px;">¡Sigue así de bien!</p>
+                <button class="btn-start" onclick="nextLevel()" style="font-size: 2rem; padding: 15px 50px; box-shadow: 0 10px 0 #c71585, 0 20px 30px rgba(0,0,0,0.3);">SIGUIENTE</button>
+            </div>
+        </div>
+        
+        <div id="win-screen" class="hidden modal-overlay">
+            <div class="clean-card">
+                <h1 style="font-family: 'Luckiest Guy'; font-size: 3rem; color: var(--primary-orange); margin: 5px 0 15px;">¡MEDALLA DE ORO!</h1>
+                <div style="font-size: 60px;">🥇🎓</div>
+                
+                <div class="report-container">
+                    <table class="report-table" id="final-report-table">
+                        <thead><tr><th>Nivel</th><th>✅</th><th>❌</th><th>Nota</th></tr></thead>
+                        <tbody id="report-body"></tbody>
+                    </table>
+                </div>
+                
+                <div id="final-grade"></div>
+                
+                <button class="pdf-btn" onclick="downloadPDF()">📥 Descargar Informe PDF</button>
+                <button class="btn-start" onclick="location.reload()" style="margin-top:15px; font-size: 1.5rem;">REINICIAR</button>
+            </div>
+        </div>
+
+        <div id="symbol-help-modal" class="hidden modal-overlay">
+            <div style="width: 220px; height: 220px; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; background: white; border-radius: 30px; border: 10px solid var(--game-yellow);" id="symbol-svg-container"></div>
+            <div style="color: white; font-family: 'Luckiest Guy'; font-size: 3.5rem; text-shadow: 4px 4px 0 #000;" id="symbol-text-container"></div>
+            <button class="btn-start hidden" id="close-help-btn" style="margin-top:20px; font-size:1.5rem;" onclick="closeSymbolHelp()">¡Entendido!</button>
+        </div>
+        <div id="units-help-modal" class="hidden modal-overlay">
+            <div style="width: 260px; height: 260px; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; background: white; border-radius: 30px; border: 10px solid var(--game-yellow); padding: 20px;" id="units-visual-container"></div>
+            <div style="color: white; font-family: 'Luckiest Guy'; font-size: 2.5rem; text-shadow: 4px 4px 0 #000; max-width: 80%; text-align: center;" id="units-text-container"></div>
+            <button class="btn-start hidden" id="close-units-btn" style="margin-top:20px; font-size:1.5rem;" onclick="closeUnitsHelp()">¡Entendido!</button>
+        </div>
+        <div id="blocks-modal" class="hidden modal-overlay" onclick="closeBlocks()">
+            <div style="background: white; padding: 20px; border-radius: 30px; border: 8px solid var(--game-yellow); max-width: 90%; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 10px;" onclick="event.stopPropagation()">
+                <div id="blocks-area" style="display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-end; gap:15px; padding:20px;"></div>
+                <button class="btn-start" style="margin-top:20px; font-size:1.5rem;" onclick="closeBlocks()">Cerrar</button>
+            </div>
+        </div>
+        <div id="vocab-modal" class="hidden modal-overlay">
+            <div style="background: white; padding: 20px; border-radius: 30px; border: 8px solid var(--game-yellow); max-width: 90%; text-align:center;">
+                <h2 style="font-family:'Luckiest Guy'; color:var(--primary-orange);">VOCABULARIO</h2>
+                <div style="font-size: 2rem; font-family:'Luckiest Guy'; color:#444; margin: 10px;">⬅️ Anterior <span style="color:var(--wrong)">(-1)</span></div>
+                <div style="font-size: 2rem; font-family:'Luckiest Guy'; color:#444; margin: 10px;">Posterior ➡️ <span style="color:var(--correct)">(+1)</span></div>
+                <button class="btn-start" style="margin-top:20px; font-size:1.5rem;" onclick="closeVocab()">¡Entendido!</button>
+            </div>
+        </div>
+        <div id="order-help-modal" class="hidden modal-overlay">
+             <div style="background: white; padding: 20px; border-radius: 30px; border: 8px solid var(--game-yellow); max-width: 90%; text-align:center;">
+                <h2 style="font-family:'Luckiest Guy'; color:var(--primary-orange);">¿CÓMO ORDENAR?</h2>
+                <p style="font-weight: bold; color:#555;">Busca el número más pequeño y púlsalo. Repite hasta terminar.</p>
+                <button class="btn-start" style="margin-top:10px; font-size:1.5rem;" onclick="closeOrderHelp()">¡Entendido!</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="snd-bg" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3"></audio>
+    <audio id="snd-win" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
+    <audio id="snd-lose" src="https://assets.mixkit.co/active_storage/sfx/2045/2045-preview.mp3"></audio>
+
+    <script>
+        // --- VARIABLES GLOBALES ---
+        let RANGE_MIN = 200; let RANGE_MAX = 299;
+        window.jsPDF = window.jspdf.jsPDF;
+        let score = 0, mistakes = 0, totalCorrect = 0, currentLevel = 1, qCount = 0;
+        const QUESTIONS_PER_LEVEL = 5;
+        let musicOn = true, currentData = {}, isAnswered = false, synth = window.speechSynthesis, levelStats = {};
+        const LEVEL_INFO = [
+            { id: 1, title: "EL GIGANTE (Mayor)", type: 'max' },
+            { id: 2, title: "BALANZA (Comparación)", type: 'compare' },
+            { id: 3, title: "EL TREN (Series)", type: 'series' },
+            { id: 4, title: "ROMPECABEZAS (Descomponer)", type: 'decomp' },
+            { id: 5, title: "CONSTRUCTOR (Suma)", type: 'comp' },
+            { id: 6, title: "VECINOS (Ant/Post)", type: 'neighbors' },
+            { id: 7, title: "LECTURA (Texto a Número)", type: 'read' },
+            { id: 8, title: "ORDEN (Menor a Mayor)", type: 'order' },
+            { id: 9, title: "EL PEQUEÑO (Menor)", type: 'min' },
+            { id: 10, title: "NÚMERO (Número a Texto)", type: 'numToText' }
+        ];
+        const LEVEL_COLORS = { 1:'#87CEEB', 2:'#FF0000', 3:'#FFFFFF', 4:'#FFC0CB', 5:'#008000', 6:'#FFD700', 7:'#90EE90', 8:'#FFFFFF', 9:'#FFA500', 10:'#808080' };
+
+        // --- INICIALIZACIÓN ---
+        function setRange(min, max) {
+            RANGE_MIN = min; RANGE_MAX = max;
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+            document.getElementById('version-display').innerText = `v${min}-${max}`;
+            document.getElementById('range-subtitle').innerText = `${min} al ${max}`;
+            document.getElementById('objectives-text').innerText = `Familia del ${min}. Identificar, comparar, ordenar y descomponer números del ${min} al ${max}.`;
+        }
+
+        function numToWords(n) {
+            if (n === 0) return "Cero"; if (n === 100) return "Cien";
+            let c = Math.floor(n/100); let rem = n%100;
+            let hundreds = "";
+            if (c===1) hundreds="Ciento"; else if(c===2) hundreds="Doscientos"; else if(c===3) hundreds="Trescientos";
+            else if(c===4) hundreds="Cuatrocientos"; else if(c===5) hundreds="Quinientos"; else if(c===6) hundreds="Seiscientos";
+            else if(c===7) hundreds="Setecientos"; else if(c===8) hundreds="Ochocientos"; else if(c===9) hundreds="Novecientos";
+            if (n < 100) hundreds = ""; 
+            let u = ["","uno","dos","tres","cuatro","cinco","seis","siete","ocho","nueve"];
+            let d = ["","diez","veinte","treinta","cuarenta","cincuenta","sesenta","setenta","ochenta","noventa"];
+            let teens = ["diez","once","doce","trece","catorce","quince","dieciséis","diecisiete","dieciocho","diecinueve"];
+            let remText = "";
+            if(rem===0) remText = ""; else if(rem<10) remText = u[rem]; else if(rem>=10 && rem<20) remText = teens[rem-10];
+            else if(rem===20) remText = "veinte"; else if(rem>20 && rem<30) remText = "veinti"+u[rem%10];
+            else { let tenD=Math.floor(rem/10); let unitD=rem%10; remText = d[tenD]; if(unitD>0) remText += " y " + u[unitD]; }
+            return (hundreds + " " + remText).trim();
+        }
+
+        const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const playSound = (id) => { try { document.getElementById(id).currentTime=0; document.getElementById(id).play().catch(e=>{}); } catch(e){} }
+        function speakText(txt) { if (synth.speaking) synth.cancel(); const utter = new SpeechSynthesisUtterance(txt); utter.lang = 'es-ES'; utter.rate = 0.9; synth.speak(utter); }
+        
+        function readObjectives() { 
+            let intro = "En este videojuego de Atletismo Numérico para 2º de Educación Primaria los objetivos de aprendizaje serán... ";
+            let content = document.getElementById('objectives-text').innerText;
+            speakText(intro + content); 
+        }
+        
+        function readDUA() {
+            speakText("El juego integra el Diseño Universal para el Aprendizaje mediante: Representación con audio y ayudas visuales. Acción con pistas y navegación sencilla. Y Compromiso con corrección positiva y niveles graduados.");
+        }
+        
+        function readQuestion() { 
+            let txt = document.getElementById('question-text').innerText;
+            txt = txt.replace(/_/g, " espacio ").replace(/>/g, " mayor que ").replace(/</g, " menor que ").replace(/=/g, " igual a ");
+            if(currentData.type === 'read') txt = "Encuentra el número " + currentData.text;
+            if(currentData.type === 'neighbors') txt = "Escribe el anterior y el posterior de " + currentData.n;
+            if(currentData.type === 'numToText') txt = "Encuentra la escritura del número " + currentData.val;
+            speakText(txt); 
+        }
+
+        function startGame() { document.getElementById('start-screen').classList.add('hidden'); document.getElementById('quiz-screen').classList.remove('hidden'); if(musicOn) document.getElementById('snd-bg').play().catch(e=>{}); LEVEL_INFO.forEach(l => levelStats[l.id] = { c: 0, m: 0 }); loadLevel(); }
+        function loadLevel() { qCount = 0; updateUI(); nextQuestion(); }
+        function nextQuestion() {
+            if(qCount >= QUESTIONS_PER_LEVEL) { showLevelWin(); return; }
+            isAnswered = false; document.getElementById('visual-hint').style.display = 'none'; document.getElementById('game-area').innerHTML = '';
+            let pct = (qCount / QUESTIONS_PER_LEVEL) * 100; document.getElementById('progress-bar').style.width = pct + "%";
+            const info = LEVEL_INFO[currentLevel - 1];
+            document.getElementById('level-num').innerText = currentLevel; document.getElementById('level-title').innerText = info.title;
+            switch(info.type) { case 'max': setupMax(); break; case 'compare': setupCompare(); break; case 'series': setupSeries(); break; case 'decomp': setupDecomp(); break; case 'comp': setupComp(); break; case 'neighbors': setupNeighbors(); break; case 'read': setupRead(); break; case 'order': setupOrder(); break; case 'min': setupMin(); break; case 'numToText': setupNumToText(); break; }
+        }
+
+        // --- NIVELES ---
+        function setupMax() {
+            let nums = []; while(nums.length<5) { let n=randomInt(RANGE_MIN, RANGE_MAX); if(!nums.includes(n)) nums.push(n); }
+            currentData = { type:'max', ans:Math.max(...nums), opts:nums }; setQ("¿Cuál es el número MAYOR?");
+            let h = `<div class="options-grid">`; nums.forEach(n => h += `<button class="btn-opt" onclick="checkAns(this, '${n}')">${n}</button>`);
+            document.getElementById('game-area').innerHTML = h + `</div>`;
+        }
+        function setupMin() {
+            let nums = []; while(nums.length<5) { let n=randomInt(RANGE_MIN, RANGE_MAX); if(!nums.includes(n)) nums.push(n); }
+            currentData = { type:'min', ans:Math.min(...nums), opts:nums }; setQ("¿Cuál es el número MENOR?");
+            let h = `<div class="options-grid">`; nums.forEach(n => h += `<button class="btn-opt" onclick="checkAns(this, '${n}')">${n}</button>`);
+            document.getElementById('game-area').innerHTML = h + `</div>`;
+        }
+        function setupCompare() {
+            let n1=randomInt(RANGE_MIN, RANGE_MAX), n2=randomInt(RANGE_MIN, RANGE_MAX); if(Math.random()<0.2) n2=n1;
+            let ans = n1>n2 ? '>' : n1<n2 ? '<' : '='; currentData = { type:'compare', ans, n1, n2 }; setQ(`Compara: ${n1} y ${n2}`);
+            document.getElementById('game-area').innerHTML = `<button class="hint-btn" style="background:#2980b9; display:block; margin:0 auto 10px;" onclick="showSymbolHelp()">❓ Ayuda Signos</button><div class="options-grid" style="grid-template-columns:repeat(3,1fr)"><button class="btn-opt" onclick="checkAns(this, '>')">></button><button class="btn-opt" onclick="checkAns(this, '=')">=</button><button class="btn-opt" onclick="checkAns(this, '<')"><</button></div>`;
+        }
+        function setupSeries() {
+            let step = [-1,-2,10,-10][randomInt(0,3)]; let minStart = RANGE_MIN, maxStart = RANGE_MAX;
+            if (step > 0) maxStart = RANGE_MAX - (5 * step); else minStart = RANGE_MIN - (5 * step);
+            if(minStart > maxStart) { minStart=RANGE_MIN; maxStart=RANGE_MAX; step=1; }
+            let start = randomInt(minStart, maxStart); let nums = Array.from({length:6}, (_,i)=>start+(i*step));
+            currentData = { type:'series', nums }; setQ(`Serie de ${step>0?'+':''}${step}`);
+            let h = `<div class="neighbors-container">`; nums.forEach((n,i) => { if(i<2) h+=`<div class="input-game" style="background:#eee;border:none;">${n}</div>`; else h+=`<input id="ser-${i}" type="number" class="input-game" placeholder="?">`; });
+            document.getElementById('game-area').innerHTML = h + `</div><button class="btn-start" style="margin-top:15px;font-size:1.5rem;" onclick="checkSeriesFull()">Comprobar</button>`;
+        }
+        function setupDecomp() {
+            let n = randomInt(RANGE_MIN, RANGE_MAX);
+            let c = Math.floor(n/100)*100; let d = Math.floor((n%100)/10)*10; let u = n%10;
+            currentData = { type:'decomp', n, c, d, u }; setQ(`Descompón el ${n}`);
+            let html = `<div class="neighbors-container"><button class="btn-units-help" onclick="showUnitsHelp()">El Orden de<br>las unidades</button>`;
+            if (RANGE_MAX >= 100) html += `<input id="dc" class="input-game" placeholder="C"><span>+</span>`;
+            html += `<input id="dd" class="input-game" placeholder="D"><span>+</span><input id="du" class="input-game" placeholder="U"><button class="visual-block-btn" onclick="showBlocks(${n})" title="Ver Bloques">🧱</button></div><button class="btn-start" style="margin-top:15px;font-size:1.5rem;" onclick="checkDecomp()">Comprobar</button>`;
+            document.getElementById('game-area').innerHTML = html;
+        }
+        function setupComp() {
+            let n = randomInt(RANGE_MIN, RANGE_MAX);
+            currentData = { type:'comp', n };
+            let c = Math.floor(n/100)*100; let d = Math.floor((n%100)/10)*10; let u = n%10;
+            let txt = RANGE_MAX >= 100 ? `${c} + ${d} + ${u}` : `${d} + ${u}`;
+            setQ(`Suma: ${txt}`);
+            document.getElementById('game-area').innerHTML = `<div style="display:flex; justify-content:center; align-items:center; gap:10px;"><input id="cre" class="input-game" style="width:120px" placeholder="?"><button class="visual-block-btn" onclick="showBlocks(${n})" title="Ver Bloques">🧱</button></div><button class="btn-start" style="margin-top:15px;font-size:1.5rem;" onclick="checkComp()">Comprobar</button>`;
+        }
+        function setupNeighbors() {
+            let safeMin = RANGE_MIN+1; let safeMax = RANGE_MAX-1; let n = randomInt(safeMin, safeMax);
+            currentData = { type:'neighbors', n, prev:n-1, next:n+1 }; setQ(`Escribe el ANTERIOR y POSTERIOR`);
+            document.getElementById('game-area').innerHTML = `<div class="neighbors-container"><input id="np" type="number" class="input-game" placeholder="?"><div class="input-game" style="background:#FFD700; border-color:#FF8C00;">${n}</div><input id="nn" type="number" class="input-game" placeholder="?"><button class="visual-block-btn" style="background:#FF69B4;" onclick="showVocabHelp()">📖</button></div><button class="btn-start" style="margin-top:15px;font-size:1.5rem;" onclick="checkNeighbors()">Comprobar</button>`;
+        }
+        function setupRead() {
+            let n = randomInt(RANGE_MIN, RANGE_MAX); let text = numToWords(n); currentData = { type:'read', text, ans:n }; setQ(text);
+            let opts = [n]; while(opts.length<3) { let r=randomInt(RANGE_MIN, RANGE_MAX); if(!opts.includes(r)) opts.push(r); } opts.sort(()=>Math.random()-0.5);
+            let h = `<div class="options-grid">`; opts.forEach(op => h+= `<button class="btn-opt" onclick="checkAns(this, '${op}')">${op}</button>`); document.getElementById('game-area').innerHTML = h+`</div>`;
+        }
+        function setupNumToText() {
+            let n = randomInt(RANGE_MIN, RANGE_MAX); let correctText = numToWords(n); currentData = { type:'numToText', val:n, ans: correctText }; setQ(`¿Cómo se escribe ${n}?`);
+            let optsNums = [n]; while(optsNums.length < 3) { let r = randomInt(RANGE_MIN, RANGE_MAX); if(r !== n && !optsNums.includes(r)) optsNums.push(r); }
+            let optsTxt = optsNums.map(num => numToWords(num)); optsTxt.sort(() => Math.random() - 0.5);
+            let h = `<div class="text-grid">`; optsTxt.forEach(txt => { h += `<button class="btn-opt" style="font-size:1.4rem; padding-right:50px;" onclick="checkAns(this, '${txt}')">${txt}<div class="opt-speaker" onclick="speakText('${txt}'); event.stopPropagation();">🔊</div></button>`; }); document.getElementById('game-area').innerHTML = h + `</div>`;
+        }
+        function setupOrder() {
+            let nums=[]; while(nums.length<3) { let x=randomInt(RANGE_MIN, RANGE_MAX); if(!nums.includes(x)) nums.push(x); }
+            let sorted = [...nums].sort((a,b)=>a-b); currentData = { type:'order', sorted, currentIdx:0 }; setQ("Toca los números de MENOR a MAYOR");
+            let h = `<div class="options-grid">`; nums.forEach(n => h+= `<button id="ord-btn-${n}" class="btn-opt" onclick="checkOrder(this, ${n})">${n}</button>`); document.getElementById('game-area').innerHTML = h+`</div>`;
+        }
+
+        // --- VERIFICADORES ---
+        function checkAns(btn, val) { if(isAnswered) return; isAnswered = true; if(val == currentData.ans) success(btn); else { btn.classList.add('wrong-answer'); document.querySelectorAll('.btn-opt').forEach(b => { if(b.innerText.includes(currentData.ans)) b.classList.add('correct-answer'); }); fail(null); } }
+        
+        function checkDecomp() {
+            if(isAnswered) return;
+            let items = [{el:document.getElementById('dd'),c:currentData.d},{el:document.getElementById('du'),c:currentData.u}];
+            if(RANGE_MAX >= 100) items.push({el:document.getElementById('dc'), c:currentData.c});
+            let allOk = true; items.forEach(it => { if(parseInt(it.el.value) === it.c) it.el.classList.add('correct-answer'); else { it.el.classList.add('wrong-answer'); allOk=false; } });
+            if(allOk) success(null); 
+            else { isAnswered=true; mistakes++; levelStats[currentLevel].m++; updateUI(); playSound('snd-lose'); 
+                setTimeout(() => { items.forEach(it => { 
+                    it.el.value = it.c; 
+                    it.el.classList.remove('wrong-answer'); 
+                    it.el.classList.add('correct-answer'); 
+                }); }, 1000); 
+                setTimeout(() => { qCount++; nextQuestion(); }, 3000); 
+            }
+        }
+        
+        function checkComp() { 
+            if(isAnswered) return; let el = document.getElementById('cre'); 
+            if(parseInt(el.value) === currentData.n) success(el); 
+            else { isAnswered=true; el.classList.add('wrong-answer'); mistakes++; levelStats[currentLevel].m++; updateUI(); playSound('snd-lose'); 
+                setTimeout(() => { 
+                    el.value = currentData.n; 
+                    el.classList.remove('wrong-answer'); 
+                    el.classList.add('correct-answer'); 
+                }, 1000); 
+                setTimeout(() => { qCount++; nextQuestion(); }, 3000); 
+            } 
+        }
+        
+        function checkNeighbors() { 
+            if(isAnswered) return; let np = document.getElementById('np'), nn = document.getElementById('nn'); 
+            let okP = parseInt(np.value) === currentData.prev; let okN = parseInt(nn.value) === currentData.next; 
+            if (okP && okN) { np.classList.add('correct-answer'); nn.classList.add('correct-answer'); success(null); } 
+            else { isAnswered=true; if(!okP) np.classList.add('wrong-answer'); if(!okN) nn.classList.add('wrong-answer'); mistakes++; levelStats[currentLevel].m++; updateUI(); playSound('snd-lose'); 
+                setTimeout(() => { 
+                    np.value = currentData.prev; nn.value = currentData.next; 
+                    np.classList.remove('wrong-answer'); np.classList.add('correct-answer'); 
+                    nn.classList.remove('wrong-answer'); nn.classList.add('correct-answer'); 
+                }, 1000); 
+                setTimeout(() => { qCount++; nextQuestion(); }, 3000); 
+            } 
+        }
+        
+        function checkSeriesFull() { 
+            if(isAnswered) return; let allCorrect = true; 
+            for(let i=2; i<6; i++) { let input = document.getElementById(`ser-${i}`); if(parseInt(input.value) === currentData.nums[i]) input.classList.add('correct-answer'); else { input.classList.add('wrong-answer'); allCorrect = false; } } 
+            if(allCorrect) success(null); 
+            else { isAnswered=true; mistakes++; levelStats[currentLevel].m++; updateUI(); playSound('snd-lose'); 
+                setTimeout(() => { for(let i=2; i<6; i++) { let input = document.getElementById(`ser-${i}`); input.value = currentData.nums[i]; input.classList.remove('wrong-answer'); input.classList.add('correct-answer'); } }, 1000); 
+                setTimeout(() => { qCount++; nextQuestion(); }, 3000); 
+            } 
+        }
+        
+        function checkOrder(btn, val) { if(isAnswered) return; if(val === currentData.sorted[currentData.currentIdx]) { btn.classList.add('correct-answer'); btn.disabled = true; currentData.currentIdx++; playSound('snd-win'); if(currentData.currentIdx >= 3) success(); } else { btn.classList.add('wrong-answer'); fail(btn); } }
+        function success(btn) { const el = document.createElement('div'); el.innerText = '+100'; el.className = 'floating-score'; el.style.color = LEVEL_COLORS[currentLevel]; document.body.appendChild(el); setTimeout(() => el.remove(), 1200); isAnswered = true; score += 100; totalCorrect++; levelStats[currentLevel].c++; playSound('snd-win'); if(btn) btn.classList.add('correct-answer'); try { confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } }); } catch(e){} qCount++; updateUI(); setTimeout(nextQuestion, 1500); }
+        function fail(btn) { mistakes++; levelStats[currentLevel].m++; playSound('snd-lose'); if(btn) btn.classList.add('wrong-answer'); qCount++; updateUI(); setTimeout(nextQuestion, 2000); }
+        function updateUI() { document.getElementById('score-display').innerText = score.toString().padStart(5,'0'); document.getElementById('mistakes-display').innerText = mistakes; document.getElementById('aciertos-display').innerText = totalCorrect; }
+        function toggleMusic() { musicOn = !musicOn; musicOn ? document.getElementById('snd-bg').play() : document.getElementById('snd-bg').pause(); }
+        
+        // --- FUNCIÓN NIVEL SUPERADO ---
+        function showLevelWin() { 
+            document.getElementById('quiz-screen').classList.add('hidden'); 
+            document.getElementById('level-win-screen').classList.remove('hidden'); 
+            playSound('snd-win'); 
+            
+            const stats = levelStats[currentLevel];
+            let msg = "";
+            let audioText = "";
+            
+            if (stats.c === 5) {
+                msg = "¡INCREÍBLE! ¡ERES UN GENIO! 🌟";
+                audioText = "¡Increíble! ¡Lo has acertado todo! Eres un genio.";
+            } else if (stats.c >= 3) {
+                msg = "¡BIEN HECHO! 👍";
+                audioText = "¡Bien hecho! Has acertado la mayoría. Sigue así.";
+            } else {
+                msg = "¡BUEN INTENTO! 💪";
+                audioText = "Buen intento. No te preocupes, vamos a practicar un poco más en el siguiente nivel.";
+            }
+            
+            document.getElementById('level-win-msg').innerText = msg;
+            speakText(audioText); 
+            
+            try { confetti({particleCount:150, spread:70}); } catch(e){} 
+        }
+        
+        function nextLevel() { document.getElementById('level-win-screen').classList.add('hidden'); if(currentLevel < 10) { currentLevel++; document.getElementById('quiz-screen').classList.remove('hidden'); loadLevel(); } else showFinalReport(); }
+        
+        // --- FUNCIÓN REPORTE FINAL ---
+        function showFinalReport() { 
+            document.getElementById('win-screen').classList.remove('hidden'); 
+            const body = document.getElementById('report-body'); body.innerHTML=''; 
+            let totalGradeSum=0; 
+            LEVEL_INFO.forEach(l=>{ 
+                let s=levelStats[l.id]; 
+                let gradeVal = s.c>=5?10:s.c>=4?8:s.c>=3?6:s.c>=2?5:3;
+                totalGradeSum += gradeVal;
+                let gT=s.c>=5?"Sobresaliente":s.c>=4?"Notable":s.c>=3?"Bien":s.c>=2?"Suficiente":"Insuficiente"; 
+                let gC=s.c>=5?"g-sobresaliente":s.c>=4?"g-notable":s.c>=3?"g-bien":s.c>=2?"g-suficiente":"g-insuficiente"; 
+                body.innerHTML+=`<tr><td style="text-align:left;">${l.title}</td><td>${s.c}</td><td>${s.m}</td><td><span class="grade-pill ${gC}">${gT}</span></td></tr>`; 
+            }); 
+            
+            let avg = totalGradeSum / LEVEL_INFO.length;
+            let gradeTxt = avg >= 9 ? "SOBRESALIENTE" : avg >= 7 ? "NOTABLE" : avg >= 6 ? "BIEN" : avg >= 5 ? "SUFICIENTE" : "INSUFICIENTE";
+            let subTxt = avg < 5 ? "(¡A REPASAR!)" : "🌟";
+            
+            let finalMsgHTML = `<div style="font-size:1.5rem; color:#e67e22; margin-bottom:5px;">CALIFICACIÓN GLOBAL:</div><div style="font-size:2.5rem; color:#d35400;">${gradeTxt} ${subTxt}</div>`;
+            
+            document.getElementById('final-grade').innerHTML = finalMsgHTML;
+            playSound('snd-win'); 
+            speakText("¡Felicidades! Has completado todo el juego. Mira tu nota final."); 
+            try { confetti({particleCount:400, spread:100}); } catch(e){} 
+        }
+        
+        // --- FUNCIÓN PDF (ESTÉTICA V31) ---
+        function downloadPDF() { 
+            const { jsPDF } = window.jspdf; 
+            const doc = new jsPDF(); 
+            
+            // Título
+            doc.setFont("helvetica", "bold"); 
+            doc.setFontSize(24); 
+            doc.setTextColor(230, 126, 34); // Naranja V31
+            doc.text("ATLETISMO NUMÉRICO", 105, 20, null, null, "center"); 
+            
+            // Subtítulo
+            doc.setFontSize(16); 
+            doc.setTextColor(50); 
+            doc.text(`Prueba: Familia ${RANGE_MIN} al ${RANGE_MAX}`, 105, 30, null, null, "center"); 
+            
+            // Datos alumno
+            doc.setFontSize(12); 
+            doc.setTextColor(80); 
+            doc.setFont("helvetica", "normal"); 
+            doc.text("Curso: 2º Educación Primaria", 14, 45); 
+            let today = new Date(); 
+            doc.text("Fecha: " + today.toLocaleDateString(), 14, 52);
+            
+            // Tabla
+            let data = []; let totalGradeSum=0; 
+            LEVEL_INFO.forEach(l => { 
+                const s = levelStats[l.id]; 
+                let gradeVal = s.c>=5?10:s.c>=4?8:s.c>=3?6:s.c>=2?5:3;
+                totalGradeSum += gradeVal;
+                let g=s.c>=5?"Sobresaliente":s.c>=4?"Notable":s.c>=3?"Bien":s.c>=2?"Suficiente":"Insuficiente"; 
+                data.push([l.title, s.c, s.m, g]); 
+            }); 
+            
+            doc.autoTable({ 
+                startY: 60, 
+                head: [['Nivel', 'Aciertos', 'Fallos', 'Calificación']], 
+                body: data, 
+                theme: 'grid', 
+                headStyles: { fillColor: [230, 126, 34], textColor: 255, fontStyle: 'bold' }, 
+                styles: { font: "helvetica", fontSize: 12, cellPadding: 4, halign: 'center' }, 
+                columnStyles: { 0: { halign: 'left' } } 
+            }); 
+            
+            // Cálculo nota
+            let avg = totalGradeSum / LEVEL_INFO.length;
+            let finalMsg = avg >= 9 ? "SOBRESALIENTE" : avg >= 7 ? "NOTABLE" : avg >= 6 ? "BIEN" : avg >= 5 ? "SUFICIENTE" : "INSUFICIENTE";
+            let suffix = avg < 5 ? "(¡A REPASAR!)" : "";
+            
+            // --- CAJA NOTA GLOBAL ESTILO V31 (GRÁFICO) ---
+            let finalY = doc.lastAutoTable.finalY + 15;
+            let boxWidth = 160;
+            let boxHeight = 35;
+            let boxX = (210 - boxWidth) / 2;
+            
+            // Fondo crema
+            doc.setFillColor(255, 248, 225); 
+            // Borde naranja discontinuo
+            doc.setDrawColor(230, 126, 34); 
+            doc.setLineWidth(1.5);
+            doc.setLineDashPattern([3, 1], 0); 
+            doc.roundedRect(boxX, finalY, boxWidth, boxHeight, 5, 5, 'FD');
+            doc.setLineDashPattern([], 0); // Reset dash
+            
+            // Texto: CALIFICACIÓN GLOBAL
+            doc.setFontSize(14);
+            doc.setTextColor(230, 126, 34); // Naranja
+            doc.setFont("helvetica", "bold");
+            doc.text("CALIFICACIÓN GLOBAL:", 105, finalY + 10, null, null, "center");
+            
+            // Texto: NOTA
+            doc.setFontSize(22);
+            doc.setTextColor(211, 84, 0); // Naranja oscuro
+            doc.text(`${finalMsg} ${suffix}`, 105, finalY + 25, null, null, "center");
+            
+            doc.save(`Informe_Atletismo_${RANGE_MIN}_${RANGE_MAX}.pdf`); 
+        }
+        
+        function setQ(txt) { document.getElementById('question-text').innerText = txt; }
+        function toggleHint() { let h = document.getElementById('visual-hint'); h.style.display = h.style.display==='block'?'none':'block'; drawHint(); }
+        function drawHint() {
+            const area = document.getElementById('visual-hint'); area.innerHTML = ''; let html = '';
+            if (['max','compare','series','min','order'].includes(currentData.type)) {
+                let nums=[]; if(currentData.type==='max' || currentData.type==='min') nums=currentData.opts; else if(currentData.type==='compare') nums=[currentData.n1, currentData.n2]; else if(currentData.type==='series') nums=currentData.nums; else if(currentData.type==='order') nums=currentData.sorted; nums.sort((a,b)=>a-b); 
+                let min=Math.min(...nums)-5, max=Math.max(...nums)+5, range=max-min; html='<div style="position:relative;width:96%;left:2%;height:40px;margin-top:20px;"><div style="position:absolute;bottom:0;left:0;width:100%;height:4px;background:#444;"></div>'; nums.forEach(n=>{ let p=((n-min)/range)*98+1; html+=`<div style="position:absolute;left:${p}%;bottom:0;height:20px;width:4px;background:var(--purple-hint);"></div><div style="position:absolute;left:${p}%;bottom:25px;transform:translateX(-50%);color:var(--purple-hint);font-weight:bold;">${n}</div>`; }); html+='</div>';
+            } else if(currentData.type==='neighbors') {
+                let n=currentData.n; html=`<div style="display:flex;justify-content:center;gap:10px;margin-top:10px;">`;
+                for(let i=n-2;i<=n+2;i++) { let c=(i===n)?'#FFD700':'#eee'; html+=`<div style="padding:10px;background:${c};border-radius:5px;font-weight:bold;">${i}</div>`; } html+=`</div>`;
+            } else {
+                let val=currentData.ans||currentData.n||currentData.val; if(typeof val === 'string') val = currentData.val;
+                if(val) { let c = Math.floor(val/100); let d = Math.floor((val%100)/10); let u = val%10; html=`<div style="font-size:2.5rem; font-family:'Luckiest Guy'; line-height:1.2;"><span style="color:var(--math-green);">${c} Centenas</span><br><span style="color:var(--math-red);">${d} Decenas</span><br><span style="color:var(--math-blue);">${u} Unidades</span></div>`; }
+            } area.innerHTML = html;
+        }
+        
+        function openSolution() { 
+            document.getElementById('solution-modal').classList.remove('hidden'); 
+            let explanation = ""; 
+            let displayVal = ""; 
+            
+            switch(currentData.type) { 
+                case 'max': 
+                    displayVal = currentData.ans; 
+                    explanation = `Comparamos los números. La respuesta es ${currentData.ans} porque tiene el valor más alto.`; 
+                    break; 
+                case 'min': 
+                    displayVal = currentData.ans; 
+                    explanation = `Comparamos los números. La respuesta es ${currentData.ans} porque tiene el valor más bajo.`; 
+                    break; 
+                case 'compare': 
+                    let signText = currentData.ans==='>'?"Mayor que":currentData.ans==='<'?"Menor que":"Igual que";
+                    displayVal = `${currentData.n1} ${currentData.ans} ${currentData.n2}`;
+                    explanation = `Comparamos ${currentData.n1} y ${currentData.n2}. La respuesta es ${signText} porque ${currentData.n1} es ${signText.toLowerCase()} ${currentData.n2}.`;
+                    break; 
+                case 'series': 
+                    displayVal = currentData.nums.join(" - "); 
+                    explanation = `Observamos la regla de la serie. Sumando o restando llegamos a la solución.`; 
+                    break; 
+                case 'decomp': 
+                    displayVal = `${currentData.c} + ${currentData.d} + ${currentData.u}`; 
+                    explanation = `Descomponemos el número ${currentData.n} en sus partes: Centenas, Decenas y Unidades.`; 
+                    break; 
+                case 'comp': 
+                    displayVal = currentData.n; 
+                    explanation = `Al sumar todas las partes (Centenas + Decenas + Unidades) formamos el número.`; 
+                    break; 
+                case 'neighbors': 
+                    displayVal = `${currentData.prev} - ${currentData.n} - ${currentData.next}`; 
+                    explanation = `El número anterior es ${currentData.n} menos 1. El posterior es ${currentData.n} más 1.`; 
+                    break; 
+                case 'read': 
+                    displayVal = currentData.ans; 
+                    explanation = `Leemos el texto y buscamos la cifra correspondiente: ${currentData.ans}.`; 
+                    break; 
+                case 'order': 
+                    displayVal = currentData.sorted.join(" < "); 
+                    explanation = `Comparamos todos los números y los ordenamos del más pequeño al más grande.`; 
+                    break; 
+                case 'numToText': 
+                    displayVal = currentData.ans; 
+                    explanation = `El número ${currentData.val} se escribe con letras de la siguiente manera.`; 
+                    break; 
+            } 
+            
+            // CONSTRUCCIÓN DEL HTML EXACTO A LA IMAGEN
+            const contentArea = document.getElementById('solution-content-area');
+            contentArea.innerHTML = `
+                <div class="sol-content">${explanation}</div>
+                <div class="sol-value">${displayVal}</div>
+            `;
+            
+            speakText(explanation); 
+        }
+        
+        function closeSolution() { document.getElementById('solution-modal').classList.add('hidden'); if (synth.speaking) synth.cancel(); }
+        function showSymbolHelp() { document.getElementById('symbol-help-modal').classList.remove('hidden'); document.getElementById('close-help-btn').classList.add('hidden'); showSymbolStep('>', 'MAYOR QUE', 0); }
+        function showSymbolStep(sym, text, step) { const svgBox = document.getElementById('symbol-svg-container'); const textBox = document.getElementById('symbol-text-container'); svgBox.innerHTML = ''; textBox.innerText = ''; let svgHTML = sym === '>' ? '<svg viewBox="0 0 100 100" width="150" height="150"><path stroke="#FF8C00" stroke-width="20" fill="none" stroke-linecap="round" stroke-linejoin="round" d="M10,20 L90,50 L10,80" /></svg>' : sym === '=' ? '<svg viewBox="0 0 100 100" width="150" height="150"><path stroke="#FF8C00" stroke-width="20" fill="none" stroke-linecap="round" stroke-linejoin="round" d="M10,35 L90,35 M10,65 L90,65" /></svg>' : '<svg viewBox="0 0 100 100" width="150" height="150"><path stroke="#FF8C00" stroke-width="20" fill="none" stroke-linecap="round" stroke-linejoin="round" d="M90,20 L10,50 L90,80" /></svg>'; svgBox.innerHTML = svgHTML; speakText("Este es el signo " + text); setTimeout(() => { textBox.innerText = text; }, 500); setTimeout(() => { if(step === 0) showSymbolStep('=', 'IGUAL QUE', 1); else if(step === 1) showSymbolStep('<', 'MENOR QUE', 2); else document.getElementById('close-help-btn').classList.remove('hidden'); }, 2500); }
+        function closeSymbolHelp() { document.getElementById('symbol-help-modal').classList.add('hidden'); if(synth.speaking) synth.cancel(); }
+        function showUnitsHelp() { document.getElementById('units-help-modal').classList.remove('hidden'); document.getElementById('close-units-btn').classList.add('hidden'); showUnitsStep(0); }
+        function showUnitsStep(step) { const visBox = document.getElementById('units-visual-container'); const txtBox = document.getElementById('units-text-container'); visBox.innerHTML = ''; txtBox.innerText = ''; if (step === 0) { visBox.innerHTML = `<div style="width:140px;height:140px;background:#2ECC71;border:4px solid #27ae60;display:flex;justify-content:center;align-items:center;color:white;font-family:'Quicksand';font-weight:bold;font-size:3rem;">1 C</div>`; let text = "1 CENTENA = 100 UNIDADES"; speakText("Una centena es igual a cien unidades."); setTimeout(() => { txtBox.innerText = text; }, 200); setTimeout(() => { showUnitsStep(1); }, 3500); } else if (step === 1) { visBox.innerHTML = `<div style="width:40px;height:140px;background:#E74C3C;border:4px solid #c0392b;display:flex;justify-content:center;align-items:center;color:white;font-family:'Quicksand';font-weight:bold;font-size:3rem;">1 D</div>`; let text = "1 DECENA = 10 UNIDADES"; speakText("Una decena es igual a diez unidades."); setTimeout(() => { txtBox.innerText = text; }, 200); setTimeout(() => { document.getElementById('close-units-btn').classList.remove('hidden'); }, 3000); } }
+        function closeUnitsHelp() { document.getElementById('units-help-modal').classList.add('hidden'); if(synth.speaking) synth.cancel(); }
+        function showBlocks(n) { const modal = document.getElementById('blocks-modal'); const area = document.getElementById('blocks-area'); modal.classList.remove('hidden'); area.innerHTML = ''; let c = Math.floor(n/100), d = Math.floor((n%100)/10), u = n%10; const makeB = (cls,txt='') => { let e=document.createElement('div'); e.className=cls; e.innerText=txt; if(cls.includes('hundred')) {e.style.cssText="width:60px;height:60px;background:#2ECC71;border:3px solid #27ae60;display:flex;justify-content:center;align-items:center;color:white;font-weight:bold;font-family:'Quicksand';";} if(cls.includes('ten')) {e.style.cssText="width:15px;height:60px;background:#E74C3C;border:2px solid #c0392b;";} if(cls.includes('unit')) {e.style.cssText="width:15px;height:15px;background:#3498DB;border:2px solid #2980b9;";} area.appendChild(e); }; for(let i=0; i<c; i++) makeB('b-hundred','100'); if(c>0) area.appendChild(document.createElement('div')).style.width='10px'; for(let i=0; i<d; i++) makeB('b-ten'); if(d>0) area.appendChild(document.createElement('div')).style.width='10px'; for(let i=0; i<u; i++) makeB('b-unit'); }
+        function closeBlocks() { document.getElementById('blocks-modal').classList.add('hidden'); }
+        function showVocabHelp() { document.getElementById('vocab-modal').classList.remove('hidden'); speakText("Anterior es menos uno. Posterior es más uno."); }
+        function closeVocab() { document.getElementById('vocab-modal').classList.add('hidden'); if(synth.speaking) synth.cancel(); }
+        function showOrderHelp() { document.getElementById('order-help-modal').classList.remove('hidden'); speakText("Busca el número más pequeño."); }
+        function closeOrderHelp() { document.getElementById('order-help-modal').classList.add('hidden'); }
+
+    </script>
+</body>
+</html>
+
+

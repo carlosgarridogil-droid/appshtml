@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bebemos un vasito - Capacidad</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Nunito:wght@700;900&display=swap');
+
+        :root {
+            --azul: #0091EA; --rosa: #FF4081; --verde: #00C853; 
+            --rojo: #D50000; --amarillo: #FFD600; --morado: #6A1B9A;
+            --naranja: #FF6D00; --plata: #B0BEC5; --plata-oscura: #78909C;
+            --bg-game: #E1F5FE;
+        }
+
+        * { box-sizing: border-box; user-select: none; }
+
+        body {
+            font-family: 'Nunito', sans-serif; margin: 0; padding: 0; 
+            background: #004D40; height: 100vh; width: 100vw; 
+            display: flex; justify-content: center; align-items: center; overflow: hidden;
+        }
+
+        #game-container {
+            background: var(--bg-game); width: 96vw; max-width: 1100px; height: 92vh;
+            border-radius: 40px; border: 8px solid white; position: relative;
+            display: flex; flex-direction: column; box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            background-image: radial-gradient(#81D4FA 3px, transparent 3px);
+            background-size: 30px 30px; overflow: hidden;
+        }
+
+        .screen { display: none; flex-direction: column; height: 100%; width: 100%; align-items: center; justify-content: space-between; position: relative; }
+        .active { display: flex; }
+
+        /* --- PANTALLA INICIAL --- */
+        .header-main { margin-top: 4%; display: flex; align-items: center; justify-content: center; gap: 20px; flex-shrink: 0; width: 100%; padding: 0 20px; flex-wrap: wrap; }
+        
+        .etiqueta { padding: 8px 18px; border-radius: 20px; font-family: 'Luckiest Guy'; color: white; font-size: 1.3rem; text-shadow: 2px 2px 0 rgba(0,0,0,0.2); box-shadow: 0 4px 0 rgba(0,0,0,0.2); white-space: nowrap; }
+        .etiq-mate { background: var(--morado); transform: rotate(-5deg); }
+        .etiq-curso { background: var(--rosa); transform: rotate(5deg); }
+        
+        /* Título modificado: tamaño adaptativo con clamp para asegurar que quepa en una línea junto a las etiquetas */
+        .titulo { font-family: 'Luckiest Guy'; font-size: clamp(2.5rem, 5vw, 4.8rem); color: var(--azul); text-shadow: -4px -4px 0 white, 4px -4px 0 white, -4px 4px 0 white, 4px 4px 0 white, 6px 6px 0 var(--morado); margin: 0; text-align: center; line-height: 1; white-space: nowrap; }
+        
+        .subtitulo { font-family: 'Luckiest Guy'; color: var(--naranja); font-size: 1.8rem; margin: 10px 0 0 0; text-shadow: 2px 2px 0 white; }
+
+        .iconos-3d { font-size: 5.5rem; filter: drop-shadow(0 10px 5px rgba(0,0,0,0.3)); margin: 10px 0; }
+        
+        .btn-jugar { background: var(--rojo); color: white; border: 6px solid white; font-family: 'Luckiest Guy'; font-size: 3rem; padding: 15px 60px; border-radius: 50px; cursor: pointer; box-shadow: 0 10px 0 #B71C1C; transition: 0.1s; margin-bottom: 20px; z-index: 10; }
+        .btn-jugar:active { transform: translateY(8px); box-shadow: 0 2px 0 #B71C1C; }
+
+        /* --- CRÉDITOS --- */
+        .creditos { text-align: center; color: #37474F; font-size: 1.1rem; font-weight: 900; line-height: 1.3; margin-bottom: 2%; }
+        .iris-dedic { color: var(--rosa); font-size: 1.4rem; font-family: 'Luckiest Guy'; letter-spacing: 1px; }
+
+        /* --- MARCADORES --- */
+        .marcadores-container { 
+            display: flex; justify-content: center; gap: 15px; width: 100%; padding: 15px 10px; 
+            background: rgba(255,255,255,0.7); border-bottom: 4px dashed var(--azul); z-index: 100;
+        }
+        .marcador {
+            padding: 10px 30px; border-radius: 20px; font-family: 'Luckiest Guy'; font-size: 2rem; 
+            color: white; border: 4px solid white; background: var(--rojo);
+            box-shadow: 0 6px 0 rgba(0,0,0,0.3); transform: translateY(-5px); display: flex; align-items: center; gap: 10px;
+        }
+
+        .btn-audio { position: absolute; top: 90px; left: 20px; background: white; border: 4px solid var(--azul); border-radius: 50%; width: 55px; height: 55px; font-size: 1.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 0 var(--azul); transition: 0.1s; z-index: 100; }
+        
+        /* --- CAJA SORPRESA --- */
+        #caja-sorpresa {
+            position: absolute; right: 30px; top: 120px; font-size: 5rem; cursor: pointer;
+            filter: drop-shadow(0 8px 5px rgba(0,0,0,0.4)); display: none; z-index: 150;
+            animation: latido 1.5s infinite, flotar 3s ease-in-out infinite;
+        }
+        #caja-sorpresa:active { transform: scale(0.9); }
+        @keyframes latido { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15) rotate(10deg); } }
+        @keyframes flotar { 0%, 100% { top: 120px; } 50% { top: 100px; } }
+
+        /* --- ZONA DE JUEGO --- */
+        .nivel-indicador { background: var(--morado); color: white; padding: 5px 25px; border-radius: 20px; font-family: 'Luckiest Guy'; font-size: 1.6rem; margin-top: 15px; box-shadow: 0 4px 0 #4A148C; text-align: center; }
+        .pregunta-texto { font-family: 'Luckiest Guy'; font-size: 2rem; color: var(--morado); text-align: center; margin: 10px 0; padding: 0 20px; }
+
+        .mesa-container { display: flex; width: 90%; justify-content: space-around; align-items: flex-end; flex-grow: 1; padding-bottom: 20px; position: relative; }
+        .mesa-patas { position: absolute; bottom: 0; left: 15%; width: 70%; height: 80px; display: flex; justify-content: space-between; z-index: 0; }
+        .pata { width: 35px; height: 100%; background: #5D4037; border-radius: 5px 5px 0 0; border: 4px solid #3E2723; border-bottom: none; }
+        .mesa-tablero { position: absolute; bottom: 80px; left: 10%; width: 80%; height: 25px; background: #8D6E63; z-index: 0; border-radius: 10px; border: 4px solid #4E342E; box-shadow: 0 8px 0 rgba(0,0,0,0.2); }
+
+        .bandeja { width: 40%; min-height: 190px; background: rgba(255,255,255,0.9); border: 8px solid var(--naranja); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 10px; box-shadow: 0 15px 0 rgba(0,0,0,0.1); position: relative; z-index: 10; transition: background 0.2s; margin-bottom: 20px;}
+        .bandeja-drop-active { background: #E8F5E9; border-color: var(--verde); }
+
+        .producto-img { font-size: 6.5rem; filter: drop-shadow(0 8px 4px rgba(0,0,0,0.3)); margin-bottom: 5px; }
+        .producto-etiqueta { background: white; border: 3px solid var(--rojo); color: var(--rojo); font-family: 'Luckiest Guy'; font-size: 1.6rem; padding: 5px 15px; border-radius: 15px; box-shadow: 0 4px 0 var(--rojo); margin-top: auto; text-align: center; line-height: 1.1;}
+        .zona-pesas-plato { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; align-items: flex-end; min-height: 110px; width: 100%; margin-bottom: 10px; }
+
+        /* --- ESTANTE DE LÍQUIDOS --- */
+        .estante { width: 95%; background: #90A4AE; border-radius: 20px; border: 6px solid #607D8B; padding: 15px; display: flex; justify-content: space-around; align-items: flex-end; margin-bottom: 15px; box-shadow: inset 0 10px 0 rgba(0,0,0,0.15), 0 8px 0 #455A64; }
+        
+        .envase { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; color: #01579B; font-family: 'Luckiest Guy'; text-shadow: 1px 1px 0 white; cursor: grab; filter: drop-shadow(0 5px 2px rgba(0,0,0,0.4)); transition: transform 0.1s; }
+        .envase:active { cursor: grabbing; transform: scale(0.95); }
+        .envase::before { content: ''; display: block; width: 35%; height: 12px; background: #0288D1; border-radius: 4px 4px 0 0; border: 2px solid #01579B; border-bottom: none; }
+        .cuerpo-envase { background: linear-gradient(to bottom, #E1F5FE, #29B6F6); border: 3px solid #01579B; border-radius: 12px 12px 6px 6px; display: flex; align-items: center; justify-content: center; width: 100%; box-shadow: inset -5px -5px 10px rgba(0,200,255,0.4); }
+        
+        .e-1l { width: 70px; } .e-1l .cuerpo-envase { height: 90px; font-size: 2rem; }
+        .e-medio { width: 55px; } .e-medio .cuerpo-envase { height: 70px; font-size: 1.5rem; }
+        .e-cuarto { width: 45px; } .e-cuarto .cuerpo-envase { height: 50px; font-size: 1.1rem; }
+
+        .controles-accion { display: flex; gap: 20px; margin-bottom: 20px; }
+        .btn-accion { font-family: 'Luckiest Guy'; font-size: 2rem; padding: 10px 30px; border-radius: 30px; cursor: pointer; border: none; color: white; transition: 0.1s; }
+        .btn-comprobar { background: var(--verde); box-shadow: 0 8px 0 #1B5E20; }
+        .btn-comprobar:active { transform: translateY(5px); box-shadow: 0 3px 0 #1B5E20; }
+        .btn-vaciar { background: var(--rojo); box-shadow: 0 8px 0 #B71C1C; }
+        .btn-vaciar:active { transform: translateY(5px); box-shadow: 0 3px 0 #B71C1C; }
+
+        .float-score { position: absolute; font-family: 'Luckiest Guy'; font-size: 6rem; color: var(--amarillo); text-shadow: 4px 4px 0 var(--naranja), -2px -2px 0 white, 2px -2px 0 white; z-index: 1000; pointer-events: none; animation: floatUp 1.5s ease-out forwards; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); } 20% { transform: translate(-50%, -60%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -150%) scale(1); } }
+
+        /* --- MODALES --- */
+        .modal { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; color: white; border-radius: 32px; backdrop-filter: blur(5px); }
+        .modal-box { background: linear-gradient(135deg, var(--azul), #00BCD4); padding: 40px; border-radius: 40px; border: 8px solid white; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); width: 80%; max-width: 700px; }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .modal h2 { font-family: 'Luckiest Guy'; font-size: 3.5rem; margin: 0; text-shadow: 4px 4px 0 #01579B; color: var(--amarillo); }
+        .modal p { font-family: 'Luckiest Guy'; font-size: 2.2rem; margin: 15px 0 25px 0; }
+        .modal-iconos { font-size: 6rem; filter: drop-shadow(0 8px 4px rgba(0,0,0,0.4)); margin-bottom: 10px; }
+
+        /* --- PANTALLA PODIO FINAL --- */
+        #screen-podio {
+            background: linear-gradient(45deg, var(--azul), #00BCD4, var(--verde), var(--amarillo));
+            background-size: 400% 400%; animation: bgArcoiris 8s ease infinite;
+            border-radius: 32px; flex-direction: column; justify-content: center; padding: 30px;
+        }
+        @keyframes bgArcoiris { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+        
+        .podio-titulo { font-family: 'Luckiest Guy'; font-size: 5.5rem; color: white; text-shadow: 4px 4px 0 black; margin-bottom: 20px; text-align: center; line-height: 1; margin-top: 0;}
+        .ranking-container { background: rgba(255,255,255,0.95); border-radius: 30px; padding: 40px; width: 80%; max-width: 600px; box-shadow: 0 20px 0 rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; margin-bottom: 40px; border: 8px solid var(--amarillo); }
+
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    
+    <div id="screen-inicio" class="screen active">
+        <div class="header-main">
+            <div class="etiqueta etiq-mate">MATEMÁTICAS</div>
+            <h1 class="titulo">BEBEMOS UN VASITO</h1>
+            <div class="etiqueta etiq-curso">2º PRIMARIA</div>
+        </div>
+        <h2 class="subtitulo">¡Aprende Jugando!</h2>
+        
+        <div class="iconos-3d">🪣 💧 🥛</div>
+
+        <button class="btn-jugar" onclick="iniciarJuego()">¡EMPEZAR A JUGAR!</button>
+
+        <div class="creditos">
+            <div class="credit-line">Elaborado por Carlos Garrido - IA Gemini</div>
+            <div class="credit-line">Curso escolar 2025-2026</div>
+            <div class="iris-dedic">💖 Especialmente para Iris 💖</div>
+        </div>
+    </div>
+
+    <div id="screen-juego" class="screen">
+        <div class="marcadores-container">
+            <div class="marcador">PUNTOS: ⭐ <span id="pts-0">0</span></div>
+        </div>
+
+        <button class="btn-audio" onclick="leerPreguntaActual()">🔊</button>
+        <div id="caja-sorpresa" onclick="abrirCaja()">🎁</div>
+        
+        <div class="nivel-indicador" id="ind-nivel">NIVEL 1</div>
+        <div class="pregunta-texto" id="texto-pregunta">Arrastra las botellas necesarias para llenar el recipiente.</div>
+
+        <div class="mesa-container">
+            <div class="mesa-patas">
+                <div class="pata"></div>
+                <div class="pata"></div>
+            </div>
+            <div class="mesa-tablero"></div>
+
+            <div class="bandeja" id="plato-izquierdo">
+                <div class="producto-img" id="img-producto">🪣</div>
+                <div class="producto-etiqueta" id="etiqueta-peso">2 litros</div>
+            </div>
+            <div class="bandeja" id="plato-derecho" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)">
+                <div class="zona-pesas-plato" id="zona-pesas"></div>
+                <div style="font-family:'Nunito'; font-weight:bold; color:var(--naranja); font-size: 1.2rem; margin-top: 10px; text-align: center;">Arrástralas aquí 👇</div>
+            </div>
+        </div>
+
+        <div class="controles-accion">
+            <button class="btn-accion btn-vaciar" onclick="vaciarBalanza()">VACIAR</button>
+            <button class="btn-accion btn-comprobar" onclick="comprobarCapacidad()">¡COMPROBAR!</button>
+        </div>
+
+        <div class="estante">
+            <div class="envase e-1l" draggable="true" ondragstart="drag(event)" data-valor="1000" onclick="añadirEnvaseClick(1000, '1 L', 'e-1l')"><div class="cuerpo-envase">1 L</div></div>
+            <div class="envase e-medio" draggable="true" ondragstart="drag(event)" data-valor="500" onclick="añadirEnvaseClick(500, '1/2 L', 'e-medio')"><div class="cuerpo-envase">1/2 L</div></div>
+            <div class="envase e-cuarto" draggable="true" ondragstart="drag(event)" data-valor="250" onclick="añadirEnvaseClick(250, '1/4 L', 'e-cuarto')"><div class="cuerpo-envase">1/4 L</div></div>
+        </div>
+    </div>
+
+    <div id="screen-podio" class="screen">
+        <h1 class="podio-titulo">¡RETO COMPLETADO!</h1>
+        <div class="iconos-3d" style="margin: 0;">🏆 💧 🌟</div>
+        <div class="ranking-container">
+            <h2 style="font-family: 'Luckiest Guy'; font-size: 3rem; color: var(--morado); margin: 0;">TU PUNTUACIÓN FINAL:</h2>
+            <div style="font-family: 'Luckiest Guy'; font-size: 7rem; color: var(--rojo); text-shadow: 4px 4px 0 var(--amarillo); margin: 10px 0;" id="puntuacion-final-texto">0</div>
+        </div>
+        <button class="btn-jugar" onclick="location.reload()" style="font-size: 2.2rem; padding: 15px 40px;">VOLVER A JUGAR</button>
+    </div>
+
+    <div id="modal-estado" class="modal">
+        <div class="modal-box">
+            <div class="modal-iconos" id="modal-icono">💧🪣💧</div>
+            <h2 id="modal-titulo">¡NIVEL 1 SUPERADO!</h2>
+            <p id="modal-texto">¡Ya dominas los litros!</p>
+            <button class="btn-jugar" id="btn-modal-accion" style="font-size: 2.2rem; padding: 15px 40px; margin-bottom: 0;" onclick="siguienteNivel()">CONTINUAR</button>
+        </div>
+    </div>
+
+    <div id="modal-sorpresa" class="modal">
+        <div class="modal-box" style="background: linear-gradient(135deg, var(--naranja), var(--rojo)); border-color: var(--amarillo);">
+            <div class="modal-iconos" style="animation: latido 1s infinite;">🎁✨</div>
+            <h2 id="sorpresa-titulo" style="font-size: 3.5rem;">¡SORPRESA!</h2>
+            <p id="sorpresa-texto" style="font-size: 2.8rem; color: white; text-shadow: 2px 2px 0 black; margin-bottom: 40px;">Has encontrado un regalo</p>
+            
+            <button class="btn-jugar" id="btn-sorpresa-ok" style="font-size: 2.2rem; padding: 15px 40px; margin-bottom: 0;" onclick="cerrarSorpresa()">¡ENTENDIDO!</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+
+    function playSound(tipo) {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+
+        if(tipo === 'acierto') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1046.50, audioCtx.currentTime + 0.2); 
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        } else if (tipo === 'error') {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.4);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+        } else if (tipo === 'magia') {
+            osc.type = 'sine';
+            [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + (i * 0.1));
+            });
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+        }
+    }
+
+    function hablar(texto, callback) {
+        window.speechSynthesis.cancel();
+        const m = new SpeechSynthesisUtterance(texto); m.lang = 'es-ES'; m.rate = 1.0;
+        if(callback) m.onend = callback;
+        window.speechSynthesis.speak(m);
+    }
+
+    const bancoPreguntas = [
+        { img: "🪣", etiqueta: "2 litros", valor: 2000 },
+        { img: "🥣", etiqueta: "Medio litro", valor: 500 },
+        { img: "🏺", etiqueta: "1 litro", valor: 1000 },
+        { img: "☕", etiqueta: "1 litro y medio", valor: 1500 },
+        { img: "🍲", etiqueta: "3 litros", valor: 3000 },
+        { img: "🍼", etiqueta: "Un cuarto de litro", valor: 250 },
+        { img: "🐠", etiqueta: "2 litros y medio", valor: 2500 },
+        { img: "🚿", etiqueta: "4 litros", valor: 4000 },
+        { img: "🥤", etiqueta: "Medio litro", valor: 500 },
+        { img: "🧊", etiqueta: "1 litro y medio", valor: 1500 },
+        
+        { img: "🍹", etiqueta: "3 cuartos de litro", valor: 750 },
+        { img: "🥘", etiqueta: "2 litros y cuarto", valor: 2250 },
+        { img: "🍶", etiqueta: "1 litro", valor: 1000 },
+        { img: "🍷", etiqueta: "Un cuarto de litro", valor: 250 },
+        { img: "🛢️", etiqueta: "5 litros", valor: 5000 },
+        { img: "🛁", etiqueta: "4 litros y medio", valor: 4500 },
+        { img: "🧉", etiqueta: "1 litro y cuarto", valor: 1250 },
+        { img: "🍯", etiqueta: "Medio litro", valor: 500 },
+        { img: "🧴", etiqueta: "3 cuartos de litro", valor: 750 },
+        { img: "🍵", etiqueta: "Un cuarto de litro", valor: 250 },
+        
+        { img: "🪣", etiqueta: "3 litros y 3 cuartos", valor: 3750 },
+        { img: "🏺", etiqueta: "2 litros y 3 cuartos", valor: 2750 },
+        { img: "💧", etiqueta: "4 litros y cuarto", valor: 4250 },
+        { img: "🍲", etiqueta: "5 litros y medio", valor: 5500 },
+        { img: "🧪", etiqueta: "1 litro y 3 cuartos", valor: 1750 },
+        { img: "🚰", etiqueta: "6 litros", valor: 6000 },
+        { img: "🧊", etiqueta: "4 litros y medio", valor: 4500 },
+        { img: "🥛", etiqueta: "2 litros y medio", valor: 2500 },
+        { img: "⛲", etiqueta: "3 litros y cuarto", valor: 3250 },
+        { img: "🪴", etiqueta: "1 litro y cuarto", valor: 1250 }
+    ];
+
+    const eventosSorpresa = [
+        { tipo: 'puntos', val: 500, txt: "¡WOOW! ¡GANAS 500 PUNTOS EXTRA!" },
+        { tipo: 'puntos', val: 300, txt: "¡GENIAL! ¡GANAS 300 PUNTOS!" },
+        { tipo: 'puntos', val: 200, txt: "¡QUÉ SUERTE! ¡+200 PUNTOS!" },
+        { tipo: 'puntos', val: -100, txt: "¡OH NO! SE DERRAMA AGUA. PIERDES 100 PUNTOS" },
+        { tipo: 'mitad', val: 0, txt: "¡UN DUENDE SE BEBE LA MITAD DE TUS PUNTOS!" }
+    ];
+
+    let indiceActual = 0; let liquidoEnBandeja = 0; let bloqueando = false;
+    let puntuacionJugador = 0; 
+
+    function iniciarJuego() {
+        document.getElementById('screen-inicio').classList.remove('active');
+        document.getElementById('screen-juego').classList.add('active');
+        indiceActual = 0; puntuacionJugador = 0;
+        actualizarMarcador(); cargarPregunta();
+    }
+
+    function actualizarMarcador() {
+        document.getElementById('pts-0').innerText = puntuacionJugador;
+    }
+
+    function cargarPregunta() {
+        bloqueando = false; vaciarBalanzaSilencioso();
+        document.getElementById('ind-nivel').innerText = indiceActual < 10 ? "NIVEL 1" : (indiceActual < 20 ? "NIVEL 2" : "NIVEL 3");
+        
+        const p = bancoPreguntas[indiceActual];
+        document.getElementById('img-producto').innerText = p.img;
+        document.getElementById('etiqueta-peso').innerText = p.etiqueta;
+        
+        const caja = document.getElementById('caja-sorpresa');
+        if(Math.random() < 0.25) { caja.style.display = 'block'; } 
+        else { caja.style.display = 'none'; }
+
+        leerPreguntaActual();
+    }
+
+    function leerPreguntaActual() {
+        if(bloqueando) return;
+        const p = bancoPreguntas[indiceActual];
+        hablar(`El recipiente necesita ${p.etiqueta}. Arrastra las botellas.`);
+    }
+
+    function abrirCaja() {
+        if(bloqueando) return;
+        document.getElementById('caja-sorpresa').style.display = 'none'; 
+        playSound('magia');
+        
+        const eventoAleatorio = eventosSorpresa[Math.floor(Math.random() * eventosSorpresa.length)];
+        
+        document.getElementById('sorpresa-texto').innerText = eventoAleatorio.txt;
+        document.getElementById('modal-sorpresa').style.display = 'flex';
+        
+        hablar(eventoAleatorio.txt);
+        confetti({ particleCount: 150, spread: 100, origin: { y: 0.4 }, zIndex: 3000 });
+
+        if(eventoAleatorio.tipo === 'puntos') {
+            puntuacionJugador = Math.max(0, puntuacionJugador + eventoAleatorio.val); 
+        } else if (eventoAleatorio.tipo === 'mitad') {
+            puntuacionJugador = Math.floor(puntuacionJugador / 2);
+        }
+    }
+
+    function cerrarSorpresa() {
+        document.getElementById('modal-sorpresa').style.display = 'none';
+        actualizarMarcador();
+    }
+
+    function drag(ev) { if(bloqueando) return; ev.dataTransfer.setData("valor", ev.target.getAttribute('data-valor')); ev.dataTransfer.setData("clase", ev.target.className); ev.dataTransfer.setData("texto", ev.target.querySelector('.cuerpo-envase').innerText); }
+    function allowDrop(ev) { ev.preventDefault(); document.getElementById('plato-derecho').classList.add('bandeja-drop-active'); }
+    function dragLeave(ev) { document.getElementById('plato-derecho').classList.remove('bandeja-drop-active'); }
+    function drop(ev) {
+        ev.preventDefault(); document.getElementById('plato-derecho').classList.remove('bandeja-drop-active');
+        if(bloqueando) return;
+        const valor = parseInt(ev.dataTransfer.getData("valor")); const claseStr = ev.dataTransfer.getData("clase"); const texto = ev.dataTransfer.getData("texto");
+        if(!valor) return; 
+        añadirEnvaseVisual(valor, texto, claseStr.split(' ')[1]);
+    }
+
+    function añadirEnvaseClick(valor, texto, claseEspecifica) { if(bloqueando) return; añadirEnvaseVisual(valor, texto, claseEspecifica); }
+
+    function añadirEnvaseVisual(valor, texto, claseEspecifica) {
+        liquidoEnBandeja += valor;
+        const nuevoEnvase = document.createElement('div'); nuevoEnvase.className = `envase ${claseEspecifica}`; nuevoEnvase.style.cursor = 'pointer'; nuevoEnvase.innerHTML = `<div class="cuerpo-envase">${texto}</div>`;
+        nuevoEnvase.onclick = function() { if(bloqueando) return; liquidoEnBandeja -= valor; this.remove(); playSound('error'); };
+        document.getElementById('zona-pesas').appendChild(nuevoEnvase);
+        
+        const osc = audioCtx.createOscillator(); osc.frequency.setValueAtTime(900, audioCtx.currentTime); osc.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+    }
+
+    function vaciarBalanzaSilencioso() { document.getElementById('zona-pesas').innerHTML = ""; liquidoEnBandeja = 0; }
+    function vaciarBalanza() { if(bloqueando) return; vaciarBalanzaSilencioso(); playSound('error'); }
+
+    function comprobarCapacidad() {
+        if(bloqueando) return;
+        bloqueando = true; window.speechSynthesis.cancel();
+        const p = bancoPreguntas[indiceActual];
+
+        document.getElementById('caja-sorpresa').style.display = 'none';
+
+        if(liquidoEnBandeja === p.valor) {
+            document.getElementById('plato-derecho').style.background = "#C8E6C9"; document.getElementById('plato-derecho').style.borderColor = "#1B5E20";
+            playSound('acierto');
+            puntuacionJugador += 100;
+            actualizarMarcador();
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            
+            hablar(`¡Perfecto! Has llenado el recipiente.`, () => {
+                document.getElementById('plato-derecho').style.background = ""; document.getElementById('plato-derecho').style.borderColor = "";
+                avanzar(); 
+            });
+        } else {
+            document.getElementById('plato-derecho').style.background = "#FFCCBC"; document.getElementById('plato-derecho').style.borderColor = "#B71C1C";
+            playSound('error');
+            let pista = liquidoEnBandeja > p.valor ? "Te has pasado, hay demasiado líquido." : "Aún falta líquido.";
+            
+            hablar(`¡Uy! No es correcto. ${pista} Inténtalo de nuevo.`, () => {
+                document.getElementById('plato-derecho').style.background = ""; document.getElementById('plato-derecho').style.borderColor = "";
+                vaciarBalanzaSilencioso(); bloqueando = false; 
+            });
+        }
+    }
+
+    function avanzar() {
+        indiceActual++;
+        if (indiceActual === 10) { mostrarModalEstado(1); }
+        else if (indiceActual === 20) { mostrarModalEstado(2); }
+        else if (indiceActual >= 30) { finalizarJuego(); }
+        else { cargarPregunta(); }
+    }
+
+    function mostrarModalEstado(nivelTerminado) {
+        playSound('acierto'); 
+        confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 }, zIndex: 3000 });
+        document.getElementById('modal-titulo').innerText = `¡NIVEL ${nivelTerminado} SUPERADO!`;
+        document.getElementById('modal-icono').innerText = nivelTerminado === 1 ? "🥤✨💧" : "🪣🌟🌊";
+        document.getElementById('modal-estado').style.display = 'flex';
+        hablar(`¡Nivel ${nivelTerminado} superado!`);
+    }
+
+    function siguienteNivel() { document.getElementById('modal-estado').style.display = 'none'; cargarPregunta(); }
+
+    function finalizarJuego() {
+        document.getElementById('screen-juego').classList.remove('active');
+        document.getElementById('screen-podio').classList.add('active');
+        
+        document.getElementById('puntuacion-final-texto').innerText = puntuacionJugador;
+
+        let duration = 15 * 1000;
+        let animationEnd = Date.now() + duration;
+        let defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+        function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+        let interval = setInterval(function() {
+            let timeLeft = animationEnd - Date.now();
+            if (timeLeft <= 0) { return clearInterval(interval); }
+            let particleCount = 50 * (timeLeft / duration);
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }, colors: ['#00BCD4', '#0288D1', '#FFFFFF'] }));
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }, colors: ['#00BCD4', '#0288D1', '#FFFFFF'] }));
+        }, 250);
+
+        hablar(`¡Reto completado! Has conseguido ${puntuacionJugador} puntos. ¡Eres un experto en litros!`);
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taller de Problemas 2º | Carlos Garrido</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #009688; /* Verde azulado para 2º */
+            --primary-dark: #00796B;
+            --accent: #FFC107;
+            --success: #4CAF50;
+            --error: #F44336;
+            --bg-color: #E0F2F1;
+            --card-bg: #FFFFFF;
+            --text-main: #263238;
+            --keyword-color: #E91E63; 
+        }
+
+        body {
+            font-family: 'Varela Round', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#B2DFDB 2px, transparent 2px);
+            background-size: 30px 30px;
+            margin: 0;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; color: var(--text-main);
+        }
+
+        #game-card {
+            background: var(--card-bg); width: 95%; max-width: 950px; height: 95vh; max-height: 850px;
+            border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; overflow: hidden; position: relative;
+            border: 4px solid #fff;
+        }
+
+        /* HEADER */
+        .header-bar {
+            background: var(--primary); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;
+            color: white; height: 60px;
+        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        
+        .home-btn { 
+            background: rgba(255,255,255,0.2); border: none; font-size: 1.5rem; cursor: pointer; 
+            padding: 8px 12px; border-radius: 10px; transition: 0.2s; color: white; display: flex; align-items: center; justify-content: center;
+        }
+        .home-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
+        
+        .game-title-small { font-family: 'Fredoka One'; font-size: 1.2rem; margin: 0; letter-spacing: 1px; }
+        .level-badge { background: var(--accent); color: #3E2723; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+        
+        /* TIMER */
+        .timer-container { 
+            font-size: 1.3rem; font-family: 'Fredoka One'; background: rgba(0,0,0,0.2); 
+            padding: 5px 15px; border-radius: 20px; display: flex; align-items: center; gap: 5px;
+        }
+
+        /* PANTALLA DE INICIO (MENU) */
+        #start-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #E0F2F1 0%, #FFFFFF 100%);
+            z-index: 300;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 40px; box-sizing: border-box; overflow-y: auto;
+        }
+
+        .main-title { font-family: 'Fredoka One'; font-size: 3.5rem; color: var(--primary); margin: 0; text-align: center; text-shadow: 4px 4px 0px #B2DFDB; }
+        
+        .sub-title-container { text-align: center; margin-bottom: 30px; }
+        .sub-title-1 { font-family: 'Varela Round'; font-size: 1.8rem; color: #546E7A; margin: 5px 0; font-weight: bold; }
+        .sub-title-innovamat { font-family: 'Varela Round'; font-size: 1.1rem; color: #7986CB; margin-bottom: 15px; font-style: italic; }
+        .author-text { font-family: 'Varela Round'; font-size: 1.1rem; color: #90A4AE; margin-top: 5px; }
+        .version-text { font-family: 'Varela Round'; font-size: 0.9rem; color: #B0BEC5; margin-top: 2px; letter-spacing: 1px; text-transform: uppercase; }
+
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 20px; width: 100%; max-width: 800px;
+        }
+
+        .level-btn {
+            background: white; border: 3px solid #B2DFDB; border-radius: 20px;
+            padding: 15px; text-align: center; cursor: pointer;
+            transition: all 0.2s; box-shadow: 0 8px 0 #B2DFDB;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+        }
+        .level-btn:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 12px 0 rgba(0, 150, 136, 0.1); }
+        .level-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0, 150, 136, 0.1); }
+        
+        .lvl-num { font-family: 'Fredoka One'; font-size: 1.2rem; color: var(--primary); background: #E0F2F1; padding: 2px 10px; border-radius: 10px; }
+        .lvl-icon { font-size: 2.5rem; }
+        .lvl-desc { font-size: 0.8rem; color: #78909C; font-weight: bold; line-height: 1.2; }
+
+        /* MAIN CONTENT */
+        .main-stage {
+            flex: 1; display: flex; flex-direction: column; 
+            padding: 20px; overflow-y: auto; gap: 20px;
+            background: linear-gradient(to bottom, #fff, #F8F9FA);
+            align-items: center;
+        }
+
+        .problem-card {
+            background: #E0F7FA; border: 2px dashed #4DB6AC; border-radius: 15px; padding: 20px;
+            display: flex; gap: 20px; align-items: flex-start; width: 90%; max-width: 800px;
+        }
+        .p-icon { font-size: 3rem; background: white; padding: 10px; border-radius: 50%; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
+        .p-text { font-size: 1.1rem; line-height: 1.6; flex: 1; }
+        .highlight { color: #00695C; font-weight: bold; background: #B2DFDB; padding: 2px 6px; border-radius: 4px; }
+        
+        .keyword { 
+            color: var(--keyword-color); font-weight: bold; 
+            border-bottom: 2px dashed var(--keyword-color); cursor: help;
+        }
+
+        .hint-box {
+            background: #FFF8E1; border-left: 5px solid var(--accent); padding: 15px;
+            border-radius: 5px; margin-bottom: 10px; width: 90%; max-width: 800px;
+            display: none; animation: slideDown 0.3s ease-out;
+            font-style: italic; color: #5D4037; font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .hint-box.visible { display: block; }
+
+        .workspace {
+            display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; align-items: flex-start;
+            padding: 10px; width: 100%;
+        }
+
+        .operation-container {
+            background: white; padding: 20px; border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 2px solid #EEEEEE;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .op-label { display: none; } 
+
+        .vertical-grid {
+            display: inline-grid; gap: 5px 5px; justify-content: center; align-items: center;
+        }
+        
+        .header-cell {
+            font-family: 'Fredoka One'; font-size: 1.5rem; text-align: center;
+            height: 30px; line-height: 30px; margin-bottom: 5px;
+        }
+        .header-um { color: #FF9800; }
+        .header-c { color: #4CAF50; }
+        .header-d { color: #D50000; }
+        .header-u { color: #2962FF; }
+        .header-empty { color: transparent; }
+
+        .cell-input {
+            width: 50px; height: 50px; font-family: 'Fredoka One'; font-size: 1.8rem;
+            text-align: center; border: 2px solid #CFD8DC; border-radius: 8px;
+            background: #FAFAFA; color: var(--text-main); outline: none; transition: 0.2s;
+        }
+        
+        .cell-input.operator-input {
+            width: 40px; height: 40px; border-radius: 50%; 
+            background: #FFF3E0; border-color: #FFB74D; color: #E65100; font-size: 1.5rem;
+        }
+
+        .cell-input.carry {
+            height: 35px; font-size: 1.2rem; border: 2px dashed #4DB6AC; background: #E0F2F1; margin-bottom: -5px;
+        }
+
+        .cell-input:focus { border-color: var(--primary); background: #fff; transform: scale(1.1); z-index: 2; }
+        .cell-input.no-border { border: none; background: transparent; font-size: 2rem; color: var(--primary); line-height: 50px; }
+        
+        .cell-input.line { 
+            grid-column: 1 / -1; height: 4px; background: #37474F; 
+            border: none; margin: 0; border-radius: 2px; width: 100%; 
+        }
+        
+        .cell-input.correct { background: #C8E6C9; border-color: #4CAF50; color: #2E7D32; }
+        .cell-input.incorrect { background: #FFCDD2; border-color: #F44336; animation: shake 0.4s; }
+
+        /* SENTENCE ANSWER SECTION */
+        .sentence-answer-container {
+            width: 90%; max-width: 800px; margin-top: 15px;
+            background: #FAFAFA; padding: 15px 25px; border-radius: 15px; border: 2px solid #E0E0E0;
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px;
+            font-size: 1.3rem; color: #37474F; font-weight: bold;
+        }
+        .final-input {
+            width: 100px; padding: 5px 10px; font-size: 1.3rem; border: 3px solid #90A4AE; border-radius: 10px;
+            font-family: 'Fredoka One'; text-align: center; color: var(--primary);
+        }
+        .final-input:focus { border-color: var(--primary); outline: none; background: #E8EAF6; }
+        .final-input.correct { border-color: var(--success); background-color: #E8F5E9; color: #2E7D32; }
+        .final-input.incorrect { border-color: var(--error); background-color: #FFEBEE; }
+
+        .controls { 
+            margin-top: auto; display: flex; justify-content: space-between; align-items: center; 
+            padding: 15px 20px; background: #FFF; border-top: 1px solid #EEE;
+        }
+        .controls-left { display: flex; gap: 10px; align-items: center; }
+        
+        .btn {
+            border: none; padding: 12px 30px; border-radius: 30px; 
+            font-family: 'Fredoka One'; font-size: 1.1rem; cursor: pointer; 
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2); transition: transform 0.1s;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .btn-check { background: var(--success); color: white; }
+        .btn-hint { background: var(--accent); color: #3E2723; }
+        .btn-next { background: var(--primary); color: white; }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        .hidden { display: none !important; }
+
+        .feedback-msg { font-weight: bold; font-size: 1.2rem; margin-right: 20px; }
+
+        /* OVERLAYS */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98); z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .big-emoji { font-size: 5rem; animation: bounce 1s infinite; margin-bottom: 20px; }
+        
+        /* FEEDBACK REPORT */
+        .feedback-report {
+            background: white; padding: 30px; border-radius: 20px; width: 80%; max-width: 600px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: left;
+        }
+        .report-title { font-family: 'Fredoka One'; color: var(--primary); font-size: 2rem; margin-bottom: 20px; text-align: center; }
+        .feedback-list { list-style: none; padding: 0; }
+        .feedback-item { margin-bottom: 15px; font-size: 1.1rem; padding: 10px; border-radius: 10px; display: flex; align-items: flex-start; gap: 10px; }
+        .fb-icon { font-size: 1.5rem; }
+        .fb-good { background: #E8F5E9; color: #2E7D32; border-left: 5px solid #4CAF50; }
+        .fb-info { background: #E3F2FD; color: #1565C0; border-left: 5px solid #2196F3; }
+        .fb-warn { background: #FFF3E0; color: #EF6C00; border-left: 5px solid #FF9800; }
+
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+        @keyframes slideDown { from {opacity:0; transform:translateY(-10px);} to {opacity:1; transform:translateY(0);} }
+        @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-10px);} }
+        #confetti-canvas { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:90; }
+
+    </style>
+</head>
+<body>
+
+    <div id="game-card">
+        <canvas id="confetti-canvas"></canvas>
+
+        <!-- PANTALLA DE INICIO -->
+        <div id="start-screen">
+            <h1 class="main-title">Taller de Problemas</h1>
+            <div class="sub-title-container">
+                <div class="sub-title-1">2º de Primaria</div>
+                <div class="sub-title-innovamat">Basado en la tipología de problemas Innovamat</div>
+                <div class="author-text">Elaborado por Carlos Garrido</div>
+                <div class="version-text">Versión 7.0 revisada</div>
+            </div>
+            
+            <div class="levels-grid" id="levels-grid">
+                <!-- Se generan con JS -->
+            </div>
+        </div>
+
+        <div class="header-bar">
+            <div class="header-left">
+                <!-- Botón Home Superior -->
+                <button class="home-btn" onclick="showStartScreen()" title="Volver al Menú">🏠</button>
+                <div style="display:flex; flex-direction:column;">
+                    <span class="game-title-small">Taller de Problemas</span>
+                    <span style="font-size:0.7rem; opacity:0.8;">Operaciones y Algoritmos</span>
+                </div>
+            </div>
+            <div class="level-badge" id="level-indicator">NIVEL 1</div>
+            <!-- TEMPORIZADOR -->
+            <div class="timer-container">
+                <span>⏱️</span> <span id="time-display">00:00</span>
+            </div>
+        </div>
+
+        <div class="main-stage" id="stage">
+            <div id="hint-display" class="hint-box"></div>
+            
+            <div class="problem-card" id="problem-card">
+                <div class="p-icon" id="p-icon"></div>
+                <div class="p-text" id="p-text"></div>
+            </div>
+
+            <div class="workspace" id="workspace"></div>
+            
+            <!-- RESPUESTA FINAL -->
+            <div id="final-answer-zone"></div>
+        </div>
+
+        <div class="controls">
+            <div class="controls-left">
+                <button class="btn btn-hint" onclick="toggleHint()">💡 PISTA</button>
+            </div>
+            <div class="feedback-msg" id="feedback"></div>
+            <button class="btn btn-check" id="btn-action" onclick="checkAnswers()">COMPROBAR ✅</button>
+        </div>
+
+        <!-- PANTALLA INFORME FINAL -->
+        <div id="screen-report" class="overlay hidden">
+            <div class="feedback-report">
+                <h2 class="report-title">¡Nivel Completado!</h2>
+                <div class="feedback-list" id="feedback-list-content">
+                    <!-- Feedback Dinámico -->
+                </div>
+                <div style="text-align:center; margin-top:20px;">
+                    <button class="btn btn-next" onclick="showStartScreen()" style="margin:0 auto;">VOLVER AL MENÚ</button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        // PROBLEMAS ANÁLOGOS 2º PRIMARIA
+        const levels = [
+            // FICHA 1
+            { title: "Nivel 1", desc: "Cromos y Canicas", icon: "💎", problems: [
+                { text: "Mi hermano tiene <span class='highlight'>25 cromos</span>. Yo le regalo algunos y ahora dice: '¡Genial, ya tengo <span class='highlight'>54 cromos</span>!'. ¿Cuántos cromos tenía mi hermano <span class='keyword'>antes</span> de que yo le regalara?", 
+                  pre: "Tenía", suf: "cromos.", solution: 29,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 5, 4], ["-", 2, 5], ["line"], [null, 2, 9]], hint: "Si sabes el total final y lo que le diste, quita lo que le diste para saber qué tenía al principio." }], icon: "🖼️" },
+                { text: "En un estanque había <span class='highlight'>34 peces</span>. Esta mañana han nacido más peces, y ahora hay <span class='highlight'>75 peces</span> en total. ¿Cuántos peces nuevos <span class='keyword'>han nacido</span>?", 
+                  pre: "Han nacido", suf: "peces.", solution: 41,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 7, 5], ["-", 3, 4], ["line"], [null, 4, 1]], hint: "Busca la diferencia entre los que hay ahora y los que había antes." }], icon: "🐟" }
+            ]},
+            // FICHA 2
+            { title: "Nivel 2", desc: "Galletas y Edades", icon: "🍪", problems: [
+                { text: "En la caja había <span class='highlight'>38 galletas</span>. Hemos merendado y ahora solo quedan <span class='highlight'>10 galletas</span>. ¿Cuántas galletas <span class='keyword'>hemos comido</span>?", 
+                  pre: "Comimos", suf: "galletas.", solution: 28,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 3, 8], ["-", 1, 0], ["line"], [null, 2, 8]], hint: "Resta las que quedan a las que había al principio." }], icon: "🍪" },
+                { text: "Yo tengo <span class='highlight'>23 años</span>. Mi hermano tiene <span class='highlight'>7 años menos</span> que yo. ¿Cuántos años tiene mi hermano?", 
+                  pre: "Tiene", suf: "años.", solution: 16,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 2, 3], ["-", "", 7], ["line"], [null, 1, 6]], hint: "Si tiene menos años, tienes que restar la diferencia." }], icon: "🎂" }
+            ]},
+            // FICHA 3
+            { title: "Nivel 3", desc: "Dinero y Altura", icon: "💰", problems: [
+                { text: "Tengo dinero en la hucha. Le presto <span class='highlight'>15 euros</span> a mi madre y ahora ella tiene <span class='highlight'>48 euros</span> en su monedero. (Espera, el problema original es al revés: Sara regala y Max tiene 48. Pregunta por Max antes. Vamos a ajustar: Max tiene 48 AHORA. Sara le dio 15. ¿Cuánto tenía Max ANTES?). Corrección análoga: En mi hucha AHORA hay 48 euros porque mi abuela me ha dado 15. ¿Cuántos tenía ANTES?", 
+                  pre: "Tenía", suf: "euros.", solution: 33,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 4, 8], ["-", 1, 5], ["line"], [null, 3, 3]], hint: "Quita los que te dieron al total que tienes ahora." }], icon: "💶" },
+                { text: "El edificio mide <span class='highlight'>45 metros</span>. Mide <span class='highlight'>17 metros más</span> que el árbol del jardín. ¿Cuánto mide el árbol?", 
+                  pre: "Mide", suf: "metros.", solution: 28,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 4, 5], ["-", 1, 7], ["line"], [null, 2, 8]], hint: "Si el edificio es más alto, el árbol es más bajo. Resta la diferencia." }], icon: "🌳" }
+            ]},
+            // FICHA 4
+            { title: "Nivel 4", desc: "Colección y Fruta", icon: "🍇", problems: [
+                { text: "Tengo <span class='highlight'>18 conchas</span> de la playa. Mi primo me va a traer <span class='highlight'>7 conchas más</span> de su viaje. ¿Cuántas conchas tendré en total?", 
+                  pre: "Tendré", suf: "conchas.", solution: 25,
+                  ops: [{ type: "add", cols: 3, structure: [[null, 1, 8], ["+", "", 7], ["line"], [null, 2, 5]], hint: "Junta las que tienes con las que te van a traer." }], icon: "🐚" },
+                { text: "En la frutería hay <span class='highlight'>47 kilos</span> de fruta. <span class='highlight'>18 kilos</span> son de naranjas y el resto son de manzanas. ¿Cuántos kilos de manzanas hay?", 
+                  pre: "Hay", suf: "kg de manzanas.", solution: 29,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 4, 7], ["-", 1, 8], ["line"], [null, 2, 9]], hint: "Si quitas las naranjas al total, te quedan las manzanas." }], icon: "🍎" }
+            ]},
+            // FICHA 5
+            { title: "Nivel 5", desc: "Juguetes y Lectura", icon: "🧸", problems: [
+                { text: "En mi habitación tengo juguetes. <span class='highlight'>12 coches</span>, <span class='highlight'>14 muñecos</span> y <span class='highlight'>5 pelotas</span>. ¿Cuántos juguetes tengo <span class='keyword'>en total</span>?", 
+                  pre: "Tengo", suf: "juguetes.", solution: 31,
+                  ops: [{ type: "add", cols: 3, structure: [[null, 1, 2], ["+", 1, 4], ["+", "", 5], ["line"], [null, 3, 1]], hint: "Suma los tres grupos de juguetes." }], icon: "🧸" },
+                { text: "Leyendo un cómic tardo <span class='highlight'>40 minutos</span>. Leyendo un cuento corto tardo <span class='highlight'>17 minutos</span>. ¿Cuánto tiempo me <span class='keyword'>ahorro</span> leyendo el cuento?", 
+                  pre: "Ahorro", suf: "minutos.", solution: 23,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 4, 0], ["-", 1, 7], ["line"], [null, 2, 3]], hint: "Calcula la diferencia de tiempo entre los dos libros." }], icon: "📖" }
+            ]},
+            // FICHA 6
+            { title: "Nivel 6", desc: "Puntos y Hucha", icon: "🐷", problems: [
+                { text: "En el marcador pone <span class='highlight'>33 puntos</span>. He conseguido <span class='highlight'>8 puntos</span> en la última jugada. ¿Cuántos puntos tenía antes de esa jugada?", 
+                  pre: "Tenía", suf: "puntos.", solution: 25,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 3, 3], ["-", "", 8], ["line"], [null, 2, 5]], hint: "Si has sumado puntos, antes tenías menos. Resta los puntos nuevos." }], icon: "🎮" },
+                { text: "En mi hucha había <span class='highlight'>100 euros</span>. He sacado dinero para comprar un regalo y ahora quedan <span class='highlight'>43 euros</span>. ¿Cuánto me ha costado el regalo?", 
+                  pre: "Costó", suf: "euros.", solution: 57,
+                  ops: [{ type: "sub", cols: 4, structure: [[null, 1, 0, 0], ["-", "", 4, 3], ["line"], [null, "", 5, 7]], hint: "Resta lo que queda al total que había al principio." }], icon: "🎁" }
+            ]},
+            // FICHA 7
+            { title: "Nivel 7", desc: "Edificio y Caramelos", icon: "🏢", problems: [
+                { text: "El edificio rojo mide <span class='highlight'>29 metros</span> y el edificio azul mide <span class='highlight'>44 metros</span>. ¿Cuántos metros <span class='keyword'>más</span> mide el edificio azul?", 
+                  pre: "Mide", suf: "metros más.", solution: 15,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 4, 4], ["-", 2, 9], ["line"], [null, 1, 5]], hint: "Busca la diferencia de altura entre los dos edificios." }], icon: "🏢" },
+                { text: "Tengo <span class='highlight'>17 caramelos</span> de fresa. Mi abuela me da <span class='highlight'>4 de limón</span> y mi hermano me regala <span class='highlight'>1 de menta</span>. ¿Cuántos caramelos tengo en total?", 
+                  pre: "Tengo", suf: "caramelos.", solution: 22,
+                  ops: [{ type: "add", cols: 3, structure: [[null, 1, 7], ["+", "", 4], ["+", "", 1], ["line"], [null, 2, 2]], hint: "Junta todos los caramelos que tienes ahora." }], icon: "🍬" }
+            ]},
+            // FICHA 8
+            { title: "Nivel 8", desc: "Cajas y Galletas", icon: "📦", problems: [
+                { text: "En el almacén había <span class='highlight'>36 cajas</span>. Ha llegado un camión y ahora hay <span class='highlight'>72 cajas</span>. ¿Cuántas cajas nuevas han traído?", 
+                  pre: "Trajeron", suf: "cajas.", solution: 36,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 7, 2], ["-", 3, 6], ["line"], [null, 3, 6]], hint: "Resta las que había antes a las que hay ahora." }], icon: "📦" },
+                { text: "En la bandeja había galletas. Nos hemos comido <span class='highlight'>8 galletas</span> y todavía quedan <span class='highlight'>18 galletas</span>. ¿Cuántas galletas había <span class='keyword'>al principio</span>?", 
+                  pre: "Había", suf: "galletas.", solution: 26,
+                  ops: [{ type: "add", cols: 3, structure: [[null, 1, 8], ["+", "", 8], ["line"], [null, 2, 6]], hint: "Suma las que quedan y las que os habéis comido." }], icon: "🍪" }
+            ]},
+            // FICHA 9
+            { title: "Nivel 9", desc: "Plantas y Librería", icon: "🌱", problems: [
+                { text: "En el jardín de Ana hay <span class='highlight'>48 plantas</span> y en el de Luis hay <span class='highlight'>39 plantas</span>. ¿Cuántas plantas <span class='keyword'>más</span> tiene Ana que Luis?", 
+                  pre: "Tiene", suf: "plantas más.", solution: 9,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 4, 8], ["-", 3, 9], ["line"], [null, "", 9]], hint: "Calcula la diferencia entre los dos jardines." }], icon: "🌻" },
+                { text: "En la librería había <span class='highlight'>47 libros</span> de aventuras. Han traído más y ahora hay <span class='highlight'>83 libros</span>. ¿Cuántos libros nuevos han traído?", 
+                  pre: "Trajeron", suf: "libros.", solution: 36,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 8, 3], ["-", 4, 7], ["line"], [null, 3, 6]], hint: "Resta los que había al principio al total actual." }], icon: "📚" }
+            ]},
+            // FICHA 10
+            { title: "Nivel 10", desc: "Excursión y Cinturones", icon: "🎒", problems: [
+                { text: "El sábado caminamos <span class='highlight'>23 km</span> y el domingo caminamos <span class='highlight'>15 km</span>. ¿Cuántos km hemos recorrido <span class='keyword'>en total</span> el fin de semana?", 
+                  pre: "Total", suf: "km.", solution: 38,
+                  ops: [{ type: "add", cols: 3, structure: [[null, 2, 3], ["+", 1, 5], ["line"], [null, 3, 8]], hint: "Suma los kilómetros del sábado y los del domingo." }], icon: "🥾" },
+                { text: "En clase de judo hay <span class='highlight'>20 cinturones</span> blancos. Son <span class='highlight'>5 cinturones más</span> que los amarillos. ¿Cuántos cinturones amarillos hay?", 
+                  pre: "Hay", suf: "amarillos.", solution: 15,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 2, 0], ["-", "", 5], ["line"], [null, 1, 5]], hint: "Si hay más blancos, hay menos amarillos. Resta la diferencia." }], icon: "🥋" }
+            ]},
+            // FICHA 11
+            { title: "Nivel 11", desc: "Puzle y Revistas", icon: "🧩", problems: [
+                { text: "Mi puzle tiene <span class='highlight'>53 piezas</span>. Ya he colocado casi todas, solo me faltan <span class='highlight'>4 piezas</span>. ¿Cuántas piezas he colocado ya?", 
+                  pre: "Coloqué", suf: "piezas.", solution: 49,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 5, 3], ["-", "", 4], ["line"], [null, 4, 9]], hint: "Quita las que faltan al total del puzle." }], icon: "🧩" },
+                { text: "En el kiosco han vendido <span class='highlight'>85 revistas</span> esta semana. Son <span class='highlight'>28 revistas más</span> que la semana pasada. ¿Cuántas revistas vendieron la semana pasada?", 
+                  pre: "Vendieron", suf: "revistas.", solution: 57,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 8, 5], ["-", 2, 8], ["line"], [null, 5, 7]], hint: "Si esta semana son más, la pasada fueron menos. Resta la diferencia." }], icon: "📰" }
+            ]},
+            // FICHA 12
+            { title: "Nivel 12", desc: "Bombones y Bici", icon: "🍬", problems: [
+                { text: "Tengo una caja de bombones. He regalado <span class='highlight'>10 bombones</span> a mis amigos y todavía me quedan <span class='highlight'>15 bombones</span>. ¿Cuántos bombones tenía <span class='keyword'>al principio</span>?", 
+                  pre: "Tenía", suf: "bombones.", solution: 25,
+                  ops: [{ type: "add", cols: 3, structure: [[null, 1, 0], ["+", 1, 5], ["line"], [null, 2, 5]], hint: "Suma los que regalaste y los que te quedan." }], icon: "🍬" },
+                { text: "Voy a pesarme con mi gato en brazos y pesamos <span class='highlight'>73 kg</span>. Si dejo al gato en el suelo, peso <span class='highlight'>15 kg menos</span>. ¿Cuánto peso yo solo?", 
+                  pre: "Peso", suf: "kg.", solution: 58,
+                  ops: [{ type: "sub", cols: 3, structure: [[null, 7, 3], ["-", 1, 5], ["line"], [null, 5, 8]], hint: "Resta el peso del gato (la diferencia) al total." }], icon: "⚖️" }
+            ]}
+        ];
+
+        let currentLevelIdx = 0;
+        let currentProblemIdx = 0;
+        let errorsCount = 0;
+        let startTime = null;
+        let timerInterval = null;
+        let questionStartTimes = [];
+
+        window.onload = function() {
+            generateStartScreen();
+        };
+
+        function generateStartScreen() {
+            const grid = document.getElementById('levels-grid');
+            grid.innerHTML = "";
+            levels.forEach((lvl, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'level-btn';
+                btn.onclick = () => selectLevel(idx);
+                btn.innerHTML = `
+                    <div class="lvl-num">Ficha ${idx + 1}</div>
+                    <div class="lvl-icon">${lvl.icon}</div>
+                    <div class="lvl-desc">${lvl.desc}</div>
+                `;
+                grid.appendChild(btn);
+            });
+        }
+
+        function showStartScreen() {
+            stopTimer();
+            ['screen-win', 'screen-report', 'screen-gameover'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.classList.add('hidden');
+            });
+            
+            const start = document.getElementById('start-screen');
+            if(start) {
+                start.classList.remove('hidden');
+                start.style.display = 'flex';
+            }
+            
+            const canvas = document.getElementById('confetti-canvas');
+            if(canvas) {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+            }
+        }
+
+        function selectLevel(idx) {
+            currentLevelIdx = idx;
+            currentProblemIdx = 0;
+            errorsCount = 0;
+            questionStartTimes = [];
+            startTimer();
+            questionStartTimes[0] = Date.now();
+            document.getElementById('start-screen').style.display = 'none';
+            loadLevel();
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimerUI, 1000);
+        }
+
+        function stopTimer() {
+            if(timerInterval) clearInterval(timerInterval);
+        }
+
+        function updateTimerUI() {
+            const delta = Date.now() - startTime;
+            const seconds = Math.floor((delta / 1000) % 60);
+            const minutes = Math.floor((delta / 1000 / 60));
+            document.getElementById('time-display').innerText = 
+                `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+        }
+
+        function loadLevel() {
+            const level = levels[currentLevelIdx];
+            const prob = level.problems[currentProblemIdx];
+            
+            if (!questionStartTimes[currentProblemIdx]) {
+                questionStartTimes[currentProblemIdx] = Date.now();
+            }
+
+            document.getElementById('level-indicator').innerText = `NIVEL ${currentLevelIdx + 1} (${currentProblemIdx + 1}/2)`;
+            document.getElementById('p-icon').innerText = prob.icon;
+            document.getElementById('p-text').innerHTML = prob.text;
+            
+            document.getElementById('hint-display').classList.remove('visible');
+            document.getElementById('feedback').innerText = "";
+            const btn = document.getElementById('btn-action');
+            btn.innerText = "COMPROBAR ✅";
+            btn.className = "btn btn-check";
+            btn.onclick = checkAnswers;
+
+            const workspace = document.getElementById('workspace');
+            workspace.innerHTML = "";
+
+            prob.ops.forEach((op, opIdx) => {
+                const container = document.createElement('div');
+                container.className = 'operation-container';
+
+                const cols = op.cols || 3;
+                const gridData = op.structure;
+                
+                const grid = document.createElement('div');
+                grid.className = 'vertical-grid';
+                grid.style.gridTemplateColumns = `repeat(${cols}, 50px)`;
+
+                for(let i=0; i<cols; i++) {
+                    const hCell = document.createElement('div');
+                    hCell.className = 'header-cell';
+                    const posFromEnd = cols - 1 - i; 
+                    if(posFromEnd === 0) { hCell.innerText = "U"; hCell.classList.add('header-u'); }
+                    else if(posFromEnd === 1) { hCell.innerText = "D"; hCell.classList.add('header-d'); }
+                    else if(posFromEnd === 2) { hCell.innerText = "C"; hCell.classList.add('header-c'); }
+                    else if(posFromEnd === 3) { hCell.innerText = "UM"; hCell.classList.add('header-um'); }
+                    else { hCell.innerText = ""; hCell.classList.add('header-empty'); }
+                    grid.appendChild(hCell);
+                }
+
+                gridData.forEach((row, rIdx) => {
+                    if (row.length === 1 && row[0] === 'line') {
+                        const line = document.createElement('div');
+                        line.className = 'cell-input line';
+                        grid.appendChild(line);
+                        return;
+                    }
+
+                    row.forEach((cellVal, cIdx) => {
+                        const input = document.createElement('input');
+                        input.type = "text"; 
+                        input.dataset.op = opIdx;
+                        input.dataset.row = rIdx;
+                        input.dataset.col = cIdx;
+                        
+                        if (cellVal === null) {
+                            input.className = "cell-input no-border";
+                            input.style.opacity = "0";
+                            input.disabled = true;
+                        } else if (cellVal === "+" || cellVal === "-" || cellVal === "x") {
+                            input.className = "cell-input operator-input";
+                            input.placeholder = "?";
+                        } else {
+                            input.className = "cell-input";
+                            if (rIdx === 0 && op.structure[0].includes(null) && cellVal !== null) {
+                                    input.classList.add('carry');
+                            }
+                        }
+                        grid.appendChild(input);
+                    });
+                });
+                container.appendChild(grid);
+                workspace.appendChild(container);
+            });
+
+            const finalZone = document.getElementById('final-answer-zone');
+            finalZone.innerHTML = '';
+
+            const ansContainer = document.createElement('div');
+            ansContainer.className = 'sentence-answer-container';
+            ansContainer.innerHTML = `
+                <span>${prob.pre}</span>
+                <input type="number" id="final-input" class="final-input" placeholder="?">
+                <span>${prob.suf}</span>
+            `;
+            finalZone.appendChild(ansContainer);
+        }
+
+        function toggleHint() {
+            const level = levels[currentLevelIdx];
+            const prob = level.problems[currentProblemIdx];
+            const hintBox = document.getElementById('hint-display');
+            let hints = prob.ops.map(o => o.hint).filter(h => h).join(" <br> ");
+            if (!hints) hints = "Lee atentamente los datos resaltados.";
+            if (hintBox.classList.contains('visible')) {
+                hintBox.classList.remove('visible');
+            } else {
+                hintBox.innerHTML = "💡 " + hints;
+                hintBox.classList.add('visible');
+            }
+        }
+
+        function checkAnswers() {
+            const level = levels[currentLevelIdx];
+            const prob = level.problems[currentProblemIdx];
+            const inputs = document.querySelectorAll('input.cell-input:not(:disabled), input.operator-input');
+            let allCorrect = true;
+
+            inputs.forEach(inp => inp.classList.remove('correct', 'incorrect'));
+
+            const sumOpsInputs = {}; 
+
+            inputs.forEach(inp => {
+                const opIdx = inp.dataset.op;
+                const opData = prob.ops[opIdx];
+                let expected = "";
+
+                const r = parseInt(inp.dataset.row);
+                const c = parseInt(inp.dataset.col);
+                expected = opData.structure[r][c];
+
+                if (opData.type === 'add') {
+                    if (!sumOpsInputs[opIdx]) sumOpsInputs[opIdx] = { rows: {}, operatorInput: null, resultInputs: [] };
+                    
+                    if (r === 0 && Number.isInteger(expected)) {
+                        if(!sumOpsInputs[opIdx].rows[0]) sumOpsInputs[opIdx].rows[0] = [];
+                        sumOpsInputs[opIdx].rows[0].push({ inp: inp, val: parseInt(inp.value), expected: expected });
+                    } else if (r === 1 && Number.isInteger(expected)) {
+                        if(!sumOpsInputs[opIdx].rows[1]) sumOpsInputs[opIdx].rows[1] = [];
+                        sumOpsInputs[opIdx].rows[1].push({ inp: inp, val: parseInt(inp.value), expected: expected });
+                    } else if (r === 3 && Number.isInteger(expected)) {
+                            if (parseInt(inp.value) === expected) inp.classList.add('correct');
+                            else { inp.classList.add('incorrect'); allCorrect = false; }
+                    } else if (typeof expected === "string" && (expected === "+")) {
+                            if (inp.value === "+") inp.classList.add('correct');
+                            else { inp.classList.add('incorrect'); allCorrect = false; }
+                    } else {
+                            if (inp.value === "" || parseInt(inp.value) === 0) inp.classList.add('correct');
+                            else { 
+                                if(expected === "") inp.classList.add('incorrect');
+                                else { inp.classList.add('incorrect'); allCorrect = false; }
+                            }
+                    }
+
+                } else {
+                    if (typeof expected === "string" && (expected === "+" || expected === "-" || expected === "x")) {
+                        if (inp.value.toLowerCase() === expected.toLowerCase()) inp.classList.add('correct');
+                        else { inp.classList.add('incorrect'); allCorrect = false; }
+                    } else {
+                        if (expected === "" || expected === undefined) {
+                                if (inp.value === "" || parseInt(inp.value) === 0) inp.classList.add('correct');
+                                else { inp.classList.add('incorrect'); allCorrect = false; }
+                        } else {
+                            if (parseInt(inp.value) === expected) inp.classList.add('correct');
+                            else { inp.classList.add('incorrect'); allCorrect = false; }
+                        }
+                    }
+                }
+            });
+
+            for (const opIdx in sumOpsInputs) {
+                const opGroup = sumOpsInputs[opIdx];
+                const row0 = opGroup.rows[0] || [];
+                const row1 = opGroup.rows[1] || [];
+                
+                row0.sort((a,b) => a.inp.dataset.col - b.inp.dataset.col);
+                row1.sort((a,b) => a.inp.dataset.col - b.inp.dataset.col);
+
+                const userValRow0 = parseInt(row0.map(item => item.val).join(''));
+                const userValRow1 = parseInt(row1.map(item => item.val).join(''));
+                
+                const expectedRow0 = parseInt(row0.map(item => item.expected).join(''));
+                const expectedRow1 = parseInt(row1.map(item => item.expected).join(''));
+
+                let isCorrectOrder = false;
+                
+                if (userValRow0 === expectedRow0 && userValRow1 === expectedRow1) isCorrectOrder = true;
+                else if (userValRow0 === expectedRow1 && userValRow1 === expectedRow0) isCorrectOrder = true;
+
+                if (isCorrectOrder) {
+                    row0.forEach(item => item.inp.classList.add('correct'));
+                    row1.forEach(item => item.inp.classList.add('correct'));
+                } else {
+                    row0.forEach(item => item.inp.classList.add('incorrect'));
+                    row1.forEach(item => item.inp.classList.add('incorrect'));
+                    allCorrect = false;
+                }
+            }
+
+            const finalInput = document.getElementById('final-input');
+            if (finalInput) {
+                if (parseInt(finalInput.value) === prob.solution) {
+                    finalInput.classList.remove('incorrect');
+                    finalInput.classList.add('correct');
+                } else {
+                    finalInput.classList.remove('correct');
+                    finalInput.classList.add('incorrect');
+                    allCorrect = false;
+                }
+            }
+
+            const feedback = document.getElementById('feedback');
+            if (allCorrect) {
+                playSound('correct');
+                feedback.innerText = "¡Correcto!";
+                feedback.style.color = "var(--success)";
+                
+                const now = Date.now();
+                const start = questionStartTimes[currentProblemIdx];
+                const elapsed = Math.floor((now - start) / 1000);
+                if(!level.times) level.times = [];
+                level.times[currentProblemIdx] = elapsed;
+
+                const btn = document.getElementById('btn-action');
+                btn.innerText = "SIGUIENTE ➜";
+                btn.className = "btn btn-next";
+                btn.onclick = nextProblem;
+            } else {
+                errorsCount++; 
+                playSound('error');
+                feedback.innerText = "Revisa los datos rojos";
+                feedback.style.color = "var(--error)";
+            }
+        }
+
+        function nextProblem() {
+            currentProblemIdx++;
+            if (currentProblemIdx >= 2) {
+                currentProblemIdx = 0;
+                stopTimer();
+                fireConfetti();
+                showReportScreen(); 
+            } else {
+                loadLevel();
+            }
+        }
+
+        function showReportScreen() {
+            const reportScreen = document.getElementById('screen-report');
+            const list = document.getElementById('feedback-list-content');
+            list.innerHTML = "";
+
+            const level = levels[currentLevelIdx];
+            const times = level.times || [0, 0];
+            const timeSpent = (Date.now() - startTime) / 1000; 
+            let feedbackItems = [];
+
+            feedbackItems.push({type: 'info', icon: '⏱️', text: `Pregunta 1: ${times[0]} seg. | Pregunta 2: ${times[1]} seg.`});
+
+            if (errorsCount === 0) {
+                feedbackItems.push({type: 'good', icon: '⭐', text: "¡Perfecto! No has cometido ningún error."});
+                feedbackItems.push({type: 'good', icon: '🚀', text: "Has demostrado mucha atención."});
+            } else if (errorsCount <= 3) {
+                feedbackItems.push({type: 'info', icon: '👀', text: "Has cometido pocos errores, ¡vas muy bien!"});
+                feedbackItems.push({type: 'info', icon: '📝', text: "Recuerda revisar siempre la operación antes de terminar."});
+            } else {
+                feedbackItems.push({type: 'warn', icon: '🛑', text: "Intenta leer el problema más despacio la próxima vez."});
+                feedbackItems.push({type: 'warn', icon: '🔢', text: "Fíjate bien en colocar las unidades debajo de las unidades."});
+                feedbackItems.push({type: 'warn', icon: '🤔', text: "Piensa qué operación necesitas antes de escribir."});
+            }
+
+            if (timeSpent < 60) {
+                feedbackItems.push({type: 'good', icon: '⚡', text: "¡Eres muy rápido calculando!"});
+            } else if (timeSpent > 180) {
+                feedbackItems.push({type: 'info', icon: '⏳', text: "Tómate tu tiempo, lo importante es entenderlo bien."});
+            }
+
+            feedbackItems.forEach(item => {
+                const li = document.createElement('li');
+                li.className = `feedback-item fb-${item.type}`;
+                li.innerHTML = `<span class="fb-icon">${item.icon}</span> <span>${item.text}</span>`;
+                list.appendChild(li);
+            });
+
+            reportScreen.classList.remove('hidden');
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+            if (type === 'correct') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+            } else {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+            }
+            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        function fireConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = document.getElementById('game-card').offsetWidth;
+            canvas.height = document.getElementById('game-card').offsetHeight;
+            const colors = ['#009688','#FFC107','#FF5722', '#4CAF50'];
+            let particles = [];
+            for(let i=0; i<150; i++) particles.push({
+                x: canvas.width/2, y: canvas.height/2,
+                vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12,
+                color: colors[Math.floor(Math.random()*4)], size: Math.random()*6+2
+            });
+            function update() {
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                particles.forEach(p => { p.x+=p.vx; p.y+=p.vy; ctx.fillStyle=p.color; ctx.fillRect(p.x,p.y,p.size,p.size); });
+                requestAnimationFrame(update);
+            }
+            update();
+        }
+    </script>
+</body>
+</html>
