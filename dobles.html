@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Gran Desafío de los Dobles: Edición Crono</title>
+    <style>
+        :root {
+            --primary: #009688; /* Verde Pizarra Andalucía */
+            --secondary: #FFC107;
+            --accent: #FF5722;
+            --bg: #E0F2F1;
+            --text: #263238;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        .game-container {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            margin-top: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 30px;
+            position: relative;
+        }
+
+        h1 { color: var(--primary); margin-bottom: 5px; }
+
+        .subtitle {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 20px;
+            font-weight: bold;
+            border-bottom: 2px solid var(--secondary);
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        /* HUD y Barra de Tiempo */
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .hud-item span { color: var(--primary); }
+
+        .timer-container {
+            width: 100%;
+            height: 12px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            overflow: hidden;
+        }
+
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background-color: var(--secondary);
+            border-radius: 10px;
+            transition: width 0.1s linear;
+        }
+
+        .question-box {
+            font-size: 1.8em;
+            margin: 30px 0;
+            color: #333;
+        }
+
+        .number-highlight {
+            color: var(--accent);
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        button.option-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 1.5em;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.3s;
+            box-shadow: 0 4px 0 #00796B;
+            position: relative; /* Para los puntos flotantes */
+        }
+
+        button.option-btn:active { transform: translateY(4px); box-shadow: none; }
+        
+        button.correct {
+            background-color: #4CAF50 !important;
+            box-shadow: 0 4px 0 #2E7D32 !important;
+        }
+
+        button.wrong {
+            background-color: #F44336 !important;
+            box-shadow: 0 4px 0 #C62828 !important;
+        }
+
+        #feedback-msg {
+            min-height: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .screen { display: none; }
+        .active { display: block; }
+
+        .btn-start {
+            background: var(--secondary);
+            color: #333;
+            font-size: 1.5em;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 0 #FFA000;
+            margin-top: 20px;
+        }
+
+        .btn-start:hover { background: #FFD54F; }
+
+        /* PUNTOS FLOTANTES */
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1.2); }
+        }
+
+        .floating-score {
+            position: absolute;
+            font-weight: 900;
+            font-size: 2em;
+            pointer-events: none;
+            z-index: 1000;
+            text-shadow: 2px 2px 0px white;
+            animation: floatUp 1s ease-out forwards;
+        }
+
+        canvas#confetti {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .author-footer {
+            margin-top: 30px;
+            font-size: 0.85em;
+            color: #777;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti"></canvas>
+
+    <div class="game-container">
+        <h1>¡Maestros del Doble!</h1>
+        <div class="subtitle">Carlos Garrido - Educación Primaria - 3º Primaria</div>
+
+        <div id="start-screen" class="screen active">
+            <p>¡Hola! ¿Estás listo para demostrar que eres un experto calculando dobles?</p>
+            <p>Tienes que superar <strong>4 niveles</strong>.</p>
+            <ul style="text-align: left; display: inline-block;">
+                <li>⚡ <strong>¡Velocidad!</strong> Cuanto antes contestes, más puntos (hasta +100).</li>
+                <li>🔴 Fallo o Tiempo Agotado: -50 puntos.</li>
+                <li>🏆 Necesitas 8 aciertos para pasar de nivel.</li>
+            </ul>
+            <br>
+            <button class="btn-start" onclick="initAudioAndStart()">¡JUGAR!</button>
+        </div>
+
+        <div id="game-screen" class="screen">
+            <div class="hud">
+                <div class="hud-item">Nivel: <span id="level-display">1</span></div>
+                <div class="hud-item">Puntos: <span id="score-display">0</span></div>
+                <div class="hud-item">Pregunta: <span id="q-display">1</span>/10</div>
+            </div>
+
+            <div class="timer-container">
+                <div id="timer-bar" class="timer-bar"></div>
+            </div>
+
+            <div class="question-box">
+                ¿Cuánto es el doble de <span id="number-question" class="number-highlight">0</span>?
+            </div>
+
+            <div class="options-grid" id="options-container"></div>
+            <div id="feedback-msg"></div>
+        </div>
+
+        <div id="level-screen" class="screen">
+            <h2 id="level-title">¡Nivel Completado!</h2>
+            <p id="level-msg">¡Has hecho un trabajo fantástico!</p>
+            <p>Aciertos en este nivel: <span id="level-hits" style="font-weight:bold; color:var(--primary)">0</span>/10</p>
+            <button class="btn-start" id="next-level-btn" onclick="nextLevel()">Siguiente Nivel</button>
+        </div>
+
+        <div id="end-screen" class="screen">
+            <h1 style="color:var(--secondary)">¡ENHORABUENA!</h1>
+            <p style="font-size: 1.3em;">Juego Completado</p>
+            <p>Puntuación Final: <span id="final-score" style="font-weight:bold; font-size:1.5em; color:var(--primary)">0</span></p>
+            <p style="background: #e8f5e9; padding: 15px; border-radius: 10px; border: 2px solid #4CAF50;">
+                Eres un experto en el cálculo de dobles a toda velocidad.
+            </p>
+            <button class="btn-start" onclick="location.reload()">Jugar de nuevo</button>
+        </div>
+
+        <div class="author-footer">
+            Carlos Garrido - Educación Primaria - 3º Primaria
+        </div>
+    </div>
+
+<script>
+    // --- SONIDOS (Web Audio API) ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx;
+
+    function initAudioAndStart() {
+        if (!audioCtx) {
+            audioCtx = new AudioContext();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        startGame();
+    }
+
+    function playSound(type) {
+        if (!audioCtx) return;
+        
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        if (type === 'correct') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+        } else {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 0.3);
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+    }
+
+    // --- LÓGICA DEL JUEGO (DOBLES) ---
+
+    let currentLevel = 1;
+    let score = 0;
+    let questionIndex = 0;
+    let currentLevelHits = 0;
+    let isProcessing = false;
+
+    // CONFIGURACIÓN (DOBLES v4.0)
+    const totalLevels = 4;
+    const questionsPerLevel = 10;
+    const requiredHits = 8;
+    const timePerQuestion = 20; // 20 segundos para dobles
+    let currentNumber = 0;
+    
+    // ARRAY PARA ALMACENAR NÚMEROS YA USADOS
+    let usedNumbers = [];
+    
+    // CRONÓMETRO
+    let timerInterval;
+    let timeLeft;
+
+    function startGame() {
+        score = 0;
+        currentLevel = 1;
+        usedNumbers = []; // Reseteamos memoria
+        startLevel();
+    }
+
+    function startLevel() {
+        questionIndex = 0;
+        currentLevelHits = 0;
+        showScreen('game-screen');
+        updateHUD();
+        loadQuestion();
+    }
+
+    function updateHUD() {
+        document.getElementById('level-display').innerText = currentLevel;
+        document.getElementById('score-display').innerText = score;
+        document.getElementById('q-display').innerText = questionIndex + 1;
+    }
+
+    // RANGOS DE DIFICULTAD (DOBLES - 1 a 100)
+    function getNumberForLevel(level) {
+        let min, max;
+        switch(level) {
+            case 1: min=1; max=20; break;   // Muy fácil
+            case 2: min=21; max=45; break;  // Fácil
+            case 3: min=46; max=70; break;  // Medio
+            case 4: min=71; max=100; break; // Difícil
+            default: min=1; max=100;
+        }
+        return {min, max};
+    }
+
+    // --- FUNCIONALIDAD VISUAL: PUNTOS FLOTANTES ---
+    function spawnFloatingPoints(text, color, targetElement) {
+        let rect;
+        if(targetElement) {
+            rect = targetElement.getBoundingClientRect();
+        } else {
+            const container = document.querySelector('.game-container');
+            rect = container.getBoundingClientRect();
+        }
+
+        const el = document.createElement('div');
+        el.className = 'floating-score';
+        el.innerText = text;
+        el.style.color = color;
+        
+        el.style.left = (rect.left + rect.width / 2 - 20) + 'px'; 
+        el.style.top = (rect.top) + 'px';
+
+        document.body.appendChild(el);
+
+        setTimeout(() => {
+            el.remove();
+        }, 1000);
+    }
+
+    // --- CONTROL DE TIEMPO ---
+    function startTimer() {
+        const bar = document.getElementById('timer-bar');
+        timeLeft = timePerQuestion;
+        bar.style.width = '100%';
+        bar.style.backgroundColor = 'var(--secondary)';
+        
+        clearInterval(timerInterval);
+
+        timerInterval = setInterval(() => {
+            timeLeft -= 0.1;
+            let percentage = (timeLeft / timePerQuestion) * 100;
+            bar.style.width = percentage + '%';
+
+            if (percentage < 30) {
+                bar.style.backgroundColor = '#F44336';
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timeOut(); 
+            }
+        }, 100);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+    }
+
+    function timeOut() {
+        if(isProcessing) return;
+        isProcessing = true;
+        
+        playSound('wrong');
+        score -= 50;
+        
+        spawnFloatingPoints("-50", "#D32F2F", document.querySelector('.question-box'));
+
+        const msgBox = document.getElementById('feedback-msg');
+        msgBox.style.color = "#D32F2F";
+        msgBox.innerText = `¡Tiempo! El doble de ${currentNumber} era ${currentNumber * 2}.`;
+
+        const correct = currentNumber * 2;
+        const allBtns = document.querySelectorAll('.option-btn');
+        allBtns.forEach(b => {
+            if(parseInt(b.innerText) === correct) b.classList.add('correct');
+        });
+
+        updateHUD();
+        setTimeout(nextStep, 2000);
+    }
+
+    function loadQuestion() {
+        isProcessing = false;
+        document.getElementById('feedback-msg').innerText = "";
+        document.getElementById('q-display').innerText = questionIndex + 1;
+
+        let range = getNumberForLevel(currentLevel);
+        let validNumberFound = false;
+        let attempts = 0;
+        
+        // Búsqueda de número no repetido
+        while (!validNumberFound && attempts < 100) {
+            currentNumber = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+            if (!usedNumbers.includes(currentNumber)) {
+                validNumberFound = true;
+                usedNumbers.push(currentNumber);
+            }
+            attempts++;
+        }
+
+        document.getElementById('number-question').innerText = currentNumber;
+
+        let correctAnswer = currentNumber * 2;
+        let options = [correctAnswer];
+        
+        while(options.length < 3) {
+            let offset = Math.random() > 0.5 ? 10 : 2;
+            let wrong = Math.random() > 0.5 ? correctAnswer + offset : correctAnswer - offset;
+            
+            if(wrong > 0 && !options.includes(wrong)) {
+                options.push(wrong);
+            } else {
+                let r = correctAnswer + Math.floor(Math.random() * 20) - 10;
+                if(r > 0 && r !== correctAnswer && !options.includes(r)) options.push(r);
+            }
+        }
+
+        options.sort(() => Math.random() - 0.5);
+
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        
+        options.forEach(opt => {
+            let btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(btn, opt, correctAnswer);
+            container.appendChild(btn);
+        });
+
+        startTimer();
+    }
+
+    function checkAnswer(btn, selected, correct) {
+        if (isProcessing) return;
+        stopTimer();
+        isProcessing = true;
+
+        const msgBox = document.getElementById('feedback-msg');
+        const allBtns = document.querySelectorAll('.option-btn');
+
+        if (selected === correct) {
+            // ACIERTO PROPORCIONAL
+            btn.classList.add('correct');
+            playSound('correct'); 
+            
+            // Cálculo de puntos
+            let rawPoints = (timeLeft / timePerQuestion) * 100;
+            let pointsEarned = Math.ceil(rawPoints);
+            if (pointsEarned < 1) pointsEarned = 1; 
+            if (pointsEarned > 100) pointsEarned = 100;
+
+            score += pointsEarned;
+            currentLevelHits++;
+            
+            spawnFloatingPoints(`+${pointsEarned}`, "#2E7D32", btn);
+
+            msgBox.style.color = "green";
+            msgBox.innerText = `¡Genial! ¡Sigue así!`;
+        } else {
+            // FALLO (-50 FIJO)
+            btn.classList.add('wrong');
+            playSound('wrong'); 
+            score -= 50;
+            
+            spawnFloatingPoints("-50", "#D32F2F", btn);
+
+            msgBox.style.color = "#D32F2F";
+            msgBox.innerText = `¡Ánimo! El doble de ${currentNumber} era ${correct}.`;
+            
+            allBtns.forEach(b => {
+                if(parseInt(b.innerText) === correct) b.classList.add('correct');
+            });
+        }
+
+        updateHUD();
+        setTimeout(nextStep, 2000);
+    }
+
+    function nextStep() {
+        questionIndex++;
+        if (questionIndex < questionsPerLevel) {
+            loadQuestion();
+        } else {
+            finishLevel();
+        }
+    }
+
+    function finishLevel() {
+        stopTimer();
+        showScreen('level-screen');
+        document.getElementById('level-hits').innerText = currentLevelHits;
+        
+        const btnNext = document.getElementById('next-level-btn');
+        const title = document.getElementById('level-title');
+        const msg = document.getElementById('level-msg');
+
+        if (currentLevelHits >= requiredHits) {
+            title.innerText = "¡FELICIDADES!";
+            msg.innerText = "Has superado el reto de este nivel.";
+            
+            if (currentLevel === totalLevels) {
+                setTimeout(showEndGame, 1000);
+            } else {
+                btnNext.innerText = "Siguiente Nivel";
+                btnNext.onclick = () => {
+                    currentLevel++;
+                    startLevel();
+                };
+            }
+        } else {
+            title.innerText = "¡Vaya...";
+            msg.innerText = `Necesitas 8 aciertos para pasar. Has conseguido ${currentLevelHits}.`;
+            btnNext.innerText = "Repetir Nivel";
+            btnNext.onclick = () => {
+                startLevel(); // NO borramos los usados para seguir forzando variedad global
+            };
+        }
+    }
+
+    function showEndGame() {
+        showScreen('end-screen');
+        playSound('correct'); 
+        document.getElementById('final-score').innerText = score;
+        startConfetti();
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    // --- EFECTO CONFETI ---
+    const canvas = document.getElementById("confetti");
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function startConfetti() {
+        for(let i=0; i<150; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - canvas.height,
+                color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                size: Math.random() * 10 + 5,
+                speed: Math.random() * 5 + 2,
+                angle: Math.random() * 6.2
+            });
+        }
+        animateConfetti();
+    }
+
+    function animateConfetti() {
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        particles.forEach((p, i) => {
+            p.y += p.speed;
+            p.x += Math.sin(p.angle);
+            p.angle += 0.1;
+            
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+
+            if(p.y > canvas.height) particles[i].y = -10;
+        });
+        requestAnimationFrame(animateConfetti);
+    }
+</script>
+
+</body>
+</html>
